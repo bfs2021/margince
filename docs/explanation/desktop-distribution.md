@@ -178,6 +178,17 @@ use is refused, instead of moved silently. The `api`, the bus and (on Windows)
 the database use free ports the OS chooses, because nothing outside the folder
 needs to reach them.
 
+The UI listener binds `127.0.0.1`. A container image that publishes the port
+sets `MARGINCE_WEB_BIND=0.0.0.0` in the process environment of the launcher, so
+the listener binds every interface. The launcher does not read it from
+`margince.env`, because it describes the host the launcher runs on, not the
+installation. The `api` and the bus stay on loopback whatever the value, and the
+database keeps the transport of its platform: the unix socket on macOS, and
+loopback on Windows.
+
+The listener speaks plain HTTP. An image that binds every interface puts a proxy
+that ends TLS in front of it, and publishes only the port of that proxy.
+
 The launcher serves the SPA itself and passes on the `api` paths, using the
 same list that `frontend/vite.config.ts` passes on in dev. One origin means no
 CORS setup that the server has no other reason to carry. It also keeps the
