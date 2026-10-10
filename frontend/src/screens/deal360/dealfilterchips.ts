@@ -2,6 +2,7 @@ import {
   type AcquisitionSource,
   acquisitionFilterOptions,
 } from "../acquisitionsources.queries";
+import { DEAL_STATUS_LABEL, DEAL_STATUS_VALUES } from "../dealdials";
 import type { FilterSpec } from "../listquery";
 import { MOTION_OPTIONS, PRIORITY_OPTIONS } from "./dealcommercialfields";
 
@@ -29,6 +30,17 @@ export function dealSurfaceChips({
   retiredSuffix: string;
 }>): FilterSpec[] {
   return [
+    // The dial the company page's lost figure and the pipeline report's open
+    // counts link in with. It shows and clears like any other.
+    {
+      key: "status",
+      label: "deals.filterStatus",
+      allLabel: "deals.filterStatusAll",
+      options: DEAL_STATUS_VALUES.map((value) => ({
+        value,
+        label: DEAL_STATUS_LABEL[value],
+      })),
+    },
     {
       key: "stalled",
       label: "deals.filterStalled",
