@@ -91,7 +91,7 @@ func readSuggestionLane[T any](
 	case errors.Is(err, apperrors.ErrPermissionDenied):
 		return nil, nil, nil
 	case err != nil:
-		slog.ErrorContext(ctx, "a suggestion read failed", "source", source, "error", err)
+		slog.Log(ctx, laneFailureLevel(ctx), "a suggestion read failed", "source", source, "error", err)
 		return nil, nil, &crmcontracts.WorklistSourceUnavailable{
 			Source: source, Reason: crmcontracts.WorklistSourceUnavailableReasonFailed,
 		}

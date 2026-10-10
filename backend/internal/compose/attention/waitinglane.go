@@ -241,7 +241,7 @@ func (s *Service) waitingCustomers(
 		// nothing in the log leaves an operator with a warning they cannot act
 		// on — which is how this one went a whole verification round without
 		// anybody being able to say what broke.
-		slog.ErrorContext(ctx, "the who-is-waiting read failed", "error", err)
+		slog.Log(ctx, laneFailureLevel(ctx), "the who-is-waiting read failed", "error", err)
 		return waitingRead{}, &crmcontracts.WorklistSourceUnavailable{
 			Source: sourceWaiting, Reason: crmcontracts.WorklistSourceUnavailableReasonFailed,
 		}
