@@ -51,6 +51,7 @@ func (h Handlers) CreateDataSubjectRequest(w http.ResponseWriter, r *http.Reques
 	in := CreateDSRInput{
 		Kind:       string(req.Kind),
 		SubjectRef: req.SubjectRef,
+		ReceivedAt: req.ReceivedAt,
 		DueAt:      req.DueAt,
 		AssigneeID: idArg[ids.UserKind](req.AssigneeId),
 	}
@@ -60,6 +61,17 @@ func (h Handlers) CreateDataSubjectRequest(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	h.writeDSR(w, r, http.StatusCreated, created)
+}
+
+// GetDataSubjectRequestDeadline answers the deadline the request form shows
+// before filing, from the resolver the filing itself uses.
+func (h Handlers) GetDataSubjectRequestDeadline(w http.ResponseWriter, r *http.Request, params crmcontracts.GetDataSubjectRequestDeadlineParams) {
+	due, rule, err := h.store.RequestDeadline(r.Context(), string(params.Kind), params.ReceivedAt)
+	if err != nil {
+		writeConsentErr(w, r, err)
+		return
+	}
+	httperr.WriteJSON(w, http.StatusOK, crmcontracts.RequestDeadline{DueAt: due, Rule: rule})
 }
 
 // writeDSR answers one request, its subject named under the queue's own rule.

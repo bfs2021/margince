@@ -382,13 +382,16 @@ func workerVault(ctx context.Context, pool *pgxpool.Pool) func() (keyvault.Vault
 // is reached, which is the posture every role takes: an installation whose root
 // key no longer opens its own secrets has a problem that outlives the license
 // question.
-// admitBoot holds every precondition this worker must satisfy before it
-// starts doing work. It is entitled to run, and anything it sends will carry
-// links a recipient can open. It hands back the vault it resolved.
+// admitBoot holds every precondition this worker must meet before it works:
+// a license, a jurisdiction with a pack, and links a recipient can open. It
+// hands back the vault it resolved.
 func admitBoot(
 	ctx context.Context, logger *slog.Logger, pool *pgxpool.Pool,
 	resolveVault func() (keyvault.Vault, error), cfg workerConfig, deployCfg deployconfig.Config,
 ) (keyvault.Vault, error) {
+	if err := compose.RequireCompiledInCountry(ctx, pool); err != nil {
+		return nil, err
+	}
 	vault, err := resolveVault()
 	if err != nil {
 		return nil, err
