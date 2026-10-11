@@ -44560,11 +44560,18 @@ type StageEvidence struct {
 	// Snippet The cited words, at most 500 characters.
 	Snippet *string `json:"snippet,omitempty"`
 
-	// SourceId The activity, contract or deal-room decision this was read from.
+	// SourceId The activity or contract this was read from.
 	SourceId openapi_types.UUID `json:"source_id"`
 
 	// SourceLines 1-based transcript lines, when the claim quotes one.
 	SourceLines *[]int `json:"source_lines,omitempty"`
+
+	// SourceMissing True when the caller cannot open the activity or contract
+	// `source_id` names: it was deleted, or it is not visible to them.
+	// The two read the same, so this never tells a hidden record from a
+	// missing one. The observation stays on the ledger either way,
+	// because a stage decision may rest on it.
+	SourceMissing bool `json:"source_missing"`
 
 	// SourceType What kind of record the observation was read from.
 	SourceType StageEvidenceSource `json:"source_type"`

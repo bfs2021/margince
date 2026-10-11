@@ -29946,9 +29946,17 @@ export interface components {
             source_type: components["schemas"]["StageEvidenceSource"];
             /**
              * Format: uuid
-             * @description The activity, contract or deal-room decision this was read from.
+             * @description The activity or contract this was read from.
              */
             source_id: string;
+            /**
+             * @description True when the caller cannot open the activity or contract
+             *     `source_id` names: it was deleted, or it is not visible to them.
+             *     The two read the same, so this never tells a hidden record from a
+             *     missing one. The observation stays on the ledger either way,
+             *     because a stage decision may rest on it.
+             */
+            source_missing: boolean;
             /** @description 1-based transcript lines, when the claim quotes one. */
             source_lines?: number[] | null;
             /** @description The cited words, at most 500 characters. */

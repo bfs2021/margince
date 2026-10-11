@@ -41,8 +41,11 @@ package gates
 import (
 	"go/ast"
 	"go/token"
+	"os"
 	"path"
+	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -366,7 +369,7 @@ func readsAnActivitysContent(text string) bool {
 // see rather than a route that carries nothing. A reader guarded only through
 // such a call reports red and is ratified by name, which is the direction that
 // asks a human instead of assuming one.
-func unguardedActivityReaders(graph map[string]*graphFunc, file *ast.File, dim activityDimension) []string {
+func unguardedActivityReaders(graph map[string]*graphFunc, bindings map[string]map[string]bool, file *ast.File, dim activityDimension) []string {
 	var offenders []string
 	for _, decl := range file.Decls {
 		// The read is looked for in the declaration's whole text, not literal by
@@ -404,7 +407,7 @@ func unguardedActivityReaders(graph map[string]*graphFunc, file *ast.File, dim a
 			// counting a sibling's namer as evidence that the fragment is
 			// composed somewhere.
 			for _, fragment := range activityFragmentsIn(decl) {
-				for _, namer := range unguardedNamers(graph, fragment.names, dim) {
+				for _, namer := range unguardedNamers(graph, namesReaching(bindings, fragment.names), dim) {
 					offenders = append(offenders, namer+": "+gatekit.FirstLineOf(fragment.sql))
 				}
 			}
@@ -609,6 +612,89 @@ func activitySQLIn(value ast.Expr) (string, bool) {
 	return found, found != ""
 }
 
+// packageBindingNames maps each package-level var or const to the identifiers
+// its value names. It reads values as activityFragmentsIn does. A value-less
+// const spec repeats the one before it. Names pair with values by index when
+// their counts agree.
+func packageBindingNames(files []*ast.File) map[string]map[string]bool {
+	out := map[string]map[string]bool{}
+	for _, file := range files {
+		for _, decl := range file.Decls {
+			gen, isGen := decl.(*ast.GenDecl)
+			if !isGen || (gen.Tok != token.VAR && gen.Tok != token.CONST) {
+				continue
+			}
+			var carried []ast.Expr
+			for _, spec := range gen.Specs {
+				value, isValue := spec.(*ast.ValueSpec)
+				if !isValue {
+					continue
+				}
+				values := value.Values
+				switch {
+				case len(values) > 0:
+					carried = values
+				case gen.Tok == token.CONST:
+					values = carried
+				}
+				for i, name := range value.Names {
+					bound := values
+					if len(values) == len(value.Names) {
+						bound = values[i : i+1]
+					}
+					out[name.Name] = identifiersIn(bound)
+				}
+			}
+		}
+	}
+	return out
+}
+
+// identifiersIn collects the identifiers the expressions name.
+func identifiersIn(exprs []ast.Expr) map[string]bool {
+	named := map[string]bool{}
+	for _, expr := range exprs {
+		ast.Inspect(expr, func(node ast.Node) bool {
+			if ident, isIdent := node.(*ast.Ident); isIdent {
+				named[ident.Name] = true
+			}
+			return true
+		})
+	}
+	return named
+}
+
+// namesReaching widens a fragment's names to every package-level binding that
+// names one of them, at any depth. A function can run the fragment through
+// another constant (`columns = "id, " + fragment`). It assembles the same
+// query as one that names the fragment, so it is a namer too.
+func namesReaching(bindings map[string]map[string]bool, names []string) []string {
+	reached := map[string]bool{}
+	for _, name := range names {
+		reached[name] = true
+	}
+	for grew := true; grew; {
+		grew = false
+		for binding, named := range bindings {
+			if reached[binding] {
+				continue
+			}
+			for name := range named {
+				if reached[name] {
+					reached[binding], grew = true, true
+					break
+				}
+			}
+		}
+	}
+	out := make([]string, 0, len(reached))
+	for name := range reached {
+		out = append(out, name)
+	}
+	sort.Strings(out)
+	return out
+}
+
 // unguardedNamers are the functions that assemble a query from this fragment
 // and reach no exclusion, sorted so a failure reads the same on every run.
 //
@@ -622,6 +708,11 @@ func unguardedNamers(graph map[string]*graphFunc, names []string, dim activityDi
 	for key, entry := range graph {
 		mentions := false
 		for _, name := range names {
+			// A local of the same name is the function's own value, not the
+			// package binding that carries the fragment.
+			if entry.shadowed[name] {
+				continue
+			}
 			if entry.reads[name] || entry.calls[name] {
 				mentions = true
 			}
@@ -658,6 +749,7 @@ func TestEveryReaderOfTheActivityTableExcludesRestrictedRows(t *testing.T) {
 	defer restrictedReadersAdmitted.AssertAllMatched(t)
 	subjects := activityReaderScope.Files(t)
 	graphs := map[string]map[string]*graphFunc{}
+	bindings := map[string]map[string]map[string]bool{}
 	for _, src := range subjects {
 		dir := path.Dir(src.Path)
 		if _, done := graphs[dir]; !done {
@@ -667,8 +759,9 @@ func TestEveryReaderOfTheActivityTableExcludesRestrictedRows(t *testing.T) {
 			// alone would follow the call, find no body, and report exactly like
 			// a helper that excludes nothing.
 			graphs[dir] = packageCallGraph(t, dir)
+			bindings[dir] = packageBindingNames(parsePackageFiles(t, dir))
 		}
-		for _, offender := range unguardedActivityReaders(graphs[dir], src.File, heldDimension) {
+		for _, offender := range unguardedActivityReaders(graphs[dir], bindings[dir], src.File, heldDimension) {
 			if restrictedReadersAdmitted.Waived(t, src.Path+":"+strings.SplitN(offender, ":", 2)[0]) {
 				continue
 			}
@@ -796,5 +889,45 @@ func TestTheAuditDoorAdmitsOnlyReadsAnActivityCanBeBehind(t *testing.T) {
 				t.Errorf("readsAnActivitysAuditImage = %v, want %v for:\n%s", got, c.want, c.sql)
 			}
 		})
+	}
+}
+
+// A fragment that reaches its query through another constant is still judged
+// at the function that runs it. The planted package names the activity
+// fragment directly only in a guarded function, and runs it unguarded through
+// other constants. Following direct names alone reads that as clean. A local
+// that shadows an alias, and a sibling bound beside the alias, are not namers.
+func TestARestrictedReaderCensusFollowsAFragmentThroughAConstant(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	planted := filepath.Join(dir, "planted.go")
+	source := "package planted\n\n" +
+		"const sourceProbe = `EXISTS (SELECT 1 FROM activity a WHERE a.id = ev.source_id)`\n\n" +
+		"const columns = `id, ` + sourceProbe\n\n" +
+		"const (\n\taliasProbe = sourceProbe\n\trepeated\n)\n\n" +
+		"const used, unrelated = sourceProbe, `SELECT 1`\n\n" +
+		"func guarded(q func(string)) { q(`SELECT ` + sourceProbe + ` AND a.restricted_at IS NULL`) }\n\n" +
+		"func unguarded(q func(string)) { q(`SELECT ` + columns + ` FROM deal_stage_evidence ev`) }\n\n" +
+		"func viaRepeated(q func(string)) { q(repeated) }\n\n" +
+		"func viaUsed(q func(string)) { q(used) }\n\n" +
+		"func viaUnrelated(q func(string)) { q(unrelated) }\n\n" +
+		"func shadowing(q func(string)) { columns := `SELECT 1`; q(columns) }\n"
+	if err := os.WriteFile(planted, []byte(source), 0o600); err != nil {
+		t.Fatalf("planting the package: %v", err)
+	}
+	file, err := gatekit.ParseFile(planted, 0)
+	if err != nil {
+		t.Fatalf("parsing the planted package: %v", err)
+	}
+	offenders := unguardedActivityReaders(packageCallGraph(t, dir),
+		packageBindingNames(parsePackageFiles(t, dir)), file, heldDimension)
+	for namer, want := range map[string]bool{
+		"unguarded": true, "viaRepeated": true, "viaUsed": true,
+		"guarded": false, "viaUnrelated": false, "shadowing": false,
+	} {
+		got := slices.ContainsFunc(offenders, func(o string) bool { return strings.HasPrefix(o, namer+":") })
+		if got != want {
+			t.Errorf("%s reported = %v, want %v (offenders %v)", namer, got, want, offenders)
+		}
 	}
 }
