@@ -45,6 +45,13 @@ func stageThenTransmit(
 	t *testing.T, e *resolveEnv, delivery ids.UUID, sentSubject, sentBody string,
 ) commsauthz.TransmitTicket {
 	t.Helper()
+	stage(t, e, delivery)
+	return transmit(t, e, delivery, sentSubject, sentBody)
+}
+
+// stage records the staging decision over a live confirmation link.
+func stage(t *testing.T, e *resolveEnv, delivery ids.UUID) {
+	t.Helper()
 	// A live confirm link, which is what authorizes a record-confirmation send.
 	// The category is chosen for how LITTLE it needs: the subject of these tests
 	// is the fingerprint, and an invoice or a deal would put a chain of
@@ -66,10 +73,16 @@ func stageThenTransmit(
 	}); err != nil {
 		t.Fatalf("staging the delivery: %v", err)
 	}
+}
+
+// transmit runs the transmit decision alone, so a case can change the
+// recipient's record between staging and transmit.
+func transmit(t *testing.T, e *resolveEnv, delivery ids.UUID, sentSubject, sentBody string) commsauthz.TransmitTicket {
+	t.Helper()
 	ticket, err := e.gate.AuthorizeTransmit(e.ctx, commsauthz.TransmitRequest{
 		DeliveryID: delivery,
 		Attempt:    1,
-		Recipients: recipients,
+		Recipients: []connector.Recipient{{Email: e.address}},
 		Subject:    sentSubject,
 		Body:       sentBody,
 	})
@@ -77,6 +90,65 @@ func stageThenTransmit(
 		t.Fatalf("authorizing the transmit: %v", err)
 	}
 	return ticket
+}
+
+// A recorded human instruction answers a refusal about consent, and only that:
+// the ticket's ConsentRefused flag is what the instruction waiver reads. A
+// refusal no rollout mode softens is no human's to sign away either.
+func TestOnlyAConsentRefusalIsOneAnInstructionMayAnswer(t *testing.T) {
+	t.Run("a hard bounce is absolute", func(t *testing.T) {
+		e := setupResolve(t)
+		delivery := e.plantDelivery(t)
+		stage(t, e, delivery)
+		e.suppress(t, "hard_bounce")
+
+		ticket := transmit(t, e, delivery, stagedSubject, stagedBody)
+		requireRefusedFor(t, ticket, commsauthz.ReasonHardBounce)
+		if ticket.ConsentRefused {
+			t.Error("a hard bounce reads as a consent refusal, so a recorded instruction would " +
+				"send to an address that does not accept mail")
+		}
+	})
+	t.Run("a newsletter with no consent on record is a consent refusal", func(t *testing.T) {
+		e := setupResolve(t)
+		e.seedPurpose(t, "newsletter", "marketing")
+		delivery := e.plantDelivery(t)
+		recipients := []connector.Recipient{{Email: e.address}}
+		if err := e.store.db.Tx(e.ctx, func(tx pgx.Tx) error {
+			_, err := e.gate.AuthorizeStagingTx(e.ctx, tx, delivery, commsauthz.Request{
+				Recipients: recipients, Context: commsauthz.CategoryMarketing,
+				LegacyPurposeKey: "newsletter", Subject: stagedSubject, Body: stagedBody,
+			})
+			return err
+		}); err != nil {
+			t.Fatalf("staging the newsletter: %v", err)
+		}
+		ticket, err := e.gate.AuthorizeTransmit(e.ctx, commsauthz.TransmitRequest{
+			DeliveryID: delivery, Attempt: 1, Recipients: recipients,
+			PurposeKey: "newsletter", Subject: stagedSubject, Body: stagedBody,
+		})
+		if err != nil {
+			t.Fatalf("authorizing the transmit: %v", err)
+		}
+
+		requireRefusedFor(t, ticket, commsauthz.ReasonNoEvidence)
+		if !ticket.ConsentRefused {
+			t.Error("a newsletter refused for want of consent does not read as a consent refusal, " +
+				"so no recorded instruction could ever answer it")
+		}
+	})
+}
+
+// requireRefusedFor pins the refusal to the recipient's reason, because a
+// wording refusal also refuses and always clears ConsentRefused.
+func requireRefusedFor(t *testing.T, ticket commsauthz.TransmitTicket, reason string) {
+	t.Helper()
+	if ticket.Allowed {
+		t.Fatalf("the transmit was allowed, want a refusal for %s", reason)
+	}
+	if !strings.Contains(ticket.Reason, "("+reason+")") {
+		t.Fatalf("the refusal reads %q, want one for %s", ticket.Reason, reason)
+	}
 }
 
 // TestTheSameWordingStillTransmits is the positive control, and it comes first
