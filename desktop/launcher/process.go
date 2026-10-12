@@ -18,14 +18,10 @@ import (
 	"time"
 )
 
-// loopbackHost is the only interface anything in this installation listens on.
-//
-// Every service here — the database, the bus, the api, the web ui — is reached
-// by another process on the same machine and by nothing else. Binding the
-// loopback address rather than a wildcard is what keeps a laptop on a café
-// network from serving a CRM to it. The one exception is the web ui's
-// listener, which MARGINCE_WEB_BIND in the process environment can move to
-// another interface for a container (web.go, webBindHost).
+// loopbackHost is the interface every service of this installation listens on.
+// Binding it rather than a wildcard keeps a laptop on a café network from
+// serving a CRM to it. Only the web ui listener may move, through
+// MARGINCE_WEB_BIND, for a container (webBindHost).
 const loopbackHost = "127.0.0.1"
 
 // child is one supervised service process. A service the bundle runs is a
