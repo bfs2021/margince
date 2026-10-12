@@ -23,9 +23,7 @@ import (
 // driven by usage, and the unfiltered read returned the WHOLE table and then
 // ran one visibility query per row it had read.
 //
-// The subtlety is that the visibility filter runs AFTER the page: a page of
-// `limit` rows can serve fewer once the invisible ones are dropped. So the
-// walk is asserted by what it SEES across pages, and the pages are sized
+// The walk is asserted by what it SEES across pages, and the pages are sized
 // smaller than the fixture so a boundary is actually crossed.
 func TestTheRecordGrantListServesThePageItWasAskedFor(t *testing.T) {
 	e := Setup(t)

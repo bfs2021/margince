@@ -7,12 +7,13 @@ package identity
 //
 // Split from grants.go because the read answers a different question from the
 // writes beside it: those decide whether one share may exist, this one decides
-// what a caller may SEE of the shares that do — a page bounded by a keyset, and
-// then narrowed again by whether the caller could read each grant's target.
+// which of the shares that do the caller may SEE.
 
 import (
 	"context"
 	"errors"
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/jackc/pgx/v5"
@@ -20,58 +21,46 @@ import (
 	"github.com/margince/margince/backend/internal/platform/auth"
 	"github.com/margince/margince/backend/internal/platform/database/storekit"
 	"github.com/margince/margince/backend/internal/shared/apperrors"
-	"github.com/margince/margince/backend/internal/shared/kernel/ids"
 	"github.com/margince/margince/backend/internal/shared/kernel/principal"
 )
 
-// ListRecordGrants answers one page of the active manual grants.
+// ListRecordGrants answers one page of the active manual grants whose record
+// the caller could read.
 //
-// PAGED, and this is the one of the three unpaged lists that had to be rather
-// than have its dial retired: consent purposes and voice corpus sources are
-// configuration a workspace sets up once, but a grant row is created every time
-// somebody shares a record. Its count is driven by usage, and the unfiltered
-// call read the WHOLE table — then ran one visibility query per row it had read.
-//
-// THE VISIBILITY FILTER RUNS AFTER THE PAGE, which is what makes the paging
-// less obvious than it looks. A page of `limit` rows can serve fewer once the
-// invisible ones are dropped, so:
-//
-//   - `HasMore` comes from the QUERY reading one row beyond the page, never
-//     from how many survived the filter — a page that filtered everything out
-//     still has more behind it, and reporting otherwise ends the walk early;
-//   - the cursor names the last row READ, not the last row served. A cursor
-//     minted from the last visible row would re-read every invisible row after
-//     it on the next page, forever, without ever serving one.
+// Visibility is part of the page's WHERE clause, so the page, HasMore and the
+// cursor all come from visible rows. A cursor minted from a row the caller
+// cannot see would hand its id and creation time to the caller.
 func (s *Service) ListRecordGrants(ctx context.Context, in ListGrantsInput) ([]grantRow, storekit.Page, error) {
 	var out []grantRow
 	var page storekit.Page
 	err := s.db.Tx(ctx, func(tx pgx.Tx) error {
 		limit := storekit.ClampLimit(in.Limit)
-		candidates, err := s.grantPage(ctx, tx, in, limit)
-		if err != nil {
+		var err error
+		if out, err = s.grantPage(ctx, tx, in, limit); err != nil {
 			return err
 		}
-		if len(candidates) > limit {
-			candidates = candidates[:limit]
-			last := candidates[len(candidates)-1]
-			next, err := storekit.EncodeCursor(last.CreatedAt, last.ID)
-			if err != nil {
-				return err
-			}
-			page.NextCursor, page.HasMore = next, true
+		if len(out) <= limit {
+			return nil
 		}
-		out, err = visibleGrants(ctx, tx, candidates)
+		out = out[:limit]
+		last := out[len(out)-1]
+		next, err := storekit.EncodeCursor(last.CreatedAt, last.ID)
+		page.NextCursor, page.HasMore = next, true
 		return err
 	})
 	return out, page, err
 }
 
-// grantPage reads one page of candidate rows, one beyond the limit so the
-// caller can tell a full page from the last one.
+// grantPage reads one page of visible rows, one beyond the limit so the caller
+// can tell a full page from the last one.
 func (s *Service) grantPage(ctx context.Context, tx pgx.Tx, in ListGrantsInput, limit int) ([]grantRow, error) {
 	var args []any
 	arg := func(v any) int { args = append(args, v); return len(args) }
-	where := "(expires_at IS NULL OR expires_at > now())"
+	visible, err := grantTargetClause(ctx, arg)
+	if err != nil {
+		return nil, err
+	}
+	where := "(expires_at IS NULL OR expires_at > now()) AND " + visible
 	var whereSb74 strings.Builder
 	for _, f := range []struct {
 		column string
@@ -105,64 +94,51 @@ func (s *Service) grantPage(ctx context.Context, tx pgx.Tx, in ListGrantsInput, 
 	// because the difference is invisible in the result. That is why it is said
 	// here rather than left to a test.
 	rows, err := tx.Query(ctx,
-		"SELECT "+grantColumns+" FROM record_grant WHERE "+where+
+		"SELECT "+grantColumns+" FROM record_grant g WHERE "+where+
 			storekit.SQLf(" ORDER BY created_at DESC, id DESC LIMIT $%d", arg(limit+1)), args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var candidates []grantRow
+	var page []grantRow
 	for rows.Next() {
 		g, err := scanGrant(rows)
 		if err != nil {
 			return nil, err
 		}
-		candidates = append(candidates, g)
+		page = append(page, g)
 	}
-	return candidates, rows.Err()
+	return page, rows.Err()
 }
 
-// visibleGrants drops the grants whose target the caller cannot read.
-//
-// Through auth.VisibleSubset, which asks BOTH halves of "could this caller read
-// that record": the object grant on the record's type, then its row scope. The
-// row-scope probe alone is no answer on the tables every seat reads whole — it
-// admits every id without a query — so it is the object grant that keeps a seat
-// whose role holds no deal.read from listing every deal share and who holds it.
-//
-// One statement per record type on the page rather than one per grant, and all
-// of it AFTER the page's cursor is drained and closed: each probe is its own
-// query on this transaction, and pgx refuses a second query while rows are open
-// ("conn busy").
-func visibleGrants(ctx context.Context, tx pgx.Tx, candidates []grantRow) ([]grantRow, error) {
-	byType := map[string][]ids.UUID{}
-	for _, g := range candidates {
-		byType[g.RecordType] = append(byType[g.RecordType], g.RecordID)
-	}
-	readable := make(map[string]map[ids.UUID]bool, len(byType))
-	for recordType, recordIDs := range byType {
-		// The object grant is this list's decision, so it is asked here rather
-		// than left to the subset below, which only omits: a type the seat may not
-		// read contributes no share at all.
-		if err := auth.Require(ctx, recordType, principal.ActionRead); err != nil {
+// grantTargetClause keeps a grant only when the caller could read its record.
+// Each arm asks auth.VisibleSubset's two halves: the object read grant on the
+// type, then the record's row visibility. A type the seat may not read has no arm.
+func grantTargetClause(ctx context.Context, arg func(any) int) (string, error) {
+	var arms []string
+	for _, table := range slices.Sorted(maps.Keys(shareableRecordTypes)) {
+		if err := auth.Require(ctx, table, principal.ActionRead); err != nil {
 			if errors.Is(err, apperrors.ErrPermissionDenied) {
 				continue
 			}
-			return nil, err
+			return "", err
 		}
-		subset, err := auth.VisibleSubset(ctx, tx, recordType, recordIDs)
+		typed := storekit.SQLf("g.record_type = '%s'", table)
+		row, err := auth.ScopeClauseFor(ctx, table, "gt", arg)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
-		readable[recordType] = subset
-	}
-	out := make([]grantRow, 0, len(candidates))
-	for _, g := range candidates {
-		if readable[g.RecordType][g.RecordID] {
-			out = append(out, g)
+		if row == "" {
+			arms = append(arms, typed)
+			continue
 		}
+		arms = append(arms, storekit.SQLf("(%s AND EXISTS (SELECT 1 FROM %s gt WHERE gt.id = g.record_id AND %s))",
+			typed, table, row))
 	}
-	return out, nil
+	if len(arms) == 0 {
+		return "FALSE", nil
+	}
+	return "(" + strings.Join(arms, " OR ") + ")", nil
 }
 
 // derefOr reads a filter's value for binding, or nil when it is unset — the
