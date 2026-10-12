@@ -81,7 +81,7 @@ func (s *Subscriber) deliverAll(ctx context.Context, stream string, entries []re
 		return
 	}
 
-	if err := s.batchHandler(ctx, envs); err != nil {
+	if err := handleRecovered(func() error { return s.batchHandler(ctx, envs) }); err != nil {
 		s.log.Warn("bus: batch handler failed; delivering its entries one at a time",
 			"stream", stream, "entries", len(kept), "error", err)
 		for _, entry := range kept {

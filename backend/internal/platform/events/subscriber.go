@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -214,13 +215,25 @@ func (s *Subscriber) deliver(ctx context.Context, stream string, entry redis.XMe
 		return
 	}
 
-	if err := s.handler(ctx, env); err != nil {
+	if err := handleRecovered(func() error { return s.handler(ctx, env) }); err != nil {
 		// No ack: the entry stays pending and re-delivers via reclaim.
 		s.log.Warn("bus: handler failed; entry stays pending",
 			"stream", stream, "entry", entry.ID, "event_id", env.EventID.String(), "error", err)
 		return
 	}
 	s.ack(ctx, stream, entry.ID)
+}
+
+// handleRecovered turns a handler panic into a failed delivery. The entry
+// stays pending and the process lives: one bad event must not crash-loop every
+// lane that shares the worker or the API.
+func handleRecovered(handle func() error) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("handler panicked: %v\n%s", r, debug.Stack())
+		}
+	}()
+	return handle()
 }
 
 func (s *Subscriber) ack(ctx context.Context, stream, entryID string) {

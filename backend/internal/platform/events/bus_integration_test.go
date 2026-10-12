@@ -369,6 +369,40 @@ func TestSubscriberReclaimRedeliversAfterHandlerCrash(t *testing.T) {
 	}
 }
 
+func TestAPanickingHandlerLeavesItsEntryPendingAndTheLaneRunning(t *testing.T) {
+	e := setup(t)
+	env := e.stage(t, "lead.created", ids.NewV7())
+	if _, err := e.relay(t).relayBatch(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	// An unrecovered panic here would take the whole test binary down, so
+	// reaching the second attempt is itself the proof the lane survived.
+	var attempts atomic.Int32
+	group := kevents.Group{Name: "cg:workflows", Streams: []string{"gw:events:crm:lead"}}
+	s := NewSubscriber(e.rdb, group, func(_ context.Context, got kevents.Envelope) error {
+		if got.EventID != env.EventID {
+			t.Errorf("delivered %s, staged %s", got.EventID, env.EventID)
+		}
+		if attempts.Add(1) == 1 {
+			panic("simulated handler bug")
+		}
+		return nil
+	}, testLogger())
+	s.block = 100 * time.Millisecond
+	s.minIdle = 200 * time.Millisecond
+
+	consumeUntil(t, s, 10*time.Second, func() bool { return attempts.Load() >= 2 })
+
+	pending, err := e.rdb.XPending(t.Context(), "gw:events:crm:lead", group.Name).Result()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pending.Count != 0 {
+		t.Fatalf("entry still pending after the redelivery succeeded (count %d)", pending.Count)
+	}
+}
+
 func TestSubscriberEnsuresEverySpecGroup(t *testing.T) {
 	e := setup(t)
 	noop := func(context.Context, kevents.Envelope) error { return nil }
