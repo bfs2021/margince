@@ -190,8 +190,15 @@ func (s *Service) sinceLastVisit(ctx context.Context, tx pgx.Tx, companyID ids.C
 // have never acknowledged this account. The user_id predicate is the whole
 // scope and has to be written out: without it one rep would read another
 // rep's reading history. It is also sufficient — core 0225 collapsed
-// user_record_view's unique key to (user_id, entity_type, entity_id).
+// user_record_view's unique key to (user_id, entity_type, entity_id). An
+// agent carries its human's user id, so it reads as never having visited.
 func (s *Service) baselineFor(ctx context.Context, tx pgx.Tx, companyID ids.CompanyID) (at time.Time, visited bool, err error) {
+	if err := auth.RequireHuman(ctx); err != nil {
+		if errors.Is(err, apperrors.ErrPermissionDenied) {
+			return time.Time{}, false, nil
+		}
+		return time.Time{}, false, err
+	}
 	userID, err := actingUser(ctx)
 	if err != nil {
 		return time.Time{}, false, err

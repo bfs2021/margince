@@ -28,6 +28,7 @@ package company360
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"time"
@@ -39,6 +40,7 @@ import (
 	"github.com/margince/margince/backend/internal/platform/auth"
 	"github.com/margince/margince/backend/internal/platform/database"
 	"github.com/margince/margince/backend/internal/platform/httperr"
+	"github.com/margince/margince/backend/internal/shared/apperrors"
 	"github.com/margince/margince/backend/internal/shared/kernel/ids"
 	"github.com/margince/margince/backend/internal/shared/kernel/principal"
 )
@@ -187,6 +189,14 @@ func isFingerprint(value string) bool {
 func (s *Service) dismissedFingerprints(
 	ctx context.Context, tx pgx.Tx, companyID ids.CompanyID, candidates []string,
 ) (map[string]bool, error) {
+	// An agent carries its human's user id; it sees every suggestion rather
+	// than learning which ones that human set aside.
+	if err := auth.RequireHuman(ctx); err != nil {
+		if errors.Is(err, apperrors.ErrPermissionDenied) {
+			return map[string]bool{}, nil
+		}
+		return nil, err
+	}
 	userID, err := actingUser(ctx)
 	if err != nil {
 		return nil, err
