@@ -121,12 +121,8 @@ func TestFulfillingAnErasureCaseTheSubjectOpenedCompletes(t *testing.T) {
 		t.Errorf("the case is %q, want fulfilled — the controller must be able to show it "+
 			"performed the erasure", status)
 	}
-	// subject_ref DELIBERATELY survives on this one row: a replayed fulfilment
-	// resolves the contact through it, and the replay must stay idempotent.
-	// finalizeErasureFulfil says so at the statement. What must not survive is
-	// the officer's prose and the contact link, both checked below.
-	if subjectRef == "" {
-		t.Error("the fulfilled case lost the reference a replayed fulfilment resolves through")
+	if want := "erased+" + caseID.String(); subjectRef != want {
+		t.Errorf("the fulfilled case's subject_ref is %q, want the tombstone %q", subjectRef, want)
 	}
 	if stillLinked != nil {
 		t.Error("the fulfilled case still names the erased contact")

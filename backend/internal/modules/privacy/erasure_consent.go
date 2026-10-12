@@ -17,6 +17,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"github.com/margince/margince/backend/internal/shared/kernel/ids"
+	"github.com/margince/margince/backend/internal/shared/kernel/retentionscope"
 )
 
 // deleteConsentCapabilities destroys every live capability over the subject's
@@ -295,12 +296,11 @@ func tombstoneExceptionExplanations(ctx context.Context, tx pgx.Tx, contactID id
 // an officer's save, then the retirement.
 //
 // The excluded row is not left naming its subject. finalizeErasureFulfil
-// (consent/dsr.go) clears it in the same statement that closes it, which is the
-// only place that can: no other transaction may touch a row this one holds.
+// (consent/dsrerasure.go) writes the same tombstone in the statement that closes it.
 func retireRightsCases(ctx context.Context, tx pgx.Tx, contactID ids.UUID, fulfilling ids.UUID) error {
 	if _, err := tx.Exec(ctx, `
 		UPDATE data_subject_request
-		   SET subject_ref = 'erased+' || id,
+		   SET subject_ref = `+retentionscope.RetiredSubjectRef+`,
 		       resolution = CASE WHEN resolution IS NULL THEN NULL ELSE 'erased' END,
 		       -- THE LINK SURVIVES on an OPEN case, and only there. A second
 		       -- erasure case for one subject must still be fulfillable after
@@ -321,7 +321,7 @@ func retireRightsCases(ctx context.Context, tx pgx.Tx, contactID ids.UUID, fulfi
 // fulfillingCase answers which rights case this erasure is being run to fulfil,
 // read off the reason its caller passed.
 //
-// "dsr:<uuid>" is the spelling FulfilErasure uses (consent/dsr.go), and it is
+// "dsr:<uuid>" is the spelling FulfilErasure uses (consent/dsrerasure.go), and it is
 // the ONE row retireRightsCases cannot wait for: that transaction holds it
 // locked across this whole call. Every other reason — an officer's manual
 // erasure, a retention sweep — names no case, and the zero uuid excludes

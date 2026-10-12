@@ -17,10 +17,12 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
+	crmcontracts "github.com/margince/margince/backend/internal/contracts"
 	"github.com/margince/margince/backend/internal/platform/database/storekit"
 	"github.com/margince/margince/backend/internal/shared/apperrors"
 	"github.com/margince/margince/backend/internal/shared/kernel/ids"
 	"github.com/margince/margince/backend/internal/shared/kernel/principal"
+	"github.com/margince/margince/backend/internal/shared/kernel/retentionscope"
 )
 
 // FulfilErasure fulfils an erasure request atomically with respect to every
@@ -65,6 +67,12 @@ func (s *Store) FulfilErasure(ctx context.Context, id ids.UUID, in UpdateDSRInpu
 		if verr := validateDSRUpdate(current, in); verr != nil {
 			return verr
 		}
+		// A fulfilled case already holds no subject to resolve, and its erase has run.
+		// A replay only reapplies the closing write.
+		if current.Status == string(crmcontracts.DataSubjectRequestStatusFulfilled) {
+			out, err = finalizeErasureFulfil(ctx, tx, id, in, current)
+			return err
+		}
 		// THE LINK FIRST, then the reference.
 		//
 		// An erasure retires every other case the subject holds, which
@@ -97,27 +105,9 @@ func (s *Store) FulfilErasure(ctx context.Context, id ids.UUID, in UpdateDSRInpu
 // can only match under that lock. A miss still answers as an illegal
 // transition, never a silent no-op.
 func finalizeErasureFulfil(ctx context.Context, tx pgx.Tx, id ids.UUID, in UpdateDSRInput, current dsrRow) (dsrRow, error) {
-	// THE RESOLUTION COMES OUT, and subject_ref deliberately does NOT.
-	//
-	// The erasure has just run and took the subject out of every other case
-	// they opened. It could not take them out of THIS one: this transaction
-	// holds the row FOR UPDATE across that call, so the engine's retirement
-	// skips it rather than blocking on a lock its caller holds.
-	//
-	// The prose goes, because an officer typed it and it can name or quote the
-	// subject. The reference stays, because THIS ROW is how a replayed
-	// fulfilment finds the contact to erase — the status is already
-	// 'fulfilled', which validateDSRUpdate treats as a legal no-op, and
-	// tombstoning the reference makes that retry fail to resolve a subject it
-	// is supposed to be idempotent about.
-	//
-	// SO THE ERASURE REQUEST KEEPS THE IDENTITY IT WAS MADE WITH, alone among
-	// the subject's cases. That is a real gap and it is bounded: one row, one
-	// column, carrying what the subject themselves wrote on a form to ask for
-	// this. Closing it means making the replay resolve the contact some other
-	// way — the audit trail, or a column the tombstone does not touch — which
-	// is a change to how a fulfilment re-finds its subject rather than to what
-	// this statement writes.
+	// The erasure's retirement of the subject's cases skips this row, which the
+	// caller holds locked. So this statement retires it the same way: reference,
+	// prose and link all go.
 	var args []any
 	arg := func(v any) int { args = append(args, v); return len(args) }
 	assignee := dsrAssigneeSet(in, arg)
@@ -125,6 +115,7 @@ func finalizeErasureFulfil(ctx context.Context, tx pgx.Tx, id ids.UUID, in Updat
 			UPDATE data_subject_request SET
 			  status = 'fulfilled',
 			  %s,
+			  subject_ref = `+retentionscope.RetiredSubjectRef+`,
 			  resolution = CASE
 			    WHEN coalesce($%d, resolution) IS NULL THEN NULL ELSE 'erased' END,
 			  contact_id = NULL
@@ -149,8 +140,8 @@ func finalizeErasureFulfil(ctx context.Context, tx pgx.Tx, id ids.UUID, in Updat
 // TWO SOURCES, because neither is always set. A case opened through the
 // subject's own confirm link carries contact_id; one an officer opened by hand
 // carries only subject_ref, which CreateDSR takes as free text. And an erasure
-// tombstones the reference on every case but the one it is fulfilling, so on a
-// sibling case the link is the only thing left to read.
+// tombstones the reference on every case it reaches, so on an open sibling case
+// the link is the only thing left to read.
 //
 // Both come off the row this transaction already holds FOR UPDATE, so there is
 // no second read to bound.

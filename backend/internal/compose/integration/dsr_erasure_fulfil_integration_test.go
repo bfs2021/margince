@@ -108,32 +108,45 @@ func TestFulfillErasureHTTPRefusesASyntacticallyValidButNonexistentSubject(t *te
 	}
 }
 
-// TestFulfillErasureHTTPIsIdempotentAcrossTwoFulfilments is the load-bearing
-// proof for the premise the ErrNotFound-refusal path rests on: EraseContact
-// anonymizes a contact row IN PLACE rather than deleting it, so fulfilling the SAME
-// erasure request a second time must keep succeeding — the second call finds the
-// (now-anonymized) row exactly like the first did, re-runs the scrub harmlessly,
-// and returns nil, never ErrNotFound. Only the real eraser can prove this; a fake
-// would succeed unconditionally either way. If this test fails, the
-// anonymize-in-place premise is wrong and the handler's ErrNotFound refusal is
-// blocking a re-fulfil idempotency actually requires to succeed.
+// TestFulfillErasureHTTPIsIdempotentAcrossTwoFulfilments pins what a fulfilled
+// erasure case keeps and what a replay of it does. The case stops naming its
+// subject, and a second fulfilment answers 200 with the case as it stands.
 func TestFulfillErasureHTTPIsIdempotentAcrossTwoFulfilments(t *testing.T) {
 	e := Setup(t)
 	contactID := e.SeedContact(t, "Erasure Subject", nil)
-	h, _, id := setupErasureDSR(t, e, contactID.String())
+	h, store, id := setupErasureDSR(t, e, contactID.String())
 
 	first := fulfilErasureDSR(t, e, h, id, `{"status":"fulfilled","resolution":"verified in person"}`)
 	if first.Code != http.StatusOK {
 		t.Fatalf("first fulfilment of a real contact must succeed, got %d: %s", first.Code, first.Body)
 	}
+	fulfilled, err := store.GetDSR(e.Admin(), id)
+	if err != nil {
+		t.Fatalf("reading back: %v", err)
+	}
+	if fulfilled.Status != "fulfilled" {
+		t.Fatalf("the case is %q after fulfilment, want fulfilled", fulfilled.Status)
+	}
+	if want := "erased+" + id.String(); fulfilled.SubjectRef != want {
+		t.Fatalf("the fulfilled case's subject_ref is %q, want the tombstone %q", fulfilled.SubjectRef, want)
+	}
 
-	// The request is already "fulfilled"; validateDSRUpdate treats a status
-	// equal to the current one as a no-op (not a transition), so this is legal
-	// to submit again — and it re-triggers the erase side effect.
+	// The tombstone names no contact, so the replay must not try to resolve one.
 	second := fulfilErasureDSR(t, e, h, id, `{"status":"fulfilled"}`)
 	if second.Code != http.StatusOK {
-		t.Fatalf("re-fulfilling an already-erased contact must still succeed (idempotent), got %d: %s",
-			second.Code, second.Body)
+		t.Fatalf("re-fulfilling a fulfilled erasure case must succeed, got %d: %s", second.Code, second.Body)
+	}
+	var replayed struct {
+		Status     string  `json:"status"`
+		SubjectRef string  `json:"subject_ref"`
+		Resolution *string `json:"resolution"`
+	}
+	if err := json.Unmarshal(second.Body.Bytes(), &replayed); err != nil {
+		t.Fatalf("decoding the replay: %v", err)
+	}
+	if replayed.Status != "fulfilled" || replayed.SubjectRef != fulfilled.SubjectRef ||
+		replayed.Resolution == nil || *replayed.Resolution != "erased" {
+		t.Fatalf("the replay answered %+v, want the fulfilled case unchanged", replayed)
 	}
 }
 

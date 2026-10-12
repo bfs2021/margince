@@ -11,6 +11,7 @@
 // without this package each would restate them and the copies would drift.
 // Every fragment takes the SQL expression naming the activity, because the
 // callers alias it differently, and is stdlib-only text with no placeholders.
+// RetiredSubjectRef is the exception: a constant over a rights case's own id column.
 package retentionscope
 
 // HeldThroughRecordLinks is true when a legal hold sits on a company, deal, lead
@@ -63,3 +64,7 @@ func UnderOpenErasure(activityID string) string {
 	    WHERE d.kind = 'erasure' AND d.status IN ('open', 'in_progress')
 	      AND (el.contact_id = d.contact_id OR el.contact_id::text = d.subject_ref))`
 }
+
+// RetiredSubjectRef is the stand-in a rights case's subject_ref takes once its
+// subject is erased. It derives from the case's own id column, so it names no one.
+const RetiredSubjectRef = `'erased+' || id`
