@@ -12104,6 +12104,8 @@ export const en = {
   "worklist.owner.nobodyYet": "Nobody yet",
   "worklist.owner.mine": "My Worklist",
   "worklist.owner.backToMine": "Back to your Worklist",
+  "worklist.owner.refused":
+    "This Worklist is not yours to read. Ask its owner, or go back to your own.",
   "worklist.manager.reassign": "Reassign",
   "worklist.manager.reassignTo": "Reassign to",
   "worklist.manager.reassignConfirm": "Reassign",
