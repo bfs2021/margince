@@ -65,6 +65,9 @@ type replayTarget struct {
 	companions []companionRef
 }
 
+// offerBuyer is the company an offer body names as its buyer.
+var offerBuyer = []companionRef{{table: tableCompany, idPath: offerBuyerField}}
+
 // companionRef is one record a body points at, and where its id sits.
 type companionRef struct {
 	table  string
@@ -121,6 +124,7 @@ const (
 	companionContactField = "contact_id"
 	companionCompanyField = "company_id"
 	companionLeadField    = "lead_id"
+	offerBuyerField       = "buyer_company_id"
 
 	objectOffer         = "offer"
 	objectPipeline      = "pipeline"
@@ -287,10 +291,12 @@ var replayableOperations = map[string]replayTarget{
 	// Bodies with no owner column of their own that hand back a record which
 	// has one. An offer without its deal's scope would return that deal's
 	// pricing and buyer snapshot to someone who can no longer open the deal.
-	"POST /v1/deals/{id}/offers":      {object: objectOffer, table: tableDeal, idPath: dealIDField},
-	"POST /v1/offers/{id}/regenerate": {object: objectOffer, table: tableDeal, idPath: dealIDField},
-	"POST /v1/offers/{id}/send":       {object: objectOffer, table: tableDeal, idPath: dealIDField},
-	"POST /v1/offers/{id}/render":     {object: objectOffer, table: tableDeal, idPath: dealIDField},
+	// The buyer company is a companion: the live read withholds a buyer the
+	// caller cannot see, and a replay must not hand it back.
+	"POST /v1/deals/{id}/offers":      {object: objectOffer, table: tableDeal, idPath: dealIDField, companions: offerBuyer},
+	"POST /v1/offers/{id}/regenerate": {object: objectOffer, table: tableDeal, idPath: dealIDField, companions: offerBuyer},
+	"POST /v1/offers/{id}/send":       {object: objectOffer, table: tableDeal, idPath: dealIDField, companions: offerBuyer},
+	"POST /v1/offers/{id}/render":     {object: objectOffer, table: tableDeal, idPath: dealIDField, companions: offerBuyer},
 	"POST /v1/record-grants": {
 		objectNote: "sharing is gated by the manage-sharing permission, which is not an entry in policy.coreObjects",
 		tableField: "record_type", idPath: "record_id",

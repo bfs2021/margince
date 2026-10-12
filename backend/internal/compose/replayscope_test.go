@@ -413,3 +413,36 @@ func TestAReplayReAsksTheObjectGrant(t *testing.T) {
 		}
 	})
 }
+
+// A replayed offer hands back its buyer snapshot. The live read withholds a
+// buyer the caller cannot see, so every offer route probes the buyer company.
+// The unreadable id is the proof the probe runs: absent, it would be skipped.
+func TestAnOfferReplayProbesTheBuyerCompanyItNames(t *testing.T) {
+	buyer := companionRef{table: tableCompany, idPath: offerBuyerField}
+	for _, route := range []string{
+		"POST /v1/deals/{id}/offers",
+		"POST /v1/offers/{id}/regenerate",
+		"POST /v1/offers/{id}/send",
+		"POST /v1/offers/{id}/render",
+	} {
+		t.Run(route, func(t *testing.T) {
+			target := replayableOperations[route]
+			if !slices.Contains(target.companions, buyer) {
+				t.Errorf("companions = %+v, want the buyer company {%s, %s}", target.companions, tableCompany, offerBuyerField)
+			}
+			err := ensureCompanionsVisible(context.Background(), nil, target,
+				`{"id":"01a00000-0000-7000-8000-000000000001","buyer_company_id":"garbage"}`)
+			if !errors.Is(err, apperrors.ErrNotFound) {
+				t.Fatalf("an unreadable buyer: err = %v, want ErrNotFound", err)
+			}
+			for _, body := range []string{
+				`{"id":"01a00000-0000-7000-8000-000000000001"}`,
+				`{"id":"01a00000-0000-7000-8000-000000000001","buyer_company_id":null}`,
+			} {
+				if err := ensureCompanionsVisible(context.Background(), nil, target, body); err != nil {
+					t.Errorf("body %s: err = %v, want nil: an offer naming no buyer has none to probe", body, err)
+				}
+			}
+		})
+	}
+}
