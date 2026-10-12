@@ -446,3 +446,34 @@ func TestAnOfferReplayProbesTheBuyerCompanyItNames(t *testing.T) {
 		})
 	}
 }
+
+// A deal or lead replay re-checks every reference the record's live read
+// withholds. An unreadable id is the proof the probe runs on that field.
+func TestADealOrLeadReplayProbesTheReferencesItsReadWithholds(t *testing.T) {
+	deal := []string{companionCompanyField, "partner_company_id", "project_id"}
+	cases := map[string][]string{
+		"POST /v1/deals":              deal,
+		"PATCH /v1/deals/{id}":        deal,
+		"POST /v1/deals/{id}/advance": deal,
+		"POST /v1/deals/{id}/stage-progressions/{approvalId}/revert": deal,
+		"POST /v1/leads":             {"from_contact_id"},
+		"PATCH /v1/leads/{id}":       {"from_contact_id"},
+		"POST /v1/leads/{id}/reopen": {"from_contact_id"},
+	}
+	for route, fields := range cases {
+		target := replayableOperations[route]
+		for _, field := range fields {
+			t.Run(route+" "+field, func(t *testing.T) {
+				body := `{"id":"01a00000-0000-7000-8000-000000000001","` + field + `":"garbage"}`
+				if err := ensureCompanionsVisible(context.Background(), nil, target, body); !errors.Is(err, apperrors.ErrNotFound) {
+					t.Fatalf("an unreadable %s: err = %v, want ErrNotFound", field, err)
+				}
+			})
+		}
+		t.Run(route+" no references", func(t *testing.T) {
+			if err := ensureCompanionsVisible(context.Background(), nil, target, `{"id":"01a00000-0000-7000-8000-000000000001"}`); err != nil {
+				t.Errorf("err = %v, want nil: a body naming no reference has none to probe", err)
+			}
+		})
+	}
+}

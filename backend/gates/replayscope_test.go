@@ -235,7 +235,7 @@ func TestReplayScopeCoversEveryIdempotentOperation(t *testing.T) {
 			}
 		}
 		for _, declared := range got.companions {
-			if !slices.Contains(companionsInContract(t, schemas, got), declared) {
+			if !slices.Contains(declarableCompanions(t, schemas), declared) {
 				t.Errorf("%s probes companion %s, which its response schema does not carry — the probe reads a field that is never there and passes for free",
 					route, declared)
 			}
@@ -251,11 +251,29 @@ func TestReplayScopeCoversEveryIdempotentOperation(t *testing.T) {
 // gatekit:fixture the field-to-table convention this census reads, not costs
 // anyone is waived from: an entry here adds a check rather than removing one.
 var companionRecordFields = map[string]string{
-	"contact_id": "contact",
-	"company_id": "company",
-	"deal_id":    "deal",
-	"lead_id":    "lead",
-	"project_id": "project",
+	"contact_id":         "contact",
+	"company_id":         "company",
+	"deal_id":            "deal",
+	"lead_id":            "lead",
+	"project_id":         "project",
+	"buyer_company_id":   "company",
+	"partner_company_id": "company",
+	"from_contact_id":    "contact",
+}
+
+// declarableCompanions names every row-scoped reference a route's response
+// schemas carry at the top level, wrapper or not. A record's own reference may
+// need a probe when its live read withholds it, so a route may declare one. It
+// may not declare a field the response never carries.
+func declarableCompanions(t *testing.T, schemas []string) []string {
+	t.Helper()
+	var out []string
+	for _, schema := range schemas {
+		for field, table := range schemaRecordFields(t, schema) {
+			out = append(out, table+":"+field)
+		}
+	}
+	return out
 }
 
 // companionsInContract names the row-scoped references a route's response

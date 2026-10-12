@@ -65,9 +65,6 @@ type replayTarget struct {
 	companions []companionRef
 }
 
-// offerBuyer is the company an offer body names as its buyer.
-var offerBuyer = []companionRef{{table: tableCompany, idPath: offerBuyerField}}
-
 // companionRef is one record a body points at, and where its id sits.
 type companionRef struct {
 	table  string
@@ -125,6 +122,9 @@ const (
 	companionCompanyField = "company_id"
 	companionLeadField    = "lead_id"
 	offerBuyerField       = "buyer_company_id"
+	dealPartnerField      = "partner_company_id"
+	dealProjectField      = "project_id"
+	leadSourceField       = "from_contact_id"
 
 	objectOffer         = "offer"
 	objectPipeline      = "pipeline"
@@ -205,9 +205,20 @@ var replayableOperations = map[string]replayTarget{
 	"PATCH /v1/companies/{id}/facts/{factKey}":               {object: tableCompany, table: tableCompany, pathParam: "id"},
 	"DELETE /v1/companies/{id}/facts/{factKey}":              {object: tableCompany, rowNote: "the removal answers 204: the row is gone, so a replay has no record to re-probe — what the original write was gated on was the company named in the path, and that gate ran then"},
 	"POST /v1/companies/{id}/facts/{factKey}/confirm":        {object: tableCompany, table: tableCompany, pathParam: "id"},
-	"POST /v1/deals":              {object: tableDeal, table: tableDeal, idPath: "id"},
-	"PATCH /v1/deals/{id}":        {object: tableDeal, table: tableDeal, idPath: "id"},
-	"POST /v1/deals/{id}/advance": {object: tableDeal, table: tableDeal, idPath: "id"},
+	// A deal's live read withholds a company or project the caller cannot see,
+	// so a replay re-checks each reference before handing it back.
+	"POST /v1/deals": {
+		object: tableDeal, table: tableDeal, idPath: "id",
+		companions: []companionRef{{table: tableCompany, idPath: companionCompanyField}, {table: tableCompany, idPath: dealPartnerField}, {table: tableProject, idPath: dealProjectField}},
+	},
+	"PATCH /v1/deals/{id}": {
+		object: tableDeal, table: tableDeal, idPath: "id",
+		companions: []companionRef{{table: tableCompany, idPath: companionCompanyField}, {table: tableCompany, idPath: dealPartnerField}, {table: tableProject, idPath: dealProjectField}},
+	},
+	"POST /v1/deals/{id}/advance": {
+		object: tableDeal, table: tableDeal, idPath: "id",
+		companions: []companionRef{{table: tableCompany, idPath: companionCompanyField}, {table: tableCompany, idPath: dealPartnerField}, {table: tableProject, idPath: dealProjectField}},
+	},
 	// A suggestion's decision answers the suggestion, evidence titles and all,
 	// so a replay clears the suggestion's own visibility rule again; the deal
 	// an acceptance opened rides beside it as a companion.
@@ -223,6 +234,7 @@ var replayableOperations = map[string]replayTarget{
 	// caller their own retry had failed.
 	"POST /v1/deals/{id}/stage-progressions/{approvalId}/revert": {
 		object: tableDeal, table: tableDeal, idPath: "id",
+		companions: []companionRef{{table: tableCompany, idPath: companionCompanyField}, {table: tableCompany, idPath: dealPartnerField}, {table: tableProject, idPath: dealProjectField}},
 	},
 	"POST /v1/contracts":             {object: probeContract, moduleProbe: probeContract, idPath: "id", rowNote: "a contract carries no owner column; visibility is inherited from its deal or company, so the contracts store owns the probe"},
 	"POST /v1/deal-rooms":            {object: probeDealRoom, moduleProbe: probeDealRoom, idPath: "id", rowNote: "a Deal Room carries no owner column; its visibility is its parent deal's, so the dealrooms store owns the probe"},
@@ -238,8 +250,15 @@ var replayableOperations = map[string]replayTarget{
 		moduleProbe: probeBulkBatch, idPath: "batch_id",
 	},
 	"POST /v1/projects/transfer-ownership": {object: tableProject, rowNote: "the response is a count, not a record: the handover's rows were each gated on the caller's write authority when it ran, and a replay hands back the number alone"},
-	"POST /v1/leads":                       {object: tableLead, table: tableLead, idPath: "id"},
-	"PATCH /v1/leads/{id}":                 {object: tableLead, table: tableLead, idPath: "id"},
+	// A lead's live read withholds a source contact the caller cannot see.
+	"POST /v1/leads": {
+		object: tableLead, table: tableLead, idPath: "id",
+		companions: []companionRef{{table: tableContact, idPath: leadSourceField}},
+	},
+	"PATCH /v1/leads/{id}": {
+		object: tableLead, table: tableLead, idPath: "id",
+		companions: []companionRef{{table: tableContact, idPath: leadSourceField}},
+	},
 	// The demote answers the lead it restored plus the contact it was demoted
 	// FROM — a second record, beside the one the replay is keyed on.
 	"POST /v1/leads/{id}/demote": {
@@ -248,7 +267,10 @@ var replayableOperations = map[string]replayTarget{
 	},
 	// The reopen answers the lead it put back, keyed on the same row the
 	// disqualify it reverses was keyed on.
-	"POST /v1/leads/{id}/reopen":        {object: tableLead, table: tableLead, idPath: "id"},
+	"POST /v1/leads/{id}/reopen": {
+		object: tableLead, table: tableLead, idPath: "id",
+		companions: []companionRef{{table: tableContact, idPath: leadSourceField}},
+	},
 	"POST /v1/activities":               {object: tableActivity, table: tableActivity, idPath: "id"},
 	"POST /v1/tasks":                    {object: tableActivity, table: tableActivity, idPath: "id"},
 	"PATCH /v1/activities/{id}":         {object: tableActivity, table: tableActivity, idPath: "id"},
@@ -293,10 +315,22 @@ var replayableOperations = map[string]replayTarget{
 	// pricing and buyer snapshot to someone who can no longer open the deal.
 	// The buyer company is a companion: the live read withholds a buyer the
 	// caller cannot see, and a replay must not hand it back.
-	"POST /v1/deals/{id}/offers":      {object: objectOffer, table: tableDeal, idPath: dealIDField, companions: offerBuyer},
-	"POST /v1/offers/{id}/regenerate": {object: objectOffer, table: tableDeal, idPath: dealIDField, companions: offerBuyer},
-	"POST /v1/offers/{id}/send":       {object: objectOffer, table: tableDeal, idPath: dealIDField, companions: offerBuyer},
-	"POST /v1/offers/{id}/render":     {object: objectOffer, table: tableDeal, idPath: dealIDField, companions: offerBuyer},
+	"POST /v1/deals/{id}/offers": {
+		object: objectOffer, table: tableDeal, idPath: dealIDField,
+		companions: []companionRef{{table: tableCompany, idPath: offerBuyerField}},
+	},
+	"POST /v1/offers/{id}/regenerate": {
+		object: objectOffer, table: tableDeal, idPath: dealIDField,
+		companions: []companionRef{{table: tableCompany, idPath: offerBuyerField}},
+	},
+	"POST /v1/offers/{id}/send": {
+		object: objectOffer, table: tableDeal, idPath: dealIDField,
+		companions: []companionRef{{table: tableCompany, idPath: offerBuyerField}},
+	},
+	"POST /v1/offers/{id}/render": {
+		object: objectOffer, table: tableDeal, idPath: dealIDField,
+		companions: []companionRef{{table: tableCompany, idPath: offerBuyerField}},
+	},
 	"POST /v1/record-grants": {
 		objectNote: "sharing is gated by the manage-sharing permission, which is not an entry in policy.coreObjects",
 		tableField: "record_type", idPath: "record_id",
