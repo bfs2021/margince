@@ -6,19 +6,30 @@ package httperr
 // How many records one response hands over, and the seam that lets the surface
 // bounding an agent's reads charge for them.
 
-import "reflect"
+import (
+	"net/http"
+	"reflect"
+)
 
 // ServedMeter is implemented by a ResponseWriter its owner has wrapped to count
-// what leaves this door. WriteJSON reports every body it is about to write, so
-// the count is taken at the ONE place a record becomes a REST response instead
-// of in the ~290 handlers that would each have to remember.
+// what leaves this door. WriteJSON reports every body it is about to write, and
+// a CSV or byte body reports through ChargeServed, so the ~290 handlers need not
+// each remember.
 //
 // This package holds no request and knows nothing about counters, so a meter that
 // cannot record its charge answers the request ITSELF and reports proceed=false;
-// WriteJSON then writes nothing more. That keeps the decision about what an
+// the writer then writes nothing more. That keeps the decision about what an
 // uncountable answer costs with the door that has the context to make it.
 type ServedMeter interface {
 	NoteServed(n int) (proceed bool)
+}
+
+// ChargeServed tells the writer's meter, if it carries one, that n records are
+// about to leave. Every body that bypasses WriteJSON calls it before its first
+// byte; proceed=false means the meter has already answered the request.
+func ChargeServed(w http.ResponseWriter, n int) (proceed bool) {
+	meter, metered := w.(ServedMeter)
+	return !metered || meter.NoteServed(n)
 }
 
 // recordsIn counts the records a response body hands over.

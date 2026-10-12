@@ -23,9 +23,9 @@ import (
 // against MCP-SESS-READS.
 //
 // It wraps the WRITER rather than threading a counter through ~290 handler
-// signatures: httperr.WriteJSON is the one place a record becomes a REST
-// response, and it reports what it is about to write to whatever meter the
-// writer carries. That is the seam newWireRecord is on the MCP door.
+// signatures: httperr.WriteJSON, and httperr.ChargeServed for a non-JSON body,
+// report what is about to be written to whatever meter the writer carries. That
+// is the seam newWireRecord is on the MCP door.
 type servedMeter struct {
 	http.ResponseWriter
 	r   *http.Request
@@ -58,6 +58,9 @@ func (m *servedMeter) NoteServed(n int) bool {
 	if err == nil || !bool(m.mayRefuse) {
 		return true
 	}
+	// A refusal must not carry the validator or cache life set for the success.
+	httperr.DropSuccessHeaders(m.Header())
+	m.Header().Del("Cache-Control")
 	httperr.Write(m.ResponseWriter, m.r, err)
 	return false
 }

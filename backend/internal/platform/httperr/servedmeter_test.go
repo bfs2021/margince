@@ -11,6 +11,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -140,5 +141,53 @@ func TestRecordsInSurvivesUnexpectedBodies(t *testing.T) {
 		if got := recordsIn(body); got != 1 {
 			t.Errorf("recordsIn(%#v) = %d, want 1 — an unrecognized body is one thing handed over", body, got)
 		}
+	}
+}
+
+// streamed is a StreamObject body that reports whether it was closed.
+type streamed struct {
+	*strings.Reader
+	closed bool
+}
+
+func (s *streamed) Close() error {
+	s.closed = true
+	return nil
+}
+
+func streamThroughMeter(proceed bool) (*httptest.ResponseRecorder, *meterStub, *streamed) {
+	rec := httptest.NewRecorder()
+	meter := &meterStub{ResponseWriter: rec, proceed: proceed}
+	body := &streamed{Reader: strings.NewReader("object bytes")}
+	r := httptest.NewRequest(http.MethodGet, "/v1/object", nil)
+	StreamObject(meter, r, StreamedObject{ContentType: "application/pdf", Body: body}, "object")
+	return rec, meter, body
+}
+
+func TestStreamObjectChargesOneRecordBeforeItsBytes(t *testing.T) {
+	rec, meter, body := streamThroughMeter(true)
+
+	if meter.calls != 1 || meter.noted != 1 {
+		t.Errorf("the meter was consulted %d times for %d records, want once for 1", meter.calls, meter.noted)
+	}
+	if rec.Body.String() != "object bytes" {
+		t.Errorf("served %q, want the object's bytes", rec.Body.String())
+	}
+	if !body.closed {
+		t.Error("the object reader was left open")
+	}
+}
+
+func TestStreamObjectWritesNothingWhenTheMeterRefuses(t *testing.T) {
+	rec, _, body := streamThroughMeter(false)
+
+	if rec.Body.Len() != 0 {
+		t.Errorf("a refused download carried %q", rec.Body.String())
+	}
+	if ct := rec.Header().Get("Content-Type"); ct != "" {
+		t.Errorf("a refused download set Content-Type %q", ct)
+	}
+	if !body.closed {
+		t.Error("a refused download left the object reader open")
 	}
 }

@@ -85,6 +85,10 @@ func writeReportingCSV(w http.ResponseWriter, r *http.Request, evaluation crmcon
 		httperr.Write(w, r, err)
 		return
 	}
+	// One evaluation, charged as the JSON twin's WriteJSON charges it.
+	if !httperr.ChargeServed(w, 1) {
+		return
+	}
 	(httperr.Download{ContentType: reportingCSVContentType, Filename: "reporting.csv", Size: int64(len(raw))}).WriteHeaders(w)
 	w.Header().Set("Cache-Control", "no-store")
 	if _, err := w.Write(raw); err != nil {

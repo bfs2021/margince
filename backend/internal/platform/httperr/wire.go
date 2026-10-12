@@ -258,7 +258,7 @@ func bodyProbe(single json.RawMessage, probe any) error {
 //
 //craft:ignore naked-any the JSON serialization seam: body is whichever contract response struct the handler produced
 func WriteJSON(w http.ResponseWriter, status int, body any) {
-	if meter, metered := w.(ServedMeter); metered && !meter.NoteServed(recordsIn(body)) {
+	if !ChargeServed(w, recordsIn(body)) {
 		return
 	}
 	// A list with no rows is `[]`, never `null` — see withEmptyLists for why
@@ -377,6 +377,9 @@ func StreamObject(w http.ResponseWriter, r *http.Request, obj StreamedObject, lo
 		}
 	}(r.Context())
 
+	if !ChargeServed(w, 1) {
+		return
+	}
 	obj.WriteHeaders(w)
 	if _, err := io.Copy(w, obj.Body); err != nil {
 		slog.WarnContext(r.Context(), "streaming object download", "object", logLabel, "err", err)
