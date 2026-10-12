@@ -245,6 +245,17 @@ var erasureColumnBaseline = map[string][]string{
 		"state",
 		"trigger",
 	},
+	// Closed vocabularies and the server's own reason codes. thread_key is the
+	// References root the verdict is found by; clearing it would reopen a held
+	// thread.
+	"capture_thread_verdict": {"disposition_reason", "kind", "status", "thread_key"},
+	// The hold's kind, and the principal id of the seat that placed it.
+	"capture_counterparty_hold": {"created_by", "kind"},
+	// An exclusion's closed vocabularies, and the principal id that wrote it.
+	"capture_exclusion": {"created_by", "kind", "scope"},
+	// Which source and task ran, its key, state and units: identifiers and
+	// closed sets, none of them written about the subject.
+	"ai_task_run": {"actor_scope", "ai_task", "kind", "occurrence_key", "quantity_unit", "source", "state", "subject_type"},
 }
 
 // catalogColumnRe reads one column line out of the schema catalog:

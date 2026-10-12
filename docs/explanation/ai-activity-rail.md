@@ -33,6 +33,11 @@ There are two exceptions, both for retention: `PurgeSettledBefore` removes old r
 `CloseAbandonedRouterRuns` settles the ones whose source will never settle them. Removing old rows from a
 read model does not change domain data, but it is still a write.
 
+One writer sits outside the module: `redactRailOccurrences` in `privacy`. When a contact is erased, it
+clears `subject_label`, `summary` and `degrade_reason` on every row about them, as the retention sweep's
+`contact/anonymize` action does too. It also lists the ids in `ai_task_run_forgotten_subject`. The
+projection stores no label for a listed record, so an event that comes after cannot name it again.
+
 ## Who reports: the router, a carrier, or nobody
 
 `ai.railOwners` (`internal/modules/ai/railowner.go`) answers this for every task in `api/ai-tasks.yaml`.

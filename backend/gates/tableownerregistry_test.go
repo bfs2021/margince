@@ -361,7 +361,8 @@ var tableOwners = map[string]string{
 	// The AI-activity projection. Derived read-model state written by exactly
 	// one consumer, so it carries no audit or outbox row of its own — the
 	// events that FEED it carry the write shape at their own writers.
-	"ai_task_run": "internal/modules/aiactivity",
+	"ai_task_run":                   "internal/modules/aiactivity",
+	"ai_task_run_forgotten_subject": "internal/modules/aiactivity",
 	// automation (the deterministic trigger-and-action catalog)
 	"workflow_run":            "internal/modules/automation",
 	"notice":                  "internal/modules/notices",

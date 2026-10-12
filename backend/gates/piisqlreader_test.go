@@ -183,6 +183,10 @@ var erasureCascadeFiles = []string{
 	// its own.
 	"internal/modules/privacy/subjectcolumns.go",
 	"internal/modules/privacy/erasurestrings.go",
+	// The capture records that keep a sender's address after the message is
+	// gone, and the AI-activity rail's lines about the subject.
+	"internal/modules/privacy/erasure_capturemarks.go",
+	"internal/modules/privacy/erasure_airail.go",
 }
 
 // reachedButNotCascade are files EraseContact's call graph reaches which are NOT

@@ -137,7 +137,7 @@ func excludedTx(ctx context.Context, tx pgx.Tx, rec connector.NormalizedRecord) 
 		            WHERE d = e.value OR d LIKE '%.' || `+storekit.EscapeLikeSQL("e.value")+`))
 		     OR (e.kind = 'container' AND e.value = ANY($4::text[])))
 		 ORDER BY e.kind LIMIT 1`,
-		addresses, domains, nilToNull(actorUserID(ctx)), rec.Containers).Scan(&kind)
+		withErasedMarkers(addresses), domains, nilToNull(actorUserID(ctx)), rec.Containers).Scan(&kind)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return "", nil

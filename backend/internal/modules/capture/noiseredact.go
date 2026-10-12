@@ -61,7 +61,7 @@ func (s *PendingStore) NoiseMailToRedact(
 		rows, err := tx.Query(ctx, `
 			SELECT DISTINCT a.id, a.occurred_at
 			  FROM activity a
-			  JOIN `+disownedSenders+` ON p.email = a.counterparty_email
+			  JOIN `+disownedSenders("")+` ON p.email = a.counterparty_email
 			 WHERE `+due+page+`
 			 ORDER BY a.occurred_at, a.id
 			 LIMIT $1`, args...)
@@ -89,7 +89,7 @@ func (s *PendingStore) ClaimNoiseMailForRedactionTx(
 	err := tx.QueryRow(ctx, `
 		SELECT a.id
 		  FROM activity a
-		  JOIN `+disownedSenders+` ON p.email = a.counterparty_email
+		  JOIN `+disownedSenders("ea.id = $1")+` ON p.email = a.counterparty_email
 		 WHERE a.id = $1 AND `+due+`
 		 LIMIT 1
 		 FOR UPDATE OF a`, args...).Scan(&claimed)

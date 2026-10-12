@@ -37,6 +37,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
+	"github.com/margince/margince/backend/internal/platform/database/storekit"
 	"github.com/margince/margince/backend/internal/shared/apperrors"
 	"github.com/margince/margince/backend/internal/shared/kernel/ids"
 )
@@ -112,4 +113,22 @@ func anotherLiveContactHoldsAChannelAccount(ctx context.Context, tx pgx.Tx, subj
 	err := tx.QueryRow(ctx, `SELECT EXISTS (`+rivalHeldChannelAccounts+`)`,
 		subject, providers, accounts).Scan(&held)
 	return held, err
+}
+
+// claimSubjectKeys does what must precede the first statement that purges or
+// suppresses by identifier.
+func claimSubjectKeys(ctx context.Context, tx pgx.Tx, subject ids.ContactID, emails []string, identities []channelIdentity) error {
+	// Held to the commit, so an inbound message naming the subject by any key
+	// lands wholly before or after this erasure. storekit.LockSubjectKeys states why.
+	if err := storekit.LockSubjectKeys(ctx, tx, channelIdentityLockKeys(identities), emails); err != nil {
+		return err
+	}
+	// A rival record holding the same identifier would lose evidence that was
+	// never this request's to destroy.
+	if err := refuseRivalIdentifierHolders(ctx, tx, subject, emails, identities); err != nil {
+		return err
+	}
+	// Before the timeline lock, so the erasure holds no activity row while it
+	// waits on a capture verdict or rule row.
+	return forgetSubjectAddressesInCapture(ctx, tx, emails)
 }

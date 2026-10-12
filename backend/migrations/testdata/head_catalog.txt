@@ -926,6 +926,12 @@ public.ai_task_run.summary text gen=- def=-
 public.ai_task_run.trg_ai_task_run_updated CREATE TRIGGER trg_ai_task_run_updated BEFORE UPDATE ON public.ai_task_run FOR EACH ROW EXECUTE FUNCTION set_updated_at()
 public.ai_task_run.updated_at timestamp with time zone NOT NULL gen=- def=now()
 public.ai_task_run_cursor CREATE INDEX ai_task_run_cursor ON public.ai_task_run USING btree (actor_user_id, seq DESC)
+public.ai_task_run_forgotten_subject acl=margince_owner=arwdDxt/margince_owner,margince_app=arwd/margince_owner rls=false force=false
+public.ai_task_run_forgotten_subject.ai_task_run_forgotten_subject_pkey PRIMARY KEY (subject_type, subject_id)
+public.ai_task_run_forgotten_subject.created_at timestamp with time zone NOT NULL gen=- def=now()
+public.ai_task_run_forgotten_subject.subject_id uuid NOT NULL gen=- def=-
+public.ai_task_run_forgotten_subject.subject_type text NOT NULL gen=- def=-
+public.ai_task_run_forgotten_subject_pkey CREATE UNIQUE INDEX ai_task_run_forgotten_subject_pkey ON public.ai_task_run_forgotten_subject USING btree (subject_type, subject_id)
 public.ai_task_run_identity CREATE UNIQUE INDEX ai_task_run_identity ON public.ai_task_run USING btree (source, occurrence_key)
 public.ai_task_run_live CREATE INDEX ai_task_run_live ON public.ai_task_run USING btree (actor_user_id, queued_at DESC, id DESC) WHERE (state = ANY (ARRAY['queued'::text, 'running'::text]))
 public.ai_task_run_pkey CREATE UNIQUE INDEX ai_task_run_pkey ON public.ai_task_run USING btree (id)

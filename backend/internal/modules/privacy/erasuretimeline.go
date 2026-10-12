@@ -322,6 +322,9 @@ func purgeDerivedTraces(ctx context.Context, tx pgx.Tx, contactID ids.ContactID,
 		return 0, 0, err
 	}
 	aiPayloadsPurged += citedTag.RowsAffected()
+	if err := redactRailOccurrences(ctx, tx, contactID, erased); err != nil {
+		return 0, 0, err
+	}
 	for _, email := range emails {
 		tag, execErr := tx.Exec(ctx, `
 			DELETE FROM ai_call_payload

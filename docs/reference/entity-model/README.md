@@ -28,8 +28,8 @@ module to put a change in, read [modules.md](../modules.md).
 
 | | |
 |---|--:|
-| Tables | 301 |
-| Columns | 3570 |
+| Tables | 302 |
+| Columns | 3573 |
 | Foreign keys | 501 |
 | Owning areas | 36 |
 
@@ -91,7 +91,7 @@ erDiagram
 | [activities](activities.md) | 25 |
 | [agents](agents.md) | 3 |
 | [ai](ai.md) | 12 |
-| [aiactivity](aiactivity.md) | 1 |
+| [aiactivity](aiactivity.md) | 2 |
 | [approvals](approvals.md) | 3 |
 | [assignments](assignments.md) | 2 |
 | [assurance](assurance.md) | 7 |
@@ -159,6 +159,7 @@ erDiagram
 | [`ai_feedback`](ai.md#ai_feedback) | ai | 15 | 0 |
 | [`ai_model_rate`](ai.md#ai_model_rate) | ai | 11 | 0 |
 | [`ai_task_run`](aiactivity.md#ai_task_run) | aiactivity | 25 | 0 |
+| [`ai_task_run_forgotten_subject`](aiactivity.md#ai_task_run_forgotten_subject) | aiactivity | 3 | 0 |
 | [`ai_usage`](ai.md#ai_usage) | ai | 10 | 0 |
 | [`analytics_share`](compose.md#analytics_share) | compose | 16 | 0 |
 | [`app_user`](identity.md#app_user) | identity | 25 | 129 |

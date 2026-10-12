@@ -344,6 +344,7 @@ func heldCounterpartyTx(ctx context.Context, tx pgx.Tx, rec connector.Normalized
 		return false, nil
 	}
 	addresses, domains := foldedAddressesAndDomains(rec.Addresses)
+	held := withErasedMarkers(addresses)
 	var found bool
 	err := tx.QueryRow(ctx, `
 		SELECT EXISTS (
@@ -353,7 +354,7 @@ func heldCounterpartyTx(ctx context.Context, tx pgx.Tx, rec connector.Normalized
 			     OR (h.kind = 'domain' AND EXISTS (
 			           SELECT 1 FROM unnest($2::text[]) d
 			            WHERE d = h.value OR d LIKE '%.' || `+storekit.EscapeLikeSQL("h.value")+`))))`,
-		addresses, domains, user).Scan(&found)
+		held, domains, user).Scan(&found)
 	if err != nil {
 		return false, fmt.Errorf("capture: reading this seat's counterparty holds: %w", err)
 	}
@@ -410,4 +411,15 @@ func (d birthDecision) bornAudience() (audience, reason string) {
 		return audienceParticipants, audienceReasonPosture
 	}
 	return audienceWorkspace, ""
+}
+
+// withErasedMarkers adds each address's erasure marker beside it. An erasure
+// replaces a seat's rule on an address with the marker, and the rule must keep
+// matching that sender's mail.
+func withErasedMarkers(addresses []string) []string {
+	out := make([]string, 0, 2*len(addresses))
+	for _, address := range addresses {
+		out = append(out, address, storekit.ErasedAddressMarker(address))
+	}
+	return out
 }

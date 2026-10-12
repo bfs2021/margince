@@ -27,5 +27,9 @@
 // (attempt, state_rank) and never state alone. Ordering across rows is this
 // package's own seq, never an emitter's clock.
 //
-// Tables owned: ai_task_run. Imports shared + platform only; never a sibling.
+// One writer outside this package: the privacy erasure and anonymize. They clear
+// the label and prose of rows about the subject, and list the record as forgotten.
+//
+// Tables owned: ai_task_run, ai_task_run_forgotten_subject. Imports shared +
+// platform only; never a sibling.
 package aiactivity

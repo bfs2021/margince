@@ -92,21 +92,9 @@ func (e *Eraser) EraseContact(ctx context.Context, contactID ids.UUID, reason st
 		if err != nil {
 			return err
 		}
-		// Taken before the first statement that purges or suppresses by
-		// identifier, and held to the commit: an inbound message naming this
-		// subject by ANY key they can be recognised by lands entirely before
-		// this erasure or entirely after it, never inside it. Addresses as well
-		// as accounts, because a mail-only subject holds no account for the
-		// account half to cover — storekit.LockSubjectKeys states the cost.
-		if err := storekit.LockSubjectKeys(ctx, tx, channelIdentityLockKeys(identities), emails); err != nil {
-			return err
-		}
-		// Refused BEFORE the first destructive statement: everything below
-		// this line suppresses and purges by IDENTIFIER, and a rival record
-		// holding the same identifier would be left named, reachable, and
-		// stripped of the evidence that was never this request's to destroy
+		// Before the first statement that purges or suppresses by identifier
 		// (erasure_rivals.go).
-		if err := refuseRivalIdentifierHolders(ctx, tx, subject, emails, identities); err != nil {
+		if err := claimSubjectKeys(ctx, tx, subject, emails, identities); err != nil {
 			return err
 		}
 

@@ -222,6 +222,20 @@ var piiTables = map[string]piiHandling{
 	// activity IS the Art. 15 answer, and the trace is the record of what the
 	// pipeline decided about it. Erased when they ask, never exported.
 	"capture_trace": {erasureWrite: true, sarRead: false},
+	// A thread verdict lists the sender addresses it read. Erasure removes the
+	// subject's; the export leaves it out, as the trace's operational record.
+	"capture_thread_verdict": {erasureWrite: true, sarRead: false},
+	// A seat's hold names a counterparty whose mail that seat keeps private.
+	// Erasure replaces the address with its marker, so the hold keeps working.
+	// The export must not carry it: whose mail a seat holds is that seat's own.
+	"capture_counterparty_hold": {erasureWrite: true, sarForbidden: true},
+	// A seat's decision about a sender, and an exclusion that keeps an address
+	// out, carry the address the same way. Erasure gives both the marker.
+	"capture_sender_override": {erasureWrite: true, sarForbidden: true},
+	"capture_exclusion":       {erasureWrite: true, sarForbidden: true},
+	// The AI-activity rail stores the subject's name as the record's label, and
+	// prose about the work. Erasure clears both; the record itself is exported.
+	"ai_task_run": {erasureWrite: true, sarRead: false},
 	// Field-level provenance names who captured which of the subject's
 	// fields from where — subject-linked metadata (B-E02.12).
 	//

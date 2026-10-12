@@ -241,10 +241,14 @@ func OverrideForTx(ctx context.Context, tx pgx.Tx, user ids.UUID, address string
 		senderOverrideIdentity(user, folded)); err != nil {
 		return "", err
 	}
+	// The marker is the decision an erasure kept for this sender. A plain row
+	// the seat wrote since then is newer and wins.
 	var decision string
 	err := tx.QueryRow(ctx, `
 		SELECT decision FROM capture_sender_override
-		 WHERE user_id = $1 AND address = $2`, user, folded).Scan(&decision)
+		 WHERE user_id = $1 AND address IN ($2, $3)
+		 ORDER BY address = $2 DESC LIMIT 1`,
+		user, folded, storekit.ErasedAddressMarker(folded)).Scan(&decision)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return "", nil

@@ -273,6 +273,14 @@ func purgeAnonymizedContactJudgments(ctx context.Context, tx pgx.Tx, id ids.UUID
 		err = redactCommitmentsNaming(ctx, tx, ids.From[ids.ContactKind](id))
 	}
 	if err == nil {
+		// The same two statements the Art. 17 cascade runs. The anonymize
+		// empties no activity or lead, so only the contact is cited.
+		err = redactRailOccurrences(ctx, tx, ids.From[ids.ContactKind](id), erasedCitations{})
+	}
+	if err == nil {
+		err = forgetSubjectAddressesInCapture(ctx, tx, subjectEmails)
+	}
+	if err == nil {
 		_, err = tx.Exec(ctx,
 			`DELETE FROM embedding WHERE entity_type = 'contact' AND entity_id = $1`, id)
 	}

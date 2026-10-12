@@ -26,6 +26,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
+	"github.com/margince/margince/backend/internal/platform/database/storekit"
 	"github.com/margince/margince/backend/internal/shared/kernel/ids"
 )
 
@@ -220,7 +221,7 @@ func (s *PendingStore) NoiseMailForTx(ctx context.Context, tx pgx.Tx, email stri
 	rows, err := tx.Query(ctx, `
 		SELECT DISTINCT a.id, a.occurred_at
 		  FROM activity a
-		  JOIN `+disownedSenders+` ON p.email = a.counterparty_email
+		  JOIN `+disownedSenders("ea.counterparty_email = $2")+` ON p.email = a.counterparty_email
 		 WHERE p.email = $2 AND p.machine AND `+noiseMailScope+withinVerdictReach()+`
 		   AND a.archived_at IS NULL
 		 ORDER BY a.occurred_at
@@ -311,13 +312,31 @@ func (s *PendingStore) PurgeRawCaptureTx(ctx context.Context, tx pgx.Tx, activit
 // reasoning that the scope below has already excluded anything a colleague
 // linked, corresponds with or holds a contact for. What is left is mail no
 // colleague has a claim on.
-const disownedSenders = `(
+//
+// The third arm is a keep_out whose address an erasure replaced with its
+// marker. It finds the sender's later mail by hashing the stored counterparty,
+// only over inbound mail captured since the marker was written. erasedMail
+// narrows that further for a caller that already knows the message or sender.
+func disownedSenders(erasedMail string) string {
+	if erasedMail != "" {
+		erasedMail = " AND " + erasedMail
+	}
+	return `(
 	  SELECT email, resolved_at, true AS machine
 	    FROM capture_pending_counterparty WHERE status = 'noise'
 	  UNION ALL
 	  SELECT address AS email, NULL::timestamptz, false
 	    FROM capture_sender_override WHERE decision = 'keep_out'
+	  UNION ALL
+	  SELECT DISTINCT ea.counterparty_email, NULL::timestamptz, false
+	    FROM capture_sender_override eo
+	    JOIN activity ea
+	      ON ea.direction = 'inbound' AND ea.counterparty_email IS NOT NULL
+	     AND ea.created_at >= eo.updated_at
+	     AND eo.address = ` + storekit.ErasedAddressMarkerSQL("ea.counterparty_email") + erasedMail + `
+	   WHERE eo.decision = 'keep_out' AND eo.address LIKE '` + storekit.ErasedAddressMarkerPattern + `'
 	) p`
+}
 
 // noiseMail runs the shared join with one extra predicate.
 func (s *PendingStore) noiseMail(ctx context.Context, extra string, limit int) ([]ids.UUID, error) {
@@ -326,7 +345,7 @@ func (s *PendingStore) noiseMail(ctx context.Context, extra string, limit int) (
 		rows, err := tx.Query(ctx, `
 			SELECT DISTINCT a.id, a.occurred_at
 			  FROM activity a
-			  JOIN `+disownedSenders+` ON p.email = a.counterparty_email
+			  JOIN `+disownedSenders("")+` ON p.email = a.counterparty_email
 			 WHERE a.restricted_at IS NULL
 			   AND `+noiseMailScope+extra+`
 			 ORDER BY a.occurred_at

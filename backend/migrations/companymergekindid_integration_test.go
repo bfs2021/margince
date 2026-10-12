@@ -37,6 +37,7 @@ var kindIDPairsTheMergeLeaves = gatekit.Waive(map[string]string{
 	"webhook_delivery.event_id":                     "names an outbox event, not a record: its sibling event_type is an event name, so the pair only looks like a kind and id",
 	"ai_call.subject_id":                            "the ledger of one model call is history, written with a label of its subject at the time; moving it would rewrite what the call was about",
 	"ai_task_run.subject_id":                        "a task run is the record of what the assistant did to the retired record, with its own subject label; it stays addressable through merged_into",
+	"ai_task_run_forgotten_subject.subject_id":      "an erasure lists only the contact, activity, lead and attachment ids it cleared from the rail, never a company",
 	"report_edition_contribution.source_id":         "a published edition is frozen evidence of what the report counted when it was published; moving a source would change a number already shown",
 	"field_provenance.object_id":                    "carried field by field for exactly the values the survivor inherits, in carryFieldAuthors, through the stamp writer every other path uses",
 })

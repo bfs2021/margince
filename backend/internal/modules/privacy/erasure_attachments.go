@@ -71,6 +71,9 @@ func (e *Eraser) eraseAttachments(ctx context.Context, tx pgx.Tx, reason, cause,
 	if err != nil {
 		return err
 	}
+	if err := redactAttachmentRailOccurrences(ctx, tx, scrubbed); err != nil {
+		return err
+	}
 	return tombstoneCollateralScrubs(ctx, tx, "attachment", scrubbed, reason, cause)
 }
 

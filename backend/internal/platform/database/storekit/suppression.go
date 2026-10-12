@@ -30,6 +30,38 @@ func SuppressionHash(value string) string {
 	return hex.EncodeToString(digest[:])
 }
 
+// ErasedAddressMarker is what a seat's counterparty hold keeps in place of an
+// erased subject's address. The prefix keeps it from ever equalling a real
+// address, and the hash lets capture still match that sender's mail.
+func ErasedAddressMarker(address string) string {
+	return erasedAddressPrefix + SuppressionHash(address)
+}
+
+// ErasedAddressMarkerSQL is ErasedAddressMarker over a column holding a folded
+// address, for a statement that matches markers on the SQL side.
+func ErasedAddressMarkerSQL(expr string) string {
+	return `('` + erasedAddressPrefix + `' || encode(sha256(convert_to(lower(btrim(` + expr + `)), 'UTF8')), 'hex'))`
+}
+
+// ErasedAddressMarkerPattern is a LIKE pattern matching every marker.
+const ErasedAddressMarkerPattern = erasedAddressPrefix + "%"
+
+const erasedAddressPrefix = "erased:"
+
+// LockRailRedaction orders a projection write against an erasure clearing the
+// AI-activity rail. The projection takes it shared, the erasure exclusive, so
+// a write either lands before the clearing or sees the forgotten record.
+func LockRailRedaction(ctx context.Context, tx pgx.Tx, exclusive bool) error {
+	lock := `SELECT pg_advisory_xact_lock_shared(hashtextextended('ai_task_run_redaction', 0))`
+	if exclusive {
+		lock = `SELECT pg_advisory_xact_lock(hashtextextended('ai_task_run_redaction', 0))`
+	}
+	if _, err := tx.Exec(ctx, lock); err != nil {
+		return fmt.Errorf("lock the AI-activity rail redaction: %w", err)
+	}
+	return nil
+}
+
 // EscapeLike neutralizes LIKE/ILIKE wildcards in a value that is about
 // to be embedded in a pattern. Postgres' default LIKE escape is the
 // backslash, so no ESCAPE clause is needed. An identifier containing %

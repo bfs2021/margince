@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"github.com/margince/margince/backend/internal/platform/database"
+	"github.com/margince/margince/backend/internal/platform/database/storekit"
 	"github.com/margince/margince/backend/internal/shared/kernel/ids"
 )
 
@@ -96,6 +97,9 @@ func NewStore(db *database.DB) *Store {
 // summary, and a partial update is how a row ends up reading as live and failed
 // at once. A renewal therefore carries the whole claim it extends, not only the
 // new lease.
+//
+// A record an erasure cleared from the rail stays cleared. An occurrence about
+// it stores NULL for label, summary and reason, on insert and update alike.
 const applyStateChangeSQL = `
 INSERT INTO ai_task_run (
   source, occurrence_key, kind, ai_task, attempt,
@@ -103,7 +107,10 @@ INSERT INTO ai_task_run (
   state, queued_at, started_at, finished_at, stale_after,
   subject_type, subject_id, subject_label, quantity, quantity_unit,
   degrade_reason, summary, last_event_id)
-VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,
+  CASE WHEN ` + forgottenSubject + ` THEN NULL ELSE $16::text END, $17, $18,
+  CASE WHEN ` + forgottenSubject + ` THEN NULL ELSE $19::text END,
+  CASE WHEN ` + forgottenSubject + ` THEN NULL ELSE $20::text END, $21)
 ON CONFLICT (source, occurrence_key) DO UPDATE SET
   kind = EXCLUDED.kind, ai_task = EXCLUDED.ai_task, attempt = EXCLUDED.attempt,
   actor_scope = EXCLUDED.actor_scope, actor_user_id = EXCLUDED.actor_user_id,
@@ -124,6 +131,12 @@ WHERE (EXCLUDED.attempt, ai_task_run_state_rank(EXCLUDED.state))
        AND EXCLUDED.stale_after > ai_task_run.stale_after)
 RETURNING seq`
 
+// forgottenSubject is whether the occurrence is about a record an erasure
+// cleared from the rail. This package owns the list and only reads it; the
+// privacy erasure is its writer.
+const forgottenSubject = `EXISTS (SELECT 1 FROM ai_task_run_forgotten_subject f
+  WHERE f.subject_type = $14 AND f.subject_id = $15)`
+
 // ApplyStateChange projects one change and reports whether it landed.
 //
 // applied=false is the guard working, not a failure: the event was delivered,
@@ -135,6 +148,9 @@ func (s *Store) ApplyStateChange(ctx context.Context, c Change) (bool, error) {
 	}
 	applied := false
 	err := s.db.Tx(ctx, func(tx pgx.Tx) error {
+		if err := storekit.LockRailRedaction(ctx, tx, false); err != nil {
+			return err
+		}
 		var seq int64
 		switch err := tx.QueryRow(ctx, applyStateChangeSQL, c.args()...).Scan(&seq); {
 		case errors.Is(err, pgx.ErrNoRows):

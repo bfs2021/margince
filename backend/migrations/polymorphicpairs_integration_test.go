@@ -141,6 +141,7 @@ var pairResolution = gatekit.Waive(map[string]string{
 	"ai_call.subject_id (subject_type)":                                  "OUTLIVES — the row is a record of what happened and is meant to survive the record it names; the reference resolving to nothing is the designed end state, not a leak",
 	"ai_feedback.subject_id (subject_type)":                              "SHAPE — one nullable foreign key per branch with ON DELETE CASCADE, and a CHECK binding the discriminator to exactly one, as activity_link carries",
 	"ai_task_run.subject_id (subject_type)":                              "OUTLIVES — the row is a record of what happened and is meant to survive the record it names; the reference resolving to nothing is the designed end state, not a leak",
+	"ai_task_run_forgotten_subject.subject_id (subject_type)":            "OUTLIVES — the row is the record that this id was erased from the rail, and it must outlive the record so a late event about it still stores no name",
 	"approval.co_target_entity_id (co_target_entity_type)":               "DECIDE — what the reference means is not settled, so neither shape nor split can be chosen yet",
 	"approval.target_entity_id (target_entity_type)":                     "DECIDE — what the reference means is not settled, so neither shape nor split can be chosen yet",
 	"assurance_exception.subject_id (subject_kind)":                      "SHAPE — one nullable foreign key per branch with ON DELETE CASCADE, and a CHECK binding the discriminator to exactly one, as activity_link carries",

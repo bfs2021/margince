@@ -277,10 +277,12 @@ not own**. The list: `contact`, `contact_email`/`_phone`/`_social`, `contact_cha
 `lead`, `activity`, `activity_participant`, `graph_interaction_edge`, `linkedin_connection`,
 `comms_outbound`, `deal`, `attachment`, `embedding`, `raw_capture`, `field_provenance`,
 `preference_token`, `capture_pending_counterparty`, `voice_learning_signal`, `ai_call` and
-`ai_call_payload`. The agreed list is the cross-writer map in `backend/gates/tableownership_test.go`,
+`ai_call_payload`. Capture's `capture_thread_verdict`, `capture_counterparty_hold`,
+`capture_sender_override` and `capture_exclusion` are on it too, and so is the rail's `ai_task_run`.
+The agreed list is the cross-writer map in `backend/gates/tableownership_test.go`,
 which gates it. That file, not this page, is the authority.
 
-Four of those show *why* nothing else can reach them:
+Five of those show *why* nothing else can reach them:
 
 - A **channel identity** is the key an inbound message would bind the subject by again. So it must
   be deleted in the same commit that hashes it into the suppression list.
@@ -291,6 +293,10 @@ Four of those show *why* nothing else can reach them:
   by an event fails, and nobody sees it, when the bus is behind.
 - A participant's **address arm** exists for a party who is not a record. So it lives through
   the `contact_email` delete and would keep the erased address open to a new match.
+- A seat's **rules about an address** must keep working on the subject's later mail. These are a
+  counterparty hold, a sender decision and a rule that keeps mail out. The erasure puts
+  `storekit.ErasedAddressMarker` in place of the address. Capture's lookups of those rules match
+  that marker too, so the row stops naming the subject and the seat's decision stands.
 
 A data-subject duty must reach **every** store that holds the subject, in that one transaction per
 record. To route each delete through the module that owns the table would give up the all-or-nothing
