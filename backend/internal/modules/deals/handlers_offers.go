@@ -35,6 +35,17 @@ var clientTotalKeys = []string{
 	"line_tax", "line_tax_minor", "net_minor", "tax_minor", "gross_minor", "total_minor",
 }
 
+// malformedOfferBody refuses an offer body that does not decode, in words the
+// caller may read. encoding/json names this program's Go types, so a shape
+// SafeDecodeError cannot restate goes to the log instead of the response.
+func malformedOfferBody(r *http.Request, err error) error {
+	safe, withheld := httperr.SafeDecodeError(err)
+	if withheld {
+		slog.WarnContext(r.Context(), "unnamed offer-body decode failure", "err", err)
+	}
+	return httperr.Validation("body", "malformed_json", safe.Error())
+}
+
 // rejectClientTotals answers 422 when an extension-carrying request body
 // smuggles a total; returns false when the response has been written.
 func rejectClientTotals(w http.ResponseWriter, r *http.Request, extra map[string]any) bool {
@@ -131,7 +142,7 @@ func (h Handlers) CreateOffer(w http.ResponseWriter, r *http.Request, id crmcont
 	}
 	var req crmcontracts.CreateOfferRequest
 	if err := json.Unmarshal(raw, &req); err != nil {
-		httperr.Write(w, r, httperr.Validation("body", "malformed_json", err.Error()))
+		httperr.Write(w, r, malformedOfferBody(r, err))
 		return
 	}
 	if !rejectClientTotals(w, r, req.AdditionalProperties) {
@@ -141,7 +152,7 @@ func (h Handlers) CreateOffer(w http.ResponseWriter, r *http.Request, id crmcont
 		LineItems []clientSuppliedTotals `json:"line_items"`
 	}
 	if err := json.Unmarshal(raw, &probe); err != nil {
-		httperr.Write(w, r, httperr.Validation("body", "malformed_json", err.Error()))
+		httperr.Write(w, r, malformedOfferBody(r, err))
 		return
 	}
 	for _, li := range probe.LineItems {
