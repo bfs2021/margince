@@ -6321,22 +6321,36 @@ export const vi = {
   "stage.removeTitle": "Gỡ giai đoạn này?",
   "stage.removeBody":
     "“{name}” sẽ rời khỏi pipeline và các giai đoạn sau dồn lên. Lịch sử chuyển giai đoạn vẫn đọc được. Chuyển các deal của giai đoạn này đi trước khi gỡ.",
-  "stage.openGroup": "Giai đoạn đang mở",
-  "stage.closingGroup": "Giai đoạn kết thúc",
-  "stage.closingNote":
-    "Mọi deal kết thúc ở một trong các giai đoạn này, nên các giai đoạn này luôn nằm sau các giai đoạn đang mở.",
   "stage.closingMissing":
     "Chưa có giai đoạn thắng hoặc thua. Thêm một giai đoạn mới thuộc loại đó.",
   "stage.orderHint":
     "Kéo giai đoạn bằng tay nắm, hoặc đặt tiêu điểm vào tay nắm rồi nhấn phím mũi tên lên hoặc xuống.",
-  "stage.handle": "Di chuyển {name}, vị trí {position} trên {total}",
-  "stage.moved": "{name} giờ ở vị trí {position} trên {total}",
+  "stage.handle": "Di chuyển {name}, bước {position} trên {total}",
+  "stage.moved": "{name} giờ ở bước {position} trên {total}",
   "stage.lowerThanAbove": "Thấp hơn {name} ({reading}) ở trên",
   "stage.oddsOf": "Xác suất thắng của {name}",
   "stage.noneOpen": "Chưa có giai đoạn đang mở",
   "stage.noneOpenNote":
     "Thêm giai đoạn đầu tiên của deal. Giai đoạn này đứng trước các giai đoạn kết thúc.",
   "stage.added": "Đã thêm giai đoạn",
+  "stage.group": "Giai đoạn",
+  "stage.orderHeader": "Thứ tự",
+  "stage.colStep": "Bước",
+  "stage.colStage": "Giai đoạn",
+  "stage.fixedLast": "Luôn ở cuối",
+  "stage.endsDeal": "Kết thúc deal",
+  "stage.criteriaRequired_one": "{count} bắt buộc",
+  "stage.criteriaRequired_other": "{count} bắt buộc",
+  "stage.criteriaOptional_one": "{count} không bắt buộc",
+  "stage.criteriaOptional_other": "{count} không bắt buộc",
+  "stage.criteriaNone": "Không có",
+  "stage.criteriaCount_one": "{count} tiêu chí",
+  "stage.criteriaCount_other": "{count} tiêu chí",
+  "stage.criteriaNoneFolded": "Không có tiêu chí",
+  "stage.criteriaDetail": "Chi tiết tiêu chí",
+  "stage.criteriaFor": "Tiêu chí rời giai đoạn của {name}",
+  "stage.occupied_one": "{count} deal đang ở giai đoạn này",
+  "stage.occupied_other": "{count} deal đang ở giai đoạn này",
   "stage.criteria.title": "Tiêu chí rời giai đoạn",
   "stage.criteria.sub":
     "Điều kiện phải đáp ứng trước khi deal rời giai đoạn này.",
@@ -6347,8 +6361,6 @@ export const vi = {
   "stage.criteria.unreadable":
     "Tải lại trước khi thay đổi; danh sách có thể chưa đầy đủ.",
   "stage.criteria.none": "Chưa có tiêu chí rời giai đoạn nào.",
-  "stage.criteria.terminal":
-    "Giai đoạn thắng hoặc thua là giai đoạn cuối, nên không có tiêu chí rời giai đoạn.",
   "stage.criteria.add": "Thêm tiêu chí",
   "stage.criteria.key": "Khóa",
   "stage.criteria.keyHint":
@@ -6358,7 +6370,8 @@ export const vi = {
   "stage.criteria.required": "Bắt buộc",
   "stage.criteria.optional": "Không bắt buộc",
   "stage.criteria.hint": "Gợi ý",
-  "stage.criteria.edit": "Sửa tiêu chí",
+  "stage.criteria.editOf": "Sửa {name}",
+  "stage.criteria.removeOf": "Gỡ {name}",
   "stage.criteria.remove": "Gỡ",
   "stage.criteria.removeTitle": "Gỡ tiêu chí này?",
   "stage.criteria.removeBody":

@@ -6454,22 +6454,36 @@ export const de = {
   "stage.removeTitle": "Diese Phase entfernen?",
   "stage.removeBody":
     "„{name}“ wird aus der Pipeline entfernt, spätere Phasen rücken auf. Frühere Phasenwechsel bleiben lesbar. Verschiebe die Deals dieser Phase, bevor du sie entfernst.",
-  "stage.openGroup": "Offene Phasen",
-  "stage.closingGroup": "Abschlussphasen",
-  "stage.closingNote":
-    "Jeder Deal endet in einer davon, deshalb bleiben sie nach den offenen Phasen.",
   "stage.closingMissing":
     "Noch keine Phase für gewonnene oder verlorene Deals. Lege eine neue Phase dieses Typs an.",
   "stage.orderHint":
     "Ziehe eine Phase am Griff, oder fokussiere den Griff und drücke die Pfeiltaste nach oben oder unten.",
-  "stage.handle": "{name} verschieben, Phase {position} von {total}",
-  "stage.moved": "{name} ist jetzt Phase {position} von {total}",
+  "stage.handle": "{name} verschieben, Schritt {position} von {total}",
+  "stage.moved": "{name} ist jetzt Schritt {position} von {total}",
   "stage.lowerThanAbove": "Niedriger als {name} ({reading}) darüber",
   "stage.oddsOf": "Gewinnwahrscheinlichkeit von {name}",
   "stage.noneOpen": "Noch keine offenen Phasen",
   "stage.noneOpenNote":
     "Lege die erste Phase eines Deals an, vor den Abschlussphasen.",
   "stage.added": "Phase hinzugefügt",
+  "stage.group": "Phasen",
+  "stage.orderHeader": "Reihenfolge",
+  "stage.colStep": "Schritt",
+  "stage.colStage": "Phase",
+  "stage.fixedLast": "Bleibt am Ende",
+  "stage.endsDeal": "Beendet den Deal",
+  "stage.criteriaRequired_one": "{count} erforderlich",
+  "stage.criteriaRequired_other": "{count} erforderlich",
+  "stage.criteriaOptional_one": "{count} optional",
+  "stage.criteriaOptional_other": "{count} optional",
+  "stage.criteriaNone": "Keine",
+  "stage.criteriaCount_one": "{count} Kriterium",
+  "stage.criteriaCount_other": "{count} Kriterien",
+  "stage.criteriaNoneFolded": "Keine Kriterien",
+  "stage.criteriaDetail": "Kriteriendetails",
+  "stage.criteriaFor": "Austrittskriterien für {name}",
+  "stage.occupied_one": "{count} Deal ist in dieser Phase",
+  "stage.occupied_other": "{count} Deals sind in dieser Phase",
   "stage.criteria.title": "Austrittskriterien",
   "stage.criteria.sub":
     "Was zutreffen muss, bevor ein Deal diese Phase verlässt.",
@@ -6481,8 +6495,6 @@ export const de = {
   "stage.criteria.unreadable":
     "Lade die Seite neu, bevor du sie änderst; die Liste ist möglicherweise unvollständig.",
   "stage.criteria.none": "Noch keine Austrittskriterien.",
-  "stage.criteria.terminal":
-    "Eine Phase vom Typ „Gewonnen“ oder „Verloren“ ist endgültig und hat daher keine Austrittskriterien.",
   "stage.criteria.add": "Kriterium hinzufügen",
   "stage.criteria.key": "Schlüssel",
   "stage.criteria.keyHint":
@@ -6492,7 +6504,8 @@ export const de = {
   "stage.criteria.required": "Erforderlich",
   "stage.criteria.optional": "Optional",
   "stage.criteria.hint": "Hinweis",
-  "stage.criteria.edit": "Kriterium bearbeiten",
+  "stage.criteria.editOf": "{name} bearbeiten",
+  "stage.criteria.removeOf": "{name} entfernen",
   "stage.criteria.remove": "Entfernen",
   "stage.criteria.removeTitle": "Dieses Kriterium entfernen?",
   "stage.criteria.removeBody":
