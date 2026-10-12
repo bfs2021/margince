@@ -177,3 +177,47 @@ func TestReplayRefusesOnceTheCallerHasLostSightOfTheRecord(t *testing.T) {
 		t.Fatalf("handler ran %d times, want 1 — the refused replay must not re-execute the mutation either", calls)
 	}
 }
+
+// A client that hangs up after the write committed still leaves a replayable
+// answer. The claim settles on a context the hang-up does not cancel. So the
+// retry replays the recorded response, not a claim stuck in progress.
+func TestIdempotencyReplaySurvivesAClientThatHungUpAfterTheWrite(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		hangsUp bool
+	}{
+		{"the client hangs up once the response is written", true},
+		{"the client stays for the response", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			e := integration.Setup(t)
+			firstCtx, hangUp := context.WithCancel(e.Admin())
+			defer hangUp()
+
+			calls := 0
+			r := keyedTemplateRouter(e, func(w http.ResponseWriter, _ *http.Request) {
+				calls++
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusCreated)
+				if _, err := io.WriteString(w, `{"recorded":true}`); err != nil {
+					t.Errorf("writing the stub response: %v", err)
+				}
+				if tc.hangsUp {
+					hangUp()
+				}
+			})
+
+			first := keyedTemplateCall(firstCtx, r, "hung-up-replay")
+			if first.Code != http.StatusCreated {
+				t.Fatalf("first keyed call = %d, want 201", first.Code)
+			}
+			retry := keyedTemplateCall(e.Admin(), r, "hung-up-replay")
+			if retry.Code != http.StatusCreated || retry.Body.String() != first.Body.String() {
+				t.Fatalf("retry = %d %q, want the recorded 201 %q", retry.Code, retry.Body.String(), first.Body.String())
+			}
+			if calls != 1 {
+				t.Fatalf("handler ran %d times, want 1: the retry must be a replay", calls)
+			}
+		})
+	}
+}

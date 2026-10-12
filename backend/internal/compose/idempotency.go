@@ -58,6 +58,10 @@ const idempotencyKeyHeader = "Idempotency-Key"
 // legitimately serve.
 const replayWindow = 24 * time.Hour
 
+// idempotencySettleTimeout bounds the detached settle: one statement, so a
+// stalled pool is the only thing it ever waits for.
+const idempotencySettleTimeout = 30 * time.Second
+
 // claimOutcome is what the claim transaction decided.
 type claimOutcome int
 
@@ -143,7 +147,11 @@ func idempotency(pool *pgxpool.Pool, probes map[string]replayProbe, restore repl
 			next.ServeHTTP(rec, r.WithContext(ctx))
 			// Zero records: this door charges no read bound, so its claims carry
 			// no cost to record (0198).
-			if err := settleHTTPClaim(r.Context(), pool, hold, route, rec, effect.committed); err != nil {
+			// Settled detached: a client that hung up after the commit must still
+			// leave a replayable answer, not a claim that refuses every retry.
+			settleCtx, release := context.WithTimeout(context.WithoutCancel(r.Context()), idempotencySettleTimeout)
+			defer release()
+			if err := settleHTTPClaim(settleCtx, pool, hold, route, rec, effect.committed); err != nil {
 				slog.ErrorContext(r.Context(), "idempotency claim settlement failed", "err", err)
 			}
 		})
