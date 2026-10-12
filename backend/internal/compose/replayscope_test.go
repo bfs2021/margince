@@ -99,6 +99,36 @@ func TestReplayModuleProbeDecidesTheReplay(t *testing.T) {
 	})
 }
 
+// A recorded DSR intake names a data subject, so its replay goes to the consent
+// probe with the case id the body carries, and the probe's answer decides it.
+func TestDSRIntakeReplayAsksTheConsentProbe(t *testing.T) {
+	const intakeRoute = "POST /v1/data-subject-requests"
+	dsr := ids.NewV7()
+	body := `{"id":"` + dsr.String() + `","subject_ref":"subject@example.com"}`
+	for _, tc := range []struct {
+		name   string
+		answer error
+	}{
+		{"a case the caller may still work replays", nil},
+		{"a case the probe refuses does not replay", apperrors.ErrNotFound},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var probed ids.UUID
+			probes := map[string]replayProbe{probeDSR: func(_ context.Context, id ids.UUID) error {
+				probed = id
+				return tc.answer
+			}}
+			err := ensureReplayVisible(context.Background(), nil, probes, intakeRoute, body)
+			if !errors.Is(err, tc.answer) {
+				t.Fatalf("err = %v, want %v", err, tc.answer)
+			}
+			if probed != dsr {
+				t.Fatalf("probe got case %s, want %s from the recorded body", probed, dsr)
+			}
+		})
+	}
+}
+
 // The middleware only reaches the probe for routes it can replay at all; an
 // unclassified one must never pay out.
 func TestReplayRefusesAnUnclassifiedRoute(t *testing.T) {

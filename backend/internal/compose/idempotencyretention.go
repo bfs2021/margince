@@ -21,8 +21,8 @@ package compose
 // outlive the retry it exists to make safe: past the replay window the row can
 // never be replayed again, so keeping it stores subject data for no purpose at
 // all — which is exactly what Art. 5(1)(e) storage limitation forbids. Inside
-// the window, ensureReplayVisible is what keeps an erased record from being
-// served (replayscope.go).
+// the window, ensureReplayVisible is what keeps an erased record, or a rights
+// case whose subject was erased, from being served (replayscope.go).
 
 import (
 	"context"

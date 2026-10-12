@@ -115,6 +115,11 @@ const (
 	// evaluates.
 	probeDealSuggestion = "deal_suggestion"
 
+	// probeDSR keys the consent-owned probe for a data-subject request. The
+	// queue's own gate decides who may read a case, and an erased subject's
+	// case no longer names them.
+	probeDSR = "data_subject_request"
+
 	// The fields a body names another record by, spelled where the table that
 	// uses them is.
 	dealIDField           = "deal_id"
@@ -455,8 +460,11 @@ var replayableOperations = map[string]replayTarget{
 	// a retry would re-execute, fail as already-decided, and lose the token
 	// for good.
 	"POST /v1/approvals/{id}/approve": {objectNote: "the approval row IS the authority object (ADR-0036); the approvals engine gates it", moduleProbe: probeApproval, pathParam: "id"},
-	"POST /v1/data-subject-requests":  {objectNote: "DSR intake is gated by the privacy module's own case rules", rowNote: "a DSR case row, not a domain record"},
-	"PUT /v1/onboarding/state":        {objectNote: "per-workspace onboarding progress, gated by session membership in identity", rowNote: "workspace progress, not a record"},
+	"POST /v1/data-subject-requests": {
+		objectNote: "DSR intake is gated by the consent module's own queue authority, which the probe re-runs", moduleProbe: probeDSR, idPath: "id",
+		rowNote: "a DSR case carries no owner column; the consent store holds the queue gate and knows an erased subject's case",
+	},
+	"PUT /v1/onboarding/state": {objectNote: "per-workspace onboarding progress, gated by session membership in identity", rowNote: "workspace progress, not a record"},
 
 	// The provider connection is installation-wide configuration: one row per
 	// provider, no tenant record to scope, gated by the integrations object.

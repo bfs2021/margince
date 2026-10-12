@@ -106,7 +106,10 @@ var rowScopedResponses = map[string]expectedTarget{
 	// the change left alone and why. Only the batch's stored result says which,
 	// so the bulk engine owns the probe.
 	"BulkChangeResult": {moduleProbe: "bulk_batch", idPath: "batch_id"},
-	"RecordGrant":      {tableField: "record_type", idPath: "record_id"},
+	// A rights case names its data subject and has no owner column; the consent
+	// store holds the queue gate and knows when the subject was erased.
+	"DataSubjectRequest": {moduleProbe: "data_subject_request", idPath: "id"},
+	"RecordGrant":        {tableField: "record_type", idPath: "record_id"},
 	// A health assessment has no owner column: its visibility IS the project it
 	// judges, which the body names as project_id. Probed rather than waved
 	// through, because a replay hands back how a delivery is going — something

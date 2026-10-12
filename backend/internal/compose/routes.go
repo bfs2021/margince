@@ -160,6 +160,9 @@ func replayProbes(
 			_, err := dealsStore.GetSuggestion(ctx, id)
 			return err
 		},
+		// A filed request names its data subject; the consent store re-runs the
+		// queue gate and refuses a case whose subject was since erased.
+		probeDSR: consent.NewStore(db).ReplayableDSR,
 	}
 }
 
