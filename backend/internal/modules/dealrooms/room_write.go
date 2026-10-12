@@ -224,6 +224,9 @@ func (s *Store) UpdateRoom(ctx context.Context, id ids.DealRoomID, in UpdateRoom
 		if !acceptsContent(string(current.State)) {
 			return notEditable(string(current.State))
 		}
+		if err := ensureNewStewardEligible(ctx, tx, current, in); err != nil {
+			return err
+		}
 		p := buildRoomPatch(current, in)
 		if p.Empty() {
 			if err := storekit.EnsureIfMatch(ctx, tx, roomObject, id.UUID, in.IfVersion); err != nil {
@@ -250,6 +253,27 @@ func (s *Store) UpdateRoom(ctx context.Context, id ids.DealRoomID, in UpdateRoom
 		return err
 	})
 	return out, err
+}
+
+// ensureNewStewardEligible holds a transfer to the rule CreateRoom applies to a
+// named steward. Clearing the steward and re-sending the current one stay open,
+// so an edit to the title never fails over a colleague who has since left.
+func ensureNewStewardEligible(ctx context.Context, tx pgx.Tx, current crmcontracts.DealRoom, in UpdateRoomInput) error {
+	if in.StewardUserID == nil || *in.StewardUserID == nil {
+		return nil
+	}
+	named := **in.StewardUserID
+	if current.StewardUserId != nil && ids.UUID(*current.StewardUserId) == named.UUID {
+		return nil
+	}
+	eligible, err := stewardIsEligible(ctx, tx, named)
+	if err != nil {
+		return err
+	}
+	if !eligible {
+		return errStewardUnknown
+	}
+	return nil
 }
 
 func buildRoomPatch(current crmcontracts.DealRoom, in UpdateRoomInput) *storekit.Patch {

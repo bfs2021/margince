@@ -113,6 +113,74 @@ func TestARoomOpensWithNoStewardWhenTheDealsOwnerHasBeenDeactivated(t *testing.T
 	}
 }
 
+// A transfer names a steward as create does, so it meets the same rule and
+// the same refusal. Only a changed name is checked: a title edit that re-sends
+// the current steward must not fail because that colleague has left.
+func TestATransferRefusesTheDeactivatedColleagueCreateRefuses(t *testing.T) {
+	e := Setup(t)
+	ctx := e.As(e.AdminUser, nil, roomStewardAdmin)
+	store := dealrooms.NewStore(e.DB())
+	deal := ids.From[ids.DealKind](e.SeedWonDealLinkedTo(t))
+	deactivate(t, e, e.Rep2)
+	departed := ids.From[ids.UserKind](e.Rep2)
+	_, createErr := store.CreateRoom(ctx, dealrooms.CreateRoomInput{
+		DealID: deal, Title: "Acme — Deal Room", StewardUserID: &departed, Source: "manual",
+	})
+	requireStewardRefusal(t, "create", createErr)
+
+	first := ids.From[ids.UserKind](e.Rep1)
+	room, err := store.CreateRoom(ctx, dealrooms.CreateRoomInput{
+		DealID: deal, Title: "Acme — Deal Room", StewardUserID: &first, Source: "manual",
+	})
+	if err != nil {
+		t.Fatalf("opening the room with a live steward: %v", err)
+	}
+	roomID := ids.From[ids.DealRoomKind](ids.UUID(room.Id))
+	named := &departed
+	_, err = store.UpdateRoom(ctx, roomID, dealrooms.UpdateRoomInput{StewardUserID: &named})
+	requireStewardRefusal(t, "transfer", err)
+	if !errors.Is(err, createErr) {
+		t.Errorf("the transfer refused with %v, create with %v: one rule, one refusal", err, createErr)
+	}
+
+	live := ids.From[ids.UserKind](e.Rep3)
+	namedLive := &live
+	moved, err := store.UpdateRoom(ctx, roomID, dealrooms.UpdateRoomInput{StewardUserID: &namedLive})
+	if err != nil {
+		t.Fatalf("transferring the room to a live colleague: %v", err)
+	}
+	if moved.StewardUserId == nil || ids.UUID(*moved.StewardUserId) != e.Rep3 {
+		t.Fatalf("the transfer to a live colleague did not take: steward is %v", moved.StewardUserId)
+	}
+
+	deactivate(t, e, e.Rep3)
+	title := "Acme — Renewal Room"
+	edited, err := store.UpdateRoom(ctx, roomID, dealrooms.UpdateRoomInput{
+		Title: &title, StewardUserID: &namedLive,
+	})
+	if err != nil {
+		t.Fatalf("a title edit re-sending the current steward, who has since left, was refused: %v", err)
+	}
+	if edited.Title != title {
+		t.Errorf("the title edit did not take: title is %q", edited.Title)
+	}
+}
+
+// requireStewardRefusal pins the refusal to the steward field, because a seat
+// missing a grant also fails these calls and would pass a bare error check.
+func requireStewardRefusal(t *testing.T, op string, err error) {
+	t.Helper()
+	var fault interface {
+		FieldFault() (field, code, message string)
+	}
+	if !errors.As(err, &fault) {
+		t.Fatalf("%s accepted a deactivated colleague as steward, or refused for another reason: %v", op, err)
+	}
+	if field, code, _ := fault.FieldFault(); field != "steward_user_id" || code != "unknown_user" {
+		t.Fatalf("%s refused on %s/%s, want steward_user_id/unknown_user", op, field, code)
+	}
+}
+
 // roomStewardAdmin is the seat that opens a room.
 var roomStewardAdmin = principal.Permissions{
 	RoleKeys: []string{"admin"},
