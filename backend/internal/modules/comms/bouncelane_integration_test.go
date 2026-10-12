@@ -122,15 +122,19 @@ func TestHardBouncesForCarriesTheCallersHardBouncesOnly(t *testing.T) {
 	}
 }
 
-// readerCtx is actorCtx plus the activity read grant the lane requires — the
-// permission every seat that sees the Worklist carries.
+// readerCtx is actorCtx plus the reads a rep holds. The lane requires activity
+// read, and a link names the contact a send went to only with contact read.
 func readerCtx(ws ids.UUID, user ids.UserID) context.Context {
 	ctx := principal.WithWorkspaceID(context.Background(), ws)
+	objects := map[string]principal.ObjectGrant{}
+	for _, object := range []string{"activity", "contact", "company", "deal", "lead", "project"} {
+		objects[object] = principal.ObjectGrant{Read: true}
+	}
 	return principal.WithActor(ctx, principal.Principal{
 		Type: principal.PrincipalHuman, ID: "human:" + user.String(), UserID: user.UUID,
 		Permissions: principal.Permissions{
 			RoleKeys: []string{"rep"},
-			Objects:  map[string]principal.ObjectGrant{"activity": {Read: true}},
+			Objects:  objects,
 			RowScope: principal.RowScopeAll,
 		},
 	})

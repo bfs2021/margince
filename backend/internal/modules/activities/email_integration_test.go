@@ -174,9 +174,12 @@ func (e *sendEnv) as(scope principal.RowScope) context.Context {
 		Type: principal.PrincipalHuman, ID: "human:" + e.rep.String(), UserID: e.rep,
 		Permissions: principal.Permissions{
 			RoleKeys: []string{"rep"},
+			// A link names its record only to a seat that may read that type,
+			// and a send can be filed under a company.
 			Objects: map[string]principal.ObjectGrant{
 				"activity": {Create: true, Read: true, Update: true},
 				"contact":  {Read: true},
+				"company":  {Read: true},
 			},
 			RowScope: scope,
 		},

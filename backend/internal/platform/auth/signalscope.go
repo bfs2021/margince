@@ -62,27 +62,19 @@ func SignalScopeClause(ctx context.Context, alias string, arg func(any) int) (st
 	if UnboundedFor(p, tableContact, tableCompany, tableDeal, tableProject) {
 		return private, nil
 	}
-	contact := VisiblePredicate(p, tableContact, arg)
-	company := VisiblePredicate(p, tableCompany, arg)
-	deal := VisiblePredicate(p, tableDeal, arg)
-	// A project-subject signal inherits the project's visibility, the same
-	// way the three older subjects do; an arm missing here would DROP such a
-	// signal for every bounded reader, not withhold it for a reason. The arm
-	// also takes the project OBJECT grant, which the row predicate alone does
-	// not ask: a project's row scope admits every seat, so without the grant
-	// half a seat holding signal.read and no project.read would read a summary
-	// that names a project it may not list.
-	project := VisiblePredicate(p, tableProject, arg)
-	projectArm := sqlNoRow
-	if p.Permissions.Allows(tableProject, principal.ActionRead) {
-		projectArm = fmt.Sprintf("EXISTS (SELECT 1 FROM project sj WHERE sj.id = %s.entity_id AND %s)", alias, project("sj"))
-	}
+	// Each subject arm inherits its record's visibility and its type's object
+	// read grant (ReadablePredicate). An arm missing here would drop such a
+	// signal for every bounded reader.
+	contact := ReadablePredicate(p, tableContact, arg)
+	company := ReadablePredicate(p, tableCompany, arg)
+	deal := ReadablePredicate(p, tableDeal, arg)
+	project := ReadablePredicate(p, tableProject, arg)
 	return fmt.Sprintf(`(%[6]s AND (%[1]s.entity_type IS NULL
-	 OR (%[1]s.entity_type = 'contact'       AND EXISTS (SELECT 1 FROM contact sp WHERE sp.id = %[1]s.entity_id AND %[2]s))
+	 OR (%[1]s.entity_type = 'contact' AND EXISTS (SELECT 1 FROM contact sp WHERE sp.id = %[1]s.entity_id AND %[2]s))
 	 OR (%[1]s.entity_type = 'company' AND EXISTS (SELECT 1 FROM company so WHERE so.id = %[1]s.entity_id AND %[3]s))
-	 OR (%[1]s.entity_type = 'deal'         AND EXISTS (SELECT 1 FROM deal sd WHERE sd.id = %[1]s.entity_id AND %[4]s))
-	 OR (%[1]s.entity_type = 'project'      AND %[5]s)))`,
-		alias, contact("sp"), company("so"), deal("sd"), projectArm, private), nil
+	 OR (%[1]s.entity_type = 'deal'    AND EXISTS (SELECT 1 FROM deal sd WHERE sd.id = %[1]s.entity_id AND %[4]s))
+	 OR (%[1]s.entity_type = 'project' AND EXISTS (SELECT 1 FROM project sj WHERE sj.id = %[1]s.entity_id AND %[5]s))))`,
+		alias, contact("sp"), company("so"), deal("sd"), project("sj"), private), nil
 }
 
 // EnsureSignalVisible is EnsureVisible for signals, using the

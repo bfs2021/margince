@@ -101,7 +101,7 @@ func activityDiscoverClause(p principal.Principal, alias string, arg func(any) i
 	return fmt.Sprintf(`%[3]s AND (coalesce((SELECT bool_or(%[2]s)
 	   FROM activity_link l WHERE l.activity_id = %[1]s.id), true)
 	   OR %[4]s)`,
-		alias, linkTargetVisible(p, "l", arg), available, activityAttendanceArm(p, alias, arg))
+		alias, linkTargetVisible(p, "l", arg, VisiblePredicate), available, activityAttendanceArm(p, alias, arg))
 }
 
 // activityAttendanceArm is the discovery half of membership: the caller was on

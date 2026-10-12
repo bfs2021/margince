@@ -57,7 +57,7 @@ func contactChildExportScope(ctx context.Context, alias string, arg func(any) in
 	if auth.UnboundedFor(actor, "contact") {
 		return "", nil
 	}
-	predicate := auth.VisiblePredicate(actor, "contact", arg)
+	predicate := auth.ReadablePredicate(actor, "contact", arg)
 	return fmt.Sprintf(
 		`EXISTS (SELECT 1 FROM contact pp WHERE pp.id = %s.contact_id AND pp.archived_at IS NULL AND %s)`,
 		alias, predicate("pp"),
@@ -150,7 +150,7 @@ func polymorphicVisibleWith(ctx context.Context, typeCol, idCol string, arg func
 		{"deal", "deal"},
 		{"lead", "lead"},
 	} {
-		predicate := auth.VisiblePredicate(actor, e.table, arg)
+		predicate := auth.ReadablePredicate(actor, e.table, arg)
 		match := fmt.Sprintf("%s = '%s'", typeCol, e.kind)
 		if extra := legacyTypes[e.kind]; len(extra) > 0 {
 			quoted := make([]string, 0, len(extra))

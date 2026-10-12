@@ -67,7 +67,21 @@ func LinkTargetVisibleClause(ctx context.Context, alias string, arg func(any) in
 	if UnboundedFor(p, linkTargetTables...) {
 		return "", nil
 	}
-	return linkTargetVisible(p, alias, arg), nil
+	return linkTargetVisible(p, alias, arg, ReadablePredicate), nil
+}
+
+// LinkTargetRowScopeClause is LinkTargetVisibleClause without the object grant,
+// for a pass filing work under a SeatPrincipal, which carries none. What it
+// files is read back later through LinkTargetVisibleClause, as its reader.
+func LinkTargetRowScopeClause(ctx context.Context, alias string, arg func(any) int) (string, error) {
+	p, err := rbacActor(ctx)
+	if err != nil {
+		return "", err
+	}
+	if UnboundedFor(p, linkTargetTables...) {
+		return "", nil
+	}
+	return linkTargetVisible(p, alias, arg, VisiblePredicate), nil
 }
 
 // The row-scoped record types, named once. Several of these appear in
@@ -81,6 +95,9 @@ const (
 	tableProject = "project"
 )
 
+// rowPredicate is the shape of VisiblePredicate and ReadablePredicate.
+type rowPredicate func(p principal.Principal, table string, arg func(any) int) func(alias string) string
+
 // linkTargetTables names every record type an activity_link points at, in
 // the order the disjunction below walks them. Both this projection and the
 // activity gate (ActivityDiscoverClause, inheritedscope.go) decide whether they
@@ -89,8 +106,10 @@ const (
 var linkTargetTables = []string{tableContact, tableCompany, tableDeal, tableLead, tableProject}
 
 // linkTargetVisible renders the per-arm "this link's target is visible"
-// disjunction over activity_link's polymorphic columns.
-func linkTargetVisible(p principal.Principal, alias string, arg func(any) int) string {
+// disjunction over activity_link's polymorphic columns. visible is the per-type
+// test: the projection, which names the target, also asks the type's read grant
+// (ReadablePredicate); discovery asks row scope alone (VisiblePredicate).
+func linkTargetVisible(p principal.Principal, alias string, arg func(any) int, visible rowPredicate) string {
 	arms := make([]string, 0, len(linkTargetTables))
 	for _, t := range []struct{ column, table, probe string }{
 		{contactIDColumn, tableContact, "sp"},
@@ -99,8 +118,12 @@ func linkTargetVisible(p principal.Principal, alias string, arg func(any) int) s
 		{leadIDColumn, tableLead, "sl"},
 		{projectIDColumn, tableProject, "spr"},
 	} {
-		arms = append(arms, linkTargetArm(alias, t.column, t.table, t.probe,
-			VisiblePredicate(p, t.table, arg)(t.probe)))
+		predicate := visible(p, t.table, arg)(t.probe)
+		if predicate == sqlNoRow {
+			arms = append(arms, sqlNoRow)
+			continue
+		}
+		arms = append(arms, linkTargetArm(alias, t.column, t.table, t.probe, predicate))
 	}
 	return "(\n\t      " + strings.Join(arms, "\n\t   OR ") + ")"
 }

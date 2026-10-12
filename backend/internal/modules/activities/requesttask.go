@@ -144,7 +144,7 @@ func readRequestFiling(ctx context.Context, tx pgx.Tx, message ids.UUID, seat pr
 	var args []any
 	arg := func(v any) int { args = append(args, v); return len(args) }
 	messagePos := arg(message)
-	visible, err := auth.LinkTargetVisibleClause(principal.WithActor(ctx, seat), "l", arg)
+	visible, err := auth.LinkTargetRowScopeClause(principal.WithActor(ctx, seat), "l", arg)
 	if err != nil {
 		return requestFiling{}, err
 	}

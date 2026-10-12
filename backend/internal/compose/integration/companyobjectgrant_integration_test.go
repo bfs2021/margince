@@ -104,10 +104,9 @@ func TestAProjectsCompanySectionIsServedWithTheCompanyGrant(t *testing.T) {
 	}
 }
 
-// An intro path REFUSES rather than withholding, and the difference is not
-// arbitrary: the company's name is the proposal ("ask X to introduce you at
-// Y"), so a path with the account removed is not a smaller answer but a wrong
-// one.
+// An intro path REFUSES rather than withholding: the company's name is the
+// proposal ("ask X to introduce you at Y"). A seat with no company grant cannot
+// see a signal about a company at all, so the refusal reads as not found.
 func TestAnIntroPathIsRefusedWithoutTheCompanyGrant(t *testing.T) {
 	e := SetupSearch(t)
 	store := signalStore(e)
@@ -121,8 +120,12 @@ func TestAnIntroPathIsRefusedWithoutTheCompanyGrant(t *testing.T) {
 	}
 
 	narrow := signalActorWithout(e, ids.NewV7(), "company")
-	if _, err := store.IntroPath(narrow, sigID, time.Now().UTC()); !errors.Is(err, apperrors.ErrPermissionDenied) {
-		t.Fatalf("intro path for a seat with no company grant = %v, want ErrPermissionDenied", err)
+	asOf := time.Now().UTC()
+	if _, err := store.IntroPath(narrow, sigID, asOf); !errors.Is(err, apperrors.ErrNotFound) {
+		t.Fatalf("intro path for a seat with no company grant = %v, want ErrNotFound", err)
+	}
+	if _, err := store.IntroPath(admin, sigID, asOf); err != nil {
+		t.Fatalf("intro path for a seat holding the company grant = %v, want it served", err)
 	}
 }
 
