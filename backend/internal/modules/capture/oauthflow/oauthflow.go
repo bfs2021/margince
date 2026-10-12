@@ -73,11 +73,14 @@ type Client struct {
 // New builds the flow client. The caller has already resolved the
 // endpoints (each connector defaults them per provider before calling).
 func New(cfg Config) *Client {
-	c := cfg.HTTPClient
-	if c == nil {
-		c = &http.Client{Timeout: httpTimeout}
+	bounded := http.Client{Timeout: httpTimeout}
+	if cfg.HTTPClient != nil {
+		bounded = *cfg.HTTPClient
 	}
-	return &Client{http: c, cfg: cfg}
+	// Every token request carries the client secret in its body, and a 307 or
+	// 308 would re-post that body to wherever the endpoint points next.
+	bounded.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
+	return &Client{http: &bounded, cfg: cfg}
 }
 
 // AuthCodeURL builds the consent URL: the common authorization-code

@@ -6,7 +6,9 @@ package compose
 import (
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
+	"time"
 )
 
 func TestGoogleTokenExchangeParsesIDToken(t *testing.T) {
@@ -100,5 +102,44 @@ func TestGoogleTokenExchangeDefaultsHTTPClientWhenNil(t *testing.T) {
 	}
 	if idToken != "the.id.token" {
 		t.Fatalf("idToken = %q", idToken)
+	}
+}
+
+// The exchange form carries the client secret, and a 307 re-posts it. So a
+// redirecting token endpoint is a failed exchange whose target hears nothing,
+// also through a client the caller injects.
+func TestGoogleTokenExchangeNeverFollowsARedirect(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		client *http.Client
+	}{
+		{"the default client", nil},
+		{"an injected client", &http.Client{Timeout: time.Minute}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var reachedTarget atomic.Int32
+			target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				reachedTarget.Add(1)
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"id_token":"the.id.token"}`))
+			}))
+			defer target.Close()
+			endpoint := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				http.Redirect(w, r, target.URL, http.StatusTemporaryRedirect)
+			}))
+			defer endpoint.Close()
+
+			ex := oidcCodeExchanger{ClientID: "cid", ClientSecret: "secret", TokenURL: endpoint.URL, HTTPClient: tc.client}
+			idToken, err := ex.Exchange(t.Context(), "auth-code", "verifier-xyz", "https://app.example.com/cb")
+			if err == nil {
+				t.Errorf("Exchange = %q, want an error for a redirected token endpoint", idToken)
+			}
+			if n := reachedTarget.Load(); n != 0 {
+				t.Errorf("the redirect target received %d token requests, want 0", n)
+			}
+			if tc.client != nil && tc.client.CheckRedirect != nil {
+				t.Error("Exchange changed the caller's own client instead of a copy of it")
+			}
+		})
 	}
 }

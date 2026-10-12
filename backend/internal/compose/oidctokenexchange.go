@@ -46,10 +46,14 @@ type oidcTokenResponse struct {
 // request StartOidcSignIn builds asks for no access_type=offline, so Google
 // issues no refresh token here either, and this flow never mints one.
 func (ex oidcCodeExchanger) Exchange(ctx context.Context, code, codeVerifier, redirectURI string) (string, error) {
-	client := ex.HTTPClient
-	if client == nil {
-		client = &http.Client{Timeout: oidcTokenExchangeTimeout}
+	bounded := http.Client{Timeout: oidcTokenExchangeTimeout}
+	if ex.HTTPClient != nil {
+		bounded = *ex.HTTPClient
 	}
+	// The form carries the client secret, and a 307 or 308 would re-post it to
+	// wherever the token endpoint redirects.
+	bounded.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
+	client := &bounded
 	form := url.Values{
 		"grant_type":    {"authorization_code"},
 		"code":          {code},

@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"slices"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -284,5 +285,54 @@ func TestExchangeTreatsAnAbsentScopeAsGrantedAsRequested(t *testing.T) {
 	}
 	if !slices.Equal(grant.Scopes, baseScope) {
 		t.Errorf("granted scopes = %v, want the requested %v", grant.Scopes, baseScope)
+	}
+}
+
+// redirectingTokenEndpoint answers every token request with a 307 to a second
+// server, which would issue a token and counts the requests that reach it.
+func redirectingTokenEndpoint(t *testing.T) (tokenURL string, reachedTarget *atomic.Int32) {
+	t.Helper()
+	reachedTarget = new(atomic.Int32)
+	target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		reachedTarget.Add(1)
+		_, _ = w.Write([]byte(`{"refresh_token":"r","access_token":"a"}`))
+	}))
+	t.Cleanup(target.Close)
+	endpoint := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, target.URL, http.StatusTemporaryRedirect)
+	}))
+	t.Cleanup(endpoint.Close)
+	return endpoint.URL, reachedTarget
+}
+
+// A token request carries the client secret in its body, and a 307 re-posts
+// that body. So the redirect is a failed exchange and is never followed, also
+// through a client the caller injects.
+func TestATokenRequestNeverFollowsARedirect(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		client *http.Client
+	}{
+		{"the default client", nil},
+		{"an injected client", &http.Client{Timeout: time.Minute}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tokenURL, reachedTarget := redirectingTokenEndpoint(t)
+			cfg := testConfig(tokenURL, false)
+			cfg.HTTPClient = tc.client
+			c := New(cfg)
+			if _, err := c.Exchange(context.Background(), "code123", "https://app.example/cb"); !errors.Is(err, errUnre) {
+				t.Errorf("Exchange err = %v, want Unreachable", err)
+			}
+			if _, err := c.AccessToken(context.Background(), "stored-refresh"); !errors.Is(err, errUnre) {
+				t.Errorf("AccessToken err = %v, want Unreachable", err)
+			}
+			if n := reachedTarget.Load(); n != 0 {
+				t.Errorf("the redirect target received %d token requests, want 0", n)
+			}
+			if tc.client != nil && tc.client.CheckRedirect != nil {
+				t.Error("New changed the caller's own client instead of a copy of it")
+			}
+		})
 	}
 }
