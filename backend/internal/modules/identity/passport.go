@@ -430,6 +430,9 @@ func (s *Service) authenticateAgentWhere(ctx context.Context, tx pgx.Tx, predica
 	if err != nil {
 		return AgentIdentity{}, err
 	}
+	if err := ensureHumanHoldsRequiredFactor(ctx, tx, a.OnBehalfOf); err != nil {
+		return AgentIdentity{}, err
+	}
 	if connection != nil {
 		a.ConnectionID = *connection
 	}

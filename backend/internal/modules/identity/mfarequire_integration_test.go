@@ -12,7 +12,10 @@ package identity
 
 import (
 	"context"
+	"errors"
 	"testing"
+
+	"github.com/margince/margince/backend/internal/shared/apperrors"
 )
 
 func (e *revocationEnv) requireMFAOn() {
@@ -114,4 +117,70 @@ func TestRequireMFAOffLeavesTheMemberUnconfined(t *testing.T) {
 	if id.MustEnrolMFA {
 		t.Error("must-enrol is set with require-MFA off")
 	}
+}
+
+// Agent <= human holds for enrolment too. A human confined to enrolling a
+// factor reaches nothing else through their passports. That holds on the bearer
+// path, the trusted-process path and a tool admission. The policy is stored,
+// never wired onto the service: most services in production are built bare.
+func TestAPassportStopsWorkingWhileItsHumanOwesARequiredFactor(t *testing.T) {
+	e := setupRevocationEnv(t, "require-mfa-passport")
+	e.withVault()
+	ctx := e.wsOnlyCtx()
+	issued, err := e.svc.IssuePassport(ctx, e.member, IssuePassportInput{Scopes: []string{"read"}})
+	if err != nil {
+		t.Fatalf("issue passport: %v", err)
+	}
+	admit := func() error {
+		_, _, err := e.svc.AdmittedAuthority(ctx, e.ws.UUID, e.member.UserID.UUID, issued.ID.UUID)
+		return err
+	}
+	if _, err := e.svc.AuthenticateAgent(ctx, issued.Token); err != nil {
+		t.Fatalf("the passport must authenticate before a factor is required: %v", err)
+	}
+
+	e.storeRequireMFA(t)
+	if _, err := e.svc.AuthenticateAgent(ctx, issued.Token); !errors.Is(err, apperrors.ErrNotFound) {
+		t.Fatalf("the passport authenticates while its human owes a required factor: err = %v, want not-found", err)
+	}
+	if _, err := e.svc.AuthenticateAgentByID(ctx, issued.ID); !errors.Is(err, apperrors.ErrNotFound) {
+		t.Errorf("the passport resolves by id while its human owes a required factor: err = %v, want not-found", err)
+	}
+	if err := admit(); !errors.Is(err, apperrors.ErrNotFound) {
+		t.Errorf("a tool call is admitted while the human owes a required factor: err = %v, want not-found", err)
+	}
+
+	// Enrolment ends only sessions, so the same passport answers again.
+	e.enrolMemberMFA(t)
+	if _, err := e.svc.AuthenticateAgent(ctx, issued.Token); err != nil {
+		t.Errorf("the passport stays refused after its human confirmed a factor: %v", err)
+	}
+	if _, err := e.svc.AuthenticateAgentByID(ctx, issued.ID); err != nil {
+		t.Errorf("the passport stays unresolvable by id after its human confirmed a factor: %v", err)
+	}
+	if err := admit(); err != nil {
+		t.Errorf("a tool call stays refused after its human confirmed a factor: %v", err)
+	}
+}
+
+// storeRequireMFA turns the policy on the way an admin does, in the setting
+// row, and takes it off again when the test ends.
+func (e *revocationEnv) storeRequireMFA(t *testing.T) {
+	t.Helper()
+	ctx := context.Background()
+	unset := func() error {
+		_, err := e.owner.Exec(ctx, `DELETE FROM setting WHERE key = $1`, RequireMFA.Key())
+		return err
+	}
+	if err := unset(); err != nil {
+		t.Fatalf("clear the require-MFA setting: %v", err)
+	}
+	if _, err := e.owner.Exec(ctx, `INSERT INTO setting (key, value) VALUES ($1, 'true'::jsonb)`, RequireMFA.Key()); err != nil {
+		t.Fatalf("store the require-MFA setting: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := unset(); err != nil {
+			t.Errorf("clear the require-MFA setting: %v", err)
+		}
+	})
 }

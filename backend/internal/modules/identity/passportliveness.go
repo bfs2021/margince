@@ -17,6 +17,18 @@ package identity
 // agentLivenessWhere is a second rule, and a passport killed by one of two
 // rules is admitted by the other.
 
+import (
+	"context"
+	"fmt"
+
+	"github.com/jackc/pgx/v5"
+
+	"github.com/margince/margince/backend/internal/platform/settings"
+	"github.com/margince/margince/backend/internal/shared/apperrors"
+	"github.com/margince/margince/backend/internal/shared/kernel/ids"
+	"github.com/margince/margince/backend/internal/shared/kernel/principal"
+)
+
 // The LEFT JOINs and the predicate below are the liveness rule for an
 // OAuth-issued passport: a revoked grant, or a disabled or soft-deleted
 // client, must stop the credential on the very next call. They are the
@@ -85,6 +97,33 @@ var agentLivenessWhere = `
 		  AND now() < p.expires_at
 		  AND ` + LiveMemberSQL("u") + `
 		  AND u.must_change_password = false` + agentLivenessPredicate
+
+// ensureHumanHoldsRequiredFactor is the require-MFA half of the liveness rule:
+// while the installation requires a factor, a human without one has passports
+// that resolve to nothing. The policy is read in the caller's transaction,
+// because most services are built bare and would never ask it otherwise.
+// An agent is refused even where enrolment is not composed; that is stricter
+// than its human, never looser.
+func ensureHumanHoldsRequiredFactor(ctx context.Context, tx pgx.Tx, human ids.UserID) error {
+	required, err := settings.GetTx(principal.WithActor(ctx, principal.Principal{
+		Type: principal.PrincipalSystem,
+		ID:   signInPolicyReadActor,
+	}), tx, RequireMFA)
+	if err != nil {
+		return fmt.Errorf("identity: reading the require-MFA policy: %w", err)
+	}
+	if !required {
+		return nil
+	}
+	confirmed, err := hasConfirmedMFA(ctx, tx, human)
+	if err != nil {
+		return err
+	}
+	if !confirmed {
+		return apperrors.ErrNotFound
+	}
+	return nil
+}
 
 // passportStillLiveQuery re-asks the liveness rule about a passport already
 // authenticated, and about the human it is still supposed to answer to.

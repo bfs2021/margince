@@ -121,6 +121,9 @@ func (s *Service) AdmittedAuthority(ctx context.Context, workspaceID, humanID, p
 			if err != nil {
 				return err
 			}
+			if err := ensureHumanHoldsRequiredFactor(ctx, tx, ids.From[ids.UserKind](humanID)); err != nil {
+				return err
+			}
 		}
 		_, teams, perms, err := loadGrants(ctx, tx, ids.From[ids.UserKind](humanID))
 		if err != nil {
