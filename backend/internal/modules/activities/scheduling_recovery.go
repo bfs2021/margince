@@ -101,6 +101,7 @@ func (s *Store) deliverInvitation(ctx context.Context, row invitationRow, in con
 	// A public booking carries no description, so the link stands alone rather
 	// than behind two blank lines.
 	footer := "Reschedule or cancel: " + link
+	in.Description = sentDescription(row, in.Description)
 	if in.Description != "" {
 		footer = in.Description + "\n\n" + footer
 	}

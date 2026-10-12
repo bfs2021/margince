@@ -56,6 +56,17 @@ type invitationRow struct {
 	Attempts       int
 	ManagementRef  string
 	PublicIntent   *publicBookingIntent
+	// BookerAuthored marks a public booking, whose description the booker wrote.
+	BookerAuthored bool
+}
+
+// sentDescription is the description an invitation may carry. A public booker
+// chose both the agenda and the address it goes to, so their words never travel.
+func sentDescription(row invitationRow, description string) string {
+	if row.BookerAuthored {
+		return ""
+	}
+	return description
 }
 
 type schedulingArgs []any
@@ -143,14 +154,11 @@ func (s *Store) reserveAndQueueInvitation(ctx context.Context, host ids.UserID, 
 	if err != nil {
 		return crmcontracts.MeetingInvitation{}, err
 	}
-	row := invitationRow{PublicIntent: intent.Public, ManagementRef: ref, Host: host, Provider: string(profile.Provider), Calendar: profile.CalendarId, ReminderStatus: "off", Status: invitationPending, Version: 1, Command: "create"}
+	row := invitationRow{PublicIntent: intent.Public, BookerAuthored: intent.DescriptionFromBooker, ManagementRef: ref, Host: host, Provider: string(profile.Provider), Calendar: profile.CalendarId, ReminderStatus: "off", Status: invitationPending, Version: 1, Command: "create"}
 	row.Appointment = connector.CalendarAppointment{
-		ContactID: ids.UUID(in.ContactId), CalendarID: profile.CalendarId, Subject: in.Subject, Description: in.Description,
+		ContactID: ids.UUID(in.ContactId), CalendarID: profile.CalendarId, Subject: in.Subject, Description: sentDescription(row, in.Description),
 		Location: in.Location, Start: in.Start, End: in.End, Attendees: []string{string(in.AttendeeEmail)},
 		VideoCall: videoCallFor(profile, in.VideoCall),
-	}
-	if intent.DescriptionFromBooker {
-		row.Appointment.Description = ""
 	}
 	if profile.EmailReminder != nil && *profile.EmailReminder {
 		row.Appointment.EmailReminder = true
@@ -187,12 +195,16 @@ func reserveInvitation(ctx context.Context, tx pgx.Tx, host ids.UserID, start, e
 
 func readInvitation(ctx context.Context, tx pgx.Tx, id ids.UUID, lock bool) (invitationRow, error) {
 	args := schedulingArgs{}
-	query := `SELECT activity_id,host_user_id,provider,calendar_id,appointment,receipt,status,version,command,attempts,management_ref,reminder_status,public_intent FROM meeting_invitation WHERE activity_id=` + args.add(id)
+	// A public booking is a public-booking activity no proposal names; the row
+	// itself says so, whichever release wrote its appointment.
+	query := `SELECT activity_id,host_user_id,provider,calendar_id,appointment,receipt,status,version,command,attempts,management_ref,reminder_status,public_intent,
+		EXISTS(SELECT 1 FROM activity a WHERE a.id=meeting_invitation.activity_id AND a.source=` + args.add(sourcePublicBooking) + ` AND NOT EXISTS(SELECT 1 FROM meeting_proposal p WHERE p.invitation_id=a.id))
+		FROM meeting_invitation WHERE activity_id=` + args.add(id)
 	if lock {
 		query += " FOR UPDATE"
 	}
 	var row invitationRow
-	err := tx.QueryRow(ctx, query, args...).Scan(&row.ID, &row.Host, &row.Provider, &row.Calendar, &row.Appointment, &row.Receipt, &row.Status, &row.Version, &row.Command, &row.Attempts, &row.ManagementRef, &row.ReminderStatus, &row.PublicIntent)
+	err := tx.QueryRow(ctx, query, args...).Scan(&row.ID, &row.Host, &row.Provider, &row.Calendar, &row.Appointment, &row.Receipt, &row.Status, &row.Version, &row.Command, &row.Attempts, &row.ManagementRef, &row.ReminderStatus, &row.PublicIntent, &row.BookerAuthored)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return row, apperrors.ErrNotFound
 	}
@@ -231,10 +243,12 @@ func (s *Store) Invitation(ctx context.Context, id ids.UUID) (crmcontracts.Meeti
 	return invitationView(row), err
 }
 
+const sourcePublicBooking = "public_booking"
+
 func invitationSource(ctx context.Context) string {
 	actor, _ := principal.Actor(ctx)
 	if actor.ID == "system:public_booking" {
-		return "public_booking"
+		return sourcePublicBooking
 	}
 	return sourceManual
 }

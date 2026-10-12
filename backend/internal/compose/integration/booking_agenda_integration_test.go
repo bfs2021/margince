@@ -96,6 +96,93 @@ func TestAnAcceptedProposalStillSendsTheDescriptionItsHostWrote(t *testing.T) {
 	e.BootstrapWorkspace(t)
 	enableBookingPage(t, e)
 	deliver := startMeetingDelivery(t, e)
+	const hostAgenda = "Walk through the migration plan"
+	id := acceptProposal(t, e, hostAgenda, nextMonday().Add(2*time.Hour))
+	deliver()
+	if !strings.Contains(deliveredDescription(t, provider, id), hostAgenda) {
+		t.Fatal("the invitation dropped the description its host wrote")
+	}
+}
+
+// A row stored with the booker's agenda still on its appointment is a public
+// booking all the same: its first send and every reschedule leave the agenda out.
+func TestAStoredAgendaOnAPublicBookingNeverReachesTheInvitation(t *testing.T) {
+	e, provider := setupBookingProvider(t)
+	e.BootstrapWorkspace(t)
+	enableBookingPage(t, e)
+	deliver := startMeetingDelivery(t, e)
+	const agenda = "Bring the renewal figures"
+	start := nextMonday().Add(time.Hour)
+	request := AnyMap{
+		"start": start, "end": start.Add(30 * time.Minute), "subject": agenda,
+		"booker":  AnyMap{"name": "Agenda Guest", "email": "agenda@visitor.example"},
+		"consent": AnyMap{"policy_version": "2026-01", "wording": "Contact me about this meeting."},
+	}
+	var booked bookedInvitation
+	if status := publicCall(t, e, "POST", "/v1/public/booking/"+bookingSlug(t, e), request, nil, &booked); status != http.StatusCreated {
+		t.Fatalf("booking → %d", status)
+	}
+	storeAppointmentDescription(t, e, booked.Invitation.ID, agenda)
+	deliver()
+	assertInvitationOmitsAgenda(t, provider, booked, agenda)
+
+	moved := start.Add(3 * time.Hour)
+	rescheduleInvitation(t, e, booked.Invitation.ID, moved)
+	deliver()
+	assertInvitationOmitsAgenda(t, provider, booked, agenda)
+}
+
+// A host's own words survive the same reschedule: the rule is about who wrote
+// the description, and a proposal's description is its host's.
+func TestARescheduledProposalKeepsTheDescriptionItsHostWrote(t *testing.T) {
+	e, provider := setupBookingProvider(t)
+	e.BootstrapWorkspace(t)
+	enableBookingPage(t, e)
+	deliver := startMeetingDelivery(t, e)
+	const hostAgenda = "Walk through the migration plan"
+	id := acceptProposal(t, e, hostAgenda, nextMonday().Add(2*time.Hour))
+	deliver()
+	rescheduleInvitation(t, e, id, nextMonday().Add(5*time.Hour))
+	deliver()
+	if !strings.Contains(deliveredDescription(t, provider, id), hostAgenda) {
+		t.Fatal("the rescheduled invitation dropped the description its host wrote")
+	}
+}
+
+// storeAppointmentDescription writes a description onto a stored appointment, the
+// shape a row keeps when an earlier release stored the booker's agenda there.
+func storeAppointmentDescription(t *testing.T, e *apptest.AppEnv, invitationID, description string) {
+	t.Helper()
+	tag, err := e.Owner.Exec(context.Background(), `UPDATE meeting_invitation SET appointment = jsonb_set(appointment, '{Description}', to_jsonb($2::text)) WHERE activity_id = $1`, invitationID, description)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if tag.RowsAffected() != 1 {
+		t.Fatalf("no stored invitation %s", invitationID)
+	}
+}
+
+// rescheduleInvitation moves a confirmed invitation as its host.
+func rescheduleInvitation(t *testing.T, e *apptest.AppEnv, invitationID string, start time.Time) {
+	t.Helper()
+	path := "/v1/scheduling/invitations/" + invitationID
+	var state struct {
+		Status  string `json:"status"`
+		Version int    `json:"version"`
+	}
+	if status := e.Call(t, "GET", path, nil, nil, &state); status != http.StatusOK || state.Status != "confirmed" {
+		t.Fatalf("invitation before the move: %d %+v", status, state)
+	}
+	move := AnyMap{"action": "reschedule", "version": state.Version, "start": start, "end": start.Add(30 * time.Minute)}
+	if status := e.Call(t, "PATCH", path, move, nil, nil); status != http.StatusAccepted {
+		t.Fatalf("host reschedule → %d", status)
+	}
+}
+
+// acceptProposal has the owner propose a meeting with a description and a guest
+// accept it at start, and answers the invitation's id.
+func acceptProposal(t *testing.T, e *apptest.AppEnv, description string, start time.Time) string {
+	t.Helper()
 	var contact struct {
 		ID string `json:"id"`
 	}
@@ -103,8 +190,7 @@ func TestAnAcceptedProposalStillSendsTheDescriptionItsHostWrote(t *testing.T) {
 	if status := e.Call(t, "POST", "/v1/contacts", guest, nil, &contact); status != http.StatusCreated {
 		t.Fatalf("contact: %d", status)
 	}
-	const hostAgenda = "Walk through the migration plan"
-	request := AnyMap{"contact_id": contact.ID, "attendee_email": "guest@visitor.example", "subject": "Project review", "description": hostAgenda, "duration_minutes": 30, "options": []AnyMap{}}
+	request := AnyMap{"contact_id": contact.ID, "attendee_email": "guest@visitor.example", "subject": "Project review", "description": description, "duration_minutes": 30, "options": []AnyMap{}}
 	var proposal struct {
 		URL string `json:"url"`
 	}
@@ -115,7 +201,6 @@ func TestAnAcceptedProposalStillSendsTheDescriptionItsHostWrote(t *testing.T) {
 	if !found {
 		t.Fatal("the proposal link carries no capability")
 	}
-	start := nextMonday().Add(2 * time.Hour)
 	accept := AnyMap{"start": start, "end": start.Add(30 * time.Minute), "consent": AnyMap{"policy_version": "2026-01", "wording": "Contact me about this meeting."}}
 	var accepted struct {
 		ID string `json:"id"`
@@ -123,10 +208,7 @@ func TestAnAcceptedProposalStillSendsTheDescriptionItsHostWrote(t *testing.T) {
 	if status := publicCall(t, e, "POST", "/v1/public/proposal/"+token, accept, nil, &accepted); status != http.StatusAccepted {
 		t.Fatalf("proposal acceptance → %d", status)
 	}
-	deliver()
-	if !strings.Contains(deliveredDescription(t, provider, accepted.ID), hostAgenda) {
-		t.Fatal("the invitation dropped the description its host wrote")
-	}
+	return accepted.ID
 }
 
 // assertInvitationOmitsAgenda reads the last invitation body the host's calendar
