@@ -5810,6 +5810,7 @@ export const vi = {
   "import.map.run": "Chạy thử",
   "import.map.running": "Đang chạy thử…",
   "import.map.stageFailed": "Không thể bắt đầu chạy thử",
+  "import.map.testStopped": "Chạy thử đã dừng",
   "import.step.hintStaged":
     "Đã tạo lần chạy thử nên tệp và ánh xạ đã cố định. Sửa và tải lại sẽ bắt đầu lại.",
   "import.progress.waiting": "Đang chờ",
@@ -5844,6 +5845,10 @@ export const vi = {
   "import.test.import_other": "Nhập {count} dòng",
   "import.test.importAnyway": "Vẫn nhập",
   "import.test.counts": "Số dòng theo loại hồ sơ",
+  "import.test.testing": "Đang kiểm tra tệp của bạn…",
+  "import.test.stop": "Dừng kiểm tra",
+  "import.test.stopFailed":
+    "Không thể dừng kiểm tra. Nhấn “Dừng kiểm tra” lần nữa.",
   "import.test.problems_one": "1 vấn đề",
   "import.test.problems_other": "{count} vấn đề",
   "import.test.col.where": "Vị trí",
@@ -5968,6 +5973,7 @@ export const vi = {
   "jobs.kind.idempotency_retention": "Dọn dẹp dữ liệu phát lại yêu cầu",
   "jobs.kind.import_commit": "Ghi dữ liệu nhập",
   "jobs.kind.import_undo": "Hoàn tác lượt nhập",
+  "jobs.kind.import_validate": "Chạy thử dữ liệu nhập",
   "jobs.kind.intro_expiry": "Hết hạn lời giới thiệu",
   "jobs.kind.knowledge_ingest": "Lập chỉ mục tài liệu",
   "jobs.kind.list_evaluate": "Kiểm tra danh sách động",
