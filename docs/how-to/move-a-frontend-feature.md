@@ -10,7 +10,8 @@ import rules are in [frontend-architecture.md](../explanation/frontend-architect
 - **Move, never change.** Each file keeps its name and its code. Only import paths change. A file
   that needs a fix, a split or a new name gets its own PR, before or after the move. A split also
   fails here: code that leaves its file counts as new lines, so every comment in it must then pass
-  the comment checks.
+  the comment checks. Only a gate that reads moved code as new may ask for more, as the
+  [section on those gates](#when-a-gate-reads-moved-code-as-new) lists.
 - **One feature per PR.** The issue for the move lists the files. If you find a file that it
   missed, add it to the PR and say so in the PR body.
 - **A size limit grows only by import lines.** A file over the size limit has its line count in
@@ -99,9 +100,13 @@ A move touches many import lines, so it often conflicts with work that lands fir
 5. Search `vi.mock` paths by hand. `tsc` does not check them.
 6. Run `make check` again before you push.
 
-## When SonarCloud fails on coverage
+## When a gate reads moved code as new
 
-SonarCloud reads a moved file as new code. So a move takes on the old test gaps of its files, and
+`make fe-ds-gates` refuses spacing written in `px` on changed lines, and a moved stylesheet counts
+as changed. Swap each such value for the `--space-*` token of the same size in `tokens.css`, such
+as `var(--space-2)` for `8px`. The page then draws the same.
+
+SonarCloud reads a moved file as new code too. So a move takes on the old test gaps of its files, and
 the gate can fail below 80% coverage of new code. Find the moved files with the most lines that no
 test runs. Write a real test for one or two of them in the same PR. Do not lower the gate.
 
