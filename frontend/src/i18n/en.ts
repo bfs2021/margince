@@ -5962,7 +5962,9 @@ export const en = {
   // The name the mapping grid announces once it is wider than its box.
   "import.mappingTable": "Column mapping",
   "import.col.column": "Column",
-  "import.col.filled": "Filled",
+  "import.col.filled": "Filled in",
+  "import.col.filledHint":
+    "Share of rows in this file that have a value in the column",
   "import.col.samples": "Values",
   "import.col.destination": "Field",
   "import.dontImport": "Do not import",
@@ -5987,7 +5989,7 @@ export const en = {
   "import.undone": "Import undone",
   "import.undoReversed_one": "1 row reversed.",
   "import.undoReversed_other": "{rows} rows reversed.",
-  "import.undoKeptLead": "Kept because they were edited after the import:",
+  "import.undoKeptLead": "Left in place by the undo:",
   "import.undoErroredLead": "Could not be reversed and left unchanged:",
   "import.hub.title": "New import",
   "import.hub.templateTitle": "Template",
@@ -6051,7 +6053,8 @@ export const en = {
   "import.guide.custom": "custom field",
   "import.guide.required": "Needed on a new row",
   "import.guide.example": "Example: {example}",
-  "import.guide.whatGoesIn": "What goes in {column}",
+  "import.guide.button": "Guide",
+  "import.guide.buttonFor": "Guide for {column}",
   "import.template.title": "Template preview",
   "import.template.download": "Download template",
   "import.template.lead":
@@ -6093,8 +6096,6 @@ export const en = {
     "Every row is filed under this contact, so the file needs no links column.",
   "import.files.ignoredTitle": "Files left out",
   "import.files.ignored.unknown_name": "the name matches no record type",
-  "import.files.ignored.not_yet_importable":
-    "this record type cannot be imported yet",
   "import.files.sourceName": "Source name",
   "import.files.sourceNameHint":
     "Use the same name on a later upload to update these records, not add them again.",
@@ -6113,6 +6114,8 @@ export const en = {
   "import.map.testStopped": "Test run stopped",
   "import.step.hintStaged":
     "A test run is staged, so the files and the map are fixed. Fix and re-upload starts again.",
+  "import.step.hintDone":
+    "This import is finished, so its files and map are fixed.",
   "import.progress.waiting": "Waiting",
   "import.progress.running": "In progress",
   "import.progress.done": "Done",
@@ -6123,6 +6126,7 @@ export const en = {
   "import.progress.links": "Links",
   "import.progress.overall": "All files",
   "import.progress.total": "{done} of {total} rows",
+  "import.progress.reversed": "{done} of {total} rows processed",
   "import.progress.rate": "{rate} rows/s",
   "import.progress.elapsed": "{span} elapsed",
   "import.progress.etaObject": "about {minutes} min left in {type}",
@@ -6151,7 +6155,9 @@ export const en = {
   "import.result.skipped_other":
     "{count} rows were skipped. problems.csv lists each one.",
   "import.result.undoing":
-    "Undo is running. If it stops, Continue undo picks it up from there.",
+    "Undo is running. It continues on its own and this page updates.",
+  "import.result.undoStopped":
+    "The undo has stopped. Continue undo picks it up from where it was.",
   "import.result.problemsFile": "problems.csv",
   "import.result.undo": "Undo this import",
   "import.result.done": "Done",
@@ -6170,7 +6176,14 @@ export const en = {
     "Import the 1 row with a broken link anyway, without the link. The result lists every link left out.",
   "import.test.anyway_other":
     "Import the {count} rows with broken links anyway, without those links. The result lists every link left out.",
+  "import.test.nothing.title": "Nothing to import",
+  "import.test.nothing.body":
+    "Every row is already in the CRM, or is listed above as a problem. Nothing was written.",
+  "import.test.nothing.skipped":
+    "Download problems.csv before you press Done: it lists the skipped rows and why.",
+  "import.test.nothing.done": "Done",
   "import.test.reupload": "Fix and re-upload",
+  "import.test.issuesUnit": "issues",
   "import.test.import_one": "Import 1 row",
   "import.test.import_other": "Import {count} rows",
   "import.test.importAnyway": "Import anyway",
@@ -6197,6 +6210,8 @@ export const en = {
   "import.reason.undo_not_visible": "This record is no longer visible to you.",
   "import.reason.undo_rule_protects":
     "The record refused the undo because a business rule protects it.",
+  "import.reason.run_in_flight":
+    "This import is already running. It finishes on its own and this page updates.",
   "import.reason.undo_failed": "The record could not be undone.",
   "import.reason.author_too_long": "Author is longer than {max} characters.",
   "import.reason.cannot_create":
@@ -6280,7 +6295,7 @@ export const en = {
   "import.reason.owner_refused":
     "You cannot make this user an owner, so you become the owner of their rows.",
   "import.reason.owner_unknown":
-    "No user has this email, so you become the owner.",
+    "No user has this email, so you become the owner; a lead stays unassigned. Rows naming it: {rows}.",
   "import.reason.phone_needs_country":
     "“{value}” needs its country code, like +49 30 1234567.",
   "import.reason.record_archived":
@@ -6376,6 +6391,18 @@ export const en = {
     "No lead with “{ref}” in this upload, in an earlier import, or in Margince. The row was imported without the link.",
   "import.reason.deal_not_found":
     "No deal with “{ref}” in this upload, in an earlier import, or in Margince.",
+  "import.reason.link_row_skipped":
+    "The row “{ref}” was skipped in this import, so there is nothing to link to.",
+  "import.reason.link_row_skipped_dropped":
+    "The row “{ref}” was skipped in this import, so there is nothing to link to. The row was imported without the link.",
+  "import.reason.undo_edited":
+    "Someone changed this record after the import, so it was left in place.",
+  "import.reason.undo_still_referenced":
+    "Live deals or contacts still name this company (deals: {deals}, contacts: {contacts}), so it was left in place.",
+  "import.reason.lead_status_unknown":
+    "“{value}” is not a lead status. The statuses are: {allowed}.",
+  "import.reason.lead_status_not_importable":
+    "A file cannot set the status “{value}”. Use Qualify or Disqualify on the lead. The statuses a file may set are: {allowed}.",
   "import.reason.deal_not_found_dropped":
     "No deal with “{ref}” in this upload, in an earlier import, or in Margince. The row was imported without the link.",
   "import.reason.activity_link_ambiguous":

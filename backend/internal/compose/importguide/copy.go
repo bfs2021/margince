@@ -78,9 +78,9 @@ var Columns = withActivityColumns(map[string]Column{
 		Vi: "Người đã viết hồ sơ trong hệ thống nguồn, giữ nguyên như ở đó. Nếu là email của một thành viên Margince, hồ sơ sẽ ghi tên thành viên đó. Chỉ được ghi khi dòng tạo hồ sơ mới.",
 	}, Example: same("mai@yourcompany.com · Mai Nguyen")},
 	"owner_email": {Description: langcopy.Phrase{
-		En: "Email of the Margince user who owns the record. If no user has this email, you become the owner and the import preview says so.",
-		De: "E-Mail-Adresse des Mitglieds, das für den Datensatz zuständig ist. Hat kein Mitglied diese Adresse, wirst du zuständig, und die Importvorschau weist darauf hin.",
-		Vi: "Email của thành viên Margince phụ trách hồ sơ. Nếu không thành viên nào có email này, bạn sẽ là người phụ trách và bản xem trước lần nhập sẽ báo điều này.",
+		En: "Email of the Margince user who owns the record. If no user has this email, you become the owner and the import preview says so. A lead stays unassigned.",
+		De: "E-Mail-Adresse des Mitglieds, das für den Datensatz zuständig ist. Hat kein Mitglied diese Adresse, wirst du zuständig, und die Importvorschau weist darauf hin. Ein Lead bleibt nicht zugewiesen.",
+		Vi: "Email của thành viên Margince phụ trách hồ sơ. Nếu không thành viên nào có email này, bạn sẽ là người phụ trách và bản xem trước lần nhập sẽ báo điều này. Lead vẫn chưa giao.",
 	}, Example: same("mai@yourcompany.com")},
 	"tags": {Description: langcopy.Phrase{
 		En: "Tags, separated by semicolons. Tags that do not exist yet are created, and the import preview lists them.",
@@ -152,6 +152,11 @@ var Columns = withActivityColumns(map[string]Column{
 		De: "Das Unternehmen, für das der Lead arbeitet, als Text. Ein Lead ist mit keinem Unternehmen verknüpft.",
 		Vi: "Công ty nơi lead làm việc, dạng văn bản. Lead không liên kết với hồ sơ công ty nào.",
 	}, Example: same("Acme")},
+	"lead.status": {Description: langcopy.Phrase{
+		En: "Where the lead stands: new, contacted or engaged. Leave it empty for new. A lead is qualified or disqualified in Margince, so a file cannot set those.",
+		De: "Wo der Lead steht: new, contacted oder engaged. Leer bedeutet new. Ein Lead wird in Margince qualifiziert oder disqualifiziert, daher kann eine Datei das nicht setzen.",
+		Vi: "Lead đang ở giai đoạn nào: new, contacted hoặc engaged. Để trống nghĩa là new. Lead được xác nhận đủ điều kiện hoặc loại ngay trong Margince, nên tệp không thể đặt hai trạng thái này.",
+	}, Example: same("contacted")},
 	"contact.company_name": {Description: langcopy.Phrase{
 		En: "The company this contact works for, by its exact name. Exactly one company must carry the name, or no link is made and the import preview says why.",
 		De: "Das Unternehmen, für das dieser Kontakt arbeitet, mit seinem genauen Namen. Genau ein Unternehmen muss diesen Namen tragen, sonst wird keine Verknüpfung angelegt, und die Importvorschau nennt den Grund.",

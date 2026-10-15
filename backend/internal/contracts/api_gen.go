@@ -10356,15 +10356,12 @@ func (e ImportFormatVersion) Valid() bool {
 
 // Defines values for ImportIgnoredEntryReason.
 const (
-	ImportIgnoredEntryReasonNotYetImportable ImportIgnoredEntryReason = "not_yet_importable"
-	ImportIgnoredEntryReasonUnknownName      ImportIgnoredEntryReason = "unknown_name"
+	ImportIgnoredEntryReasonUnknownName ImportIgnoredEntryReason = "unknown_name"
 )
 
 // Valid indicates whether the value is a known member of the ImportIgnoredEntryReason enum.
 func (e ImportIgnoredEntryReason) Valid() bool {
 	switch e {
-	case ImportIgnoredEntryReasonNotYetImportable:
-		return true
 	case ImportIgnoredEntryReasonUnknownName:
 		return true
 	default:
@@ -10540,6 +10537,8 @@ const (
 	ImportReasonCodeIdOnNonCompany               ImportReasonCode = "id_on_non_company"
 	ImportReasonCodeLeadNotFound                 ImportReasonCode = "lead_not_found"
 	ImportReasonCodeLeadNotFoundDropped          ImportReasonCode = "lead_not_found_dropped"
+	ImportReasonCodeLeadStatusNotImportable      ImportReasonCode = "lead_status_not_importable"
+	ImportReasonCodeLeadStatusUnknown            ImportReasonCode = "lead_status_unknown"
 	ImportReasonCodeLinkAmbiguous                ImportReasonCode = "link_ambiguous"
 	ImportReasonCodeLinkAmbiguousDropped         ImportReasonCode = "link_ambiguous_dropped"
 	ImportReasonCodeLinkContactNotImported       ImportReasonCode = "link_contact_not_imported"
@@ -10549,6 +10548,8 @@ const (
 	ImportReasonCodeLinkNotFound                 ImportReasonCode = "link_not_found"
 	ImportReasonCodeLinkNotFoundDropped          ImportReasonCode = "link_not_found_dropped"
 	ImportReasonCodeLinkRowNotImported           ImportReasonCode = "link_row_not_imported"
+	ImportReasonCodeLinkRowSkipped               ImportReasonCode = "link_row_skipped"
+	ImportReasonCodeLinkRowSkippedDropped        ImportReasonCode = "link_row_skipped_dropped"
 	ImportReasonCodeLinkTypeUnknown              ImportReasonCode = "link_type_unknown"
 	ImportReasonCodeLinkedinHeld                 ImportReasonCode = "linkedin_held"
 	ImportReasonCodeLostReasonMissing            ImportReasonCode = "lost_reason_missing"
@@ -10577,6 +10578,7 @@ const (
 	ImportReasonCodeRefTakenByAnotherCompany     ImportReasonCode = "ref_taken_by_another_company"
 	ImportReasonCodeRowKeyEmpty                  ImportReasonCode = "row_key_empty"
 	ImportReasonCodeRowKeyRepeated               ImportReasonCode = "row_key_repeated"
+	ImportReasonCodeRunInFlight                  ImportReasonCode = "run_in_flight"
 	ImportReasonCodeSizeBandInvalid              ImportReasonCode = "size_band_invalid"
 	ImportReasonCodeStageUnknown                 ImportReasonCode = "stage_unknown"
 	ImportReasonCodeStageUnnamed                 ImportReasonCode = "stage_unnamed"
@@ -10586,10 +10588,12 @@ const (
 	ImportReasonCodeTaskNotImportable            ImportReasonCode = "task_not_importable"
 	ImportReasonCodeTimestampNeedsZone           ImportReasonCode = "timestamp_needs_zone"
 	ImportReasonCodeTooManyLinks                 ImportReasonCode = "too_many_links"
+	ImportReasonCodeUndoEdited                   ImportReasonCode = "undo_edited"
 	ImportReasonCodeUndoFailed                   ImportReasonCode = "undo_failed"
 	ImportReasonCodeUndoGrantLost                ImportReasonCode = "undo_grant_lost"
 	ImportReasonCodeUndoNotVisible               ImportReasonCode = "undo_not_visible"
 	ImportReasonCodeUndoRuleProtects             ImportReasonCode = "undo_rule_protects"
+	ImportReasonCodeUndoStillReferenced          ImportReasonCode = "undo_still_referenced"
 	ImportReasonCodeValueRefused                 ImportReasonCode = "value_refused"
 	ImportReasonCodeValueUnreadable              ImportReasonCode = "value_unreadable"
 )
@@ -10701,6 +10705,10 @@ func (e ImportReasonCode) Valid() bool {
 		return true
 	case ImportReasonCodeLeadNotFoundDropped:
 		return true
+	case ImportReasonCodeLeadStatusNotImportable:
+		return true
+	case ImportReasonCodeLeadStatusUnknown:
+		return true
 	case ImportReasonCodeLinkAmbiguous:
 		return true
 	case ImportReasonCodeLinkAmbiguousDropped:
@@ -10718,6 +10726,10 @@ func (e ImportReasonCode) Valid() bool {
 	case ImportReasonCodeLinkNotFoundDropped:
 		return true
 	case ImportReasonCodeLinkRowNotImported:
+		return true
+	case ImportReasonCodeLinkRowSkipped:
+		return true
+	case ImportReasonCodeLinkRowSkippedDropped:
 		return true
 	case ImportReasonCodeLinkTypeUnknown:
 		return true
@@ -10775,6 +10787,8 @@ func (e ImportReasonCode) Valid() bool {
 		return true
 	case ImportReasonCodeRowKeyRepeated:
 		return true
+	case ImportReasonCodeRunInFlight:
+		return true
 	case ImportReasonCodeSizeBandInvalid:
 		return true
 	case ImportReasonCodeStageUnknown:
@@ -10793,6 +10807,8 @@ func (e ImportReasonCode) Valid() bool {
 		return true
 	case ImportReasonCodeTooManyLinks:
 		return true
+	case ImportReasonCodeUndoEdited:
+		return true
 	case ImportReasonCodeUndoFailed:
 		return true
 	case ImportReasonCodeUndoGrantLost:
@@ -10800,6 +10816,8 @@ func (e ImportReasonCode) Valid() bool {
 	case ImportReasonCodeUndoNotVisible:
 		return true
 	case ImportReasonCodeUndoRuleProtects:
+		return true
+	case ImportReasonCodeUndoStillReferenced:
 		return true
 	case ImportReasonCodeValueRefused:
 		return true
@@ -23046,6 +23064,9 @@ type Activity struct {
 	HostUserId *openapi_types.UUID `json:"host_user_id,omitempty"`
 	Id         openapi_types.UUID  `json:"id"`
 
+	// ImportedFrom Which import wrote this record, so a screen can say "Imported from <name>" instead of "Typed by you". Null when no import wrote it. The name is the source the import was run for (`bundle`); an empty string is an import that was given none. Derived from `source_system`, whose reserved `mirror:` prefix is never shown.
+	ImportedFrom *string `json:"imported_from,omitempty"`
+
 	// InvitationStatus Calendar delivery state, independent of the recorded meeting outcome. Absent for meetings without a Margince invitation.
 	InvitationStatus *ActivityInvitationStatus `json:"invitation_status,omitempty"`
 
@@ -28995,7 +29016,10 @@ type Company struct {
 	DisplayName string             `json:"display_name"`
 	Domains     *[]CompanyDomain   `json:"domains,omitempty"`
 	Id          openapi_types.UUID `json:"id"`
-	Industry    *string            `json:"industry,omitempty"`
+
+	// ImportedFrom Which import wrote this record, so a screen can say "Imported from <name>" instead of "Typed by you". Null when no import wrote it. The name is the source the import was run for (`bundle`); an empty string is an import that was given none. Derived from `source_system`, whose reserved `mirror:` prefix is never shown.
+	ImportedFrom *string `json:"imported_from,omitempty"`
+	Industry     *string `json:"industry,omitempty"`
 
 	// IsAnchor True only for this installation's own company.
 	// It is one ordinary company, reachable by id everywhere, but the surfaces that answer
@@ -31845,6 +31869,9 @@ type Contact struct {
 	FullName string             `json:"full_name"`
 	Id       openapi_types.UUID `json:"id"`
 
+	// ImportedFrom Which import wrote this record, so a screen can say "Imported from <name>" instead of "Typed by you". Null when no import wrote it. The name is the source the import was run for (`bundle`); an empty string is an import that was given none. Derived from `source_system`, whose reserved `mirror:` prefix is never shown.
+	ImportedFrom *string `json:"imported_from,omitempty"`
+
 	// LastActivityAt When something last happened with this contact: the newest `occurred_at` of an activity linked to it, maintained on the activity write as `deal.last_activity_at` is (a read accelerator that a rebuild must reproduce). NULL until the first linked activity. Sortable (DM-VOCAB-1).
 	LastActivityAt *time.Time `json:"last_activity_at,omitempty"`
 	LastName       *string    `json:"last_name,omitempty"`
@@ -31943,6 +31970,9 @@ type Contact360 struct {
 
 	// LastInboundAt When they last wrote to us. Null means nothing inbound was ever captured — a fact about the relationship, not a missing field. Absent entirely when the caller has no activity grant, named in `sections_omitted` as `last_touch`.
 	LastInboundAt *time.Time `json:"last_inbound_at,omitempty"`
+
+	// LastLiveInboundAt When they last wrote to us, leaving out email an import brought in as history. Equal to `last_inbound_at` when nothing imported is newer. The re-engaged suggestion reads this, because history that arrived by import is not a reply. Absent when the caller has no activity grant, named in `sections_omitted` as `last_touch`.
+	LastLiveInboundAt *time.Time `json:"last_live_inbound_at,omitempty"`
 
 	// LastOutboundAt When we last wrote to them. Shown BESIDE last_inbound_at rather than folded into one "last touch": which direction went last is the whole question.
 	LastOutboundAt *time.Time `json:"last_outbound_at,omitempty"`
@@ -34394,6 +34424,9 @@ type Deal struct {
 	// FxRateToBase Native→base, frozen at close (null while open). Decimal-as-string to avoid float rounding of the 10-dp rate.
 	FxRateToBase *string            `json:"fx_rate_to_base,omitempty"`
 	Id           openapi_types.UUID `json:"id"`
+
+	// ImportedFrom Which import wrote this record, so a screen can say "Imported from <name>" instead of "Typed by you". Null when no import wrote it. The name is the source the import was run for (`bundle`); an empty string is an import that was given none. Derived from `source_system`, whose reserved `mirror:` prefix is never shown.
+	ImportedFrom *string `json:"imported_from,omitempty"`
 
 	// LastActivityAt Drives the deterministic stalled flag. Counts workspace-audience activities only, so a deal whose only recent mail is limited to its participants reads as stalled.
 	LastActivityAt *time.Time `json:"last_activity_at,omitempty"`
@@ -37235,11 +37268,11 @@ type ImportIgnoredEntry struct {
 	// File The entry's path inside the ZIP.
 	File string `json:"file"`
 
-	// Reason `unknown_name`: the file name names no type this CRM knows. `not_yet_importable`: it names a type an import cannot land yet.
+	// Reason `unknown_name`: the file name names no type this CRM knows.
 	Reason ImportIgnoredEntryReason `json:"reason"`
 }
 
-// ImportIgnoredEntryReason `unknown_name`: the file name names no type this CRM knows. `not_yet_importable`: it names a type an import cannot land yet.
+// ImportIgnoredEntryReason `unknown_name`: the file name names no type this CRM knows.
 type ImportIgnoredEntryReason string
 
 // ImportObject What the file's rows are, and therefore what the run creates.
@@ -37477,7 +37510,7 @@ type ImportPresetLinkType string
 // ImportProblemKind What kind of problem a report issue names, so a screen can group them. One closed list, the same one the server reports from.
 type ImportProblemKind string
 
-// ImportReasonCode Why a row was skipped or warned about, so a screen can say it in the reader's language with `params`. One closed list, the same one the server reports from; `reason` is the English sentence for a reader that does not know a code.
+// ImportReasonCode Why a row was skipped or warned about, so a screen can say it in the reader's language with `params`. One closed list, the same one the server reports from; `reason` is the English sentence for a reader that does not know a code. `run_in_flight` is the one refusal code: it answers a commit or undo on a run another attempt holds, and no row carries it.
 type ImportReasonCode string
 
 // ImportRowIssue One row the import could not take, named by its line so a human can go fix it. A problem of a whole file, such as a tag the file names that does not exist yet, has no line.
@@ -37500,7 +37533,7 @@ type ImportRowIssue struct {
 	// Reason What is wrong, in terms of the file the human uploaded — never a database or driver message.
 	Reason string `json:"reason"`
 
-	// ReasonCode Why a row was skipped or warned about, so a screen can say it in the reader's language with `params`. One closed list, the same one the server reports from; `reason` is the English sentence for a reader that does not know a code.
+	// ReasonCode Why a row was skipped or warned about, so a screen can say it in the reader's language with `params`. One closed list, the same one the server reports from; `reason` is the English sentence for a reader that does not know a code. `run_in_flight` is the one refusal code: it answers a commit or undo on a run another attempt holds, and no row carries it.
 	ReasonCode *ImportReasonCode `json:"reason_code,omitempty"`
 
 	// Value The cell value at fault, when one is, so a screen can group the rows that share it.
@@ -37614,7 +37647,7 @@ type ImportRun struct {
 	// Profile What the upload read of the file. Present on a single read of a `pending` or `awaiting_approval` run whose file is kept; never in a list.
 	Profile *ImportSourceProfile `json:"profile,omitempty"`
 
-	// Progress What a run has done so far, per object and in total. Absent on a run that never moved.
+	// Progress What a run has done so far, per object and in total. Absent on a run that never moved. While a run is `undoing`, `objects` lists the types it reverses in undo order, each with the rows reversed of the rows it created, and `counts` stays zero.
 	Progress *ImportRunProgress `json:"progress,omitempty"`
 
 	// RateRowsPerSecond Rows walked per second over the last minute. Absent until enough rows and time have passed to say, and while the run is idle.
@@ -37758,7 +37791,7 @@ type ImportRunPart struct {
 // ImportRunPhase What a run is doing. A test run reads, then checks; a commit or an undo reports the rest.
 type ImportRunPhase string
 
-// ImportRunProgress What a run has done so far, per object and in total. Absent on a run that never moved.
+// ImportRunProgress What a run has done so far, per object and in total. Absent on a run that never moved. While a run is `undoing`, `objects` lists the types it reverses in undo order, each with the rows reversed of the rows it created, and `counts` stays zero.
 type ImportRunProgress struct {
 	Counts struct {
 		Created int `json:"created"`
@@ -37982,11 +38015,11 @@ type ImportUndoReport struct {
 		// Reason What kept it from reversing, in terms the operator can act on — never a database or driver message.
 		Reason string `json:"reason"`
 
-		// ReasonCode Why a row was skipped or warned about, so a screen can say it in the reader's language with `params`. One closed list, the same one the server reports from; `reason` is the English sentence for a reader that does not know a code.
+		// ReasonCode Why a row was skipped or warned about, so a screen can say it in the reader's language with `params`. One closed list, the same one the server reports from; `reason` is the English sentence for a reader that does not know a code. `run_in_flight` is the one refusal code: it answers a commit or undo on a run another attempt holds, and no row carries it.
 		ReasonCode *ImportReasonCode `json:"reason_code,omitempty"`
 	} `json:"errored"`
 
-	// Kept Import-created rows a human edited since import, therefore left in place (A93).
+	// Kept Import-created rows left in place: a human edited them since import (A93), or a live record still names the company.
 	Kept []struct {
 		Id openapi_types.UUID `json:"id"`
 
@@ -38024,6 +38057,15 @@ type ImportUndoReport struct {
 		// match — so a file of duplicates produces a review queue, not a silent
 		// merge.
 		Object ImportObject `json:"object"`
+
+		// Params The values the sentence of `reason_code` names, by name. Absent when the code names none.
+		Params *map[string]string `json:"params,omitempty"`
+
+		// Reason Why the row was left in place, in terms the operator can act on. Absent in a report written before kept rows carried one.
+		Reason *string `json:"reason,omitempty"`
+
+		// ReasonCode Why a row was skipped or warned about, so a screen can say it in the reader's language with `params`. One closed list, the same one the server reports from; `reason` is the English sentence for a reader that does not know a code. `run_in_flight` is the one refusal code: it answers a commit or undo on a run another attempt holds, and no row carries it.
+		ReasonCode *ImportReasonCode `json:"reason_code,omitempty"`
 	} `json:"kept"`
 
 	// ReversedCount Import-created rows that were untouched since and have been reversed (archived).
@@ -38057,7 +38099,7 @@ type ImportUnresolvedLink struct {
 	// Reason Why it was not applied, in the words of the contact who made the file.
 	Reason string `json:"reason"`
 
-	// ReasonCode Why a row was skipped or warned about, so a screen can say it in the reader's language with `params`. One closed list, the same one the server reports from; `reason` is the English sentence for a reader that does not know a code.
+	// ReasonCode Why a row was skipped or warned about, so a screen can say it in the reader's language with `params`. One closed list, the same one the server reports from; `reason` is the English sentence for a reader that does not know a code. `run_in_flight` is the one refusal code: it answers a commit or undo on a run another attempt holds, and no row carries it.
 	ReasonCode *ImportReasonCode `json:"reason_code,omitempty"`
 
 	// To What the file named as the other end — a company name, not an id, because no id was found.
@@ -39032,6 +39074,9 @@ type Lead struct {
 	FromContactId *openapi_types.UUID `json:"from_contact_id,omitempty"`
 	FullName      *string             `json:"full_name,omitempty"`
 	Id            openapi_types.UUID  `json:"id"`
+
+	// ImportedFrom Which import wrote this record, so a screen can say "Imported from <name>" instead of "Typed by you". Null when no import wrote it. The name is the source the import was run for (`bundle`); an empty string is an import that was given none. Derived from `source_system`, whose reserved `mirror:` prefix is never shown.
+	ImportedFrom *string `json:"imported_from,omitempty"`
 
 	// LastActivityAt Most recent activity linked to this lead — the "last touch" a work queue row shows (ADR-0118). Derived from activity_link, not stored on the lead.
 	LastActivityAt *time.Time `json:"last_activity_at,omitempty"`
@@ -59569,6 +59614,14 @@ func (a *Company) UnmarshalJSON(b []byte) error {
 		delete(object, "id")
 	}
 
+	if raw, found := object["imported_from"]; found {
+		err = json.Unmarshal(raw, &a.ImportedFrom)
+		if err != nil {
+			return fmt.Errorf("error reading 'imported_from': %w", err)
+		}
+		delete(object, "imported_from")
+	}
+
 	if raw, found := object["industry"]; found {
 		err = json.Unmarshal(raw, &a.Industry)
 		if err != nil {
@@ -59847,6 +59900,13 @@ func (a Company) MarshalJSON() ([]byte, error) {
 	object["id"], err = json.Marshal(a.Id)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling 'id': %w", err)
+	}
+
+	if a.ImportedFrom != nil {
+		object["imported_from"], err = json.Marshal(a.ImportedFrom)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'imported_from': %w", err)
+		}
 	}
 
 	if a.Industry != nil {
@@ -60151,6 +60211,14 @@ func (a *Contact) UnmarshalJSON(b []byte) error {
 		delete(object, "id")
 	}
 
+	if raw, found := object["imported_from"]; found {
+		err = json.Unmarshal(raw, &a.ImportedFrom)
+		if err != nil {
+			return fmt.Errorf("error reading 'imported_from': %w", err)
+		}
+		delete(object, "imported_from")
+	}
+
 	if raw, found := object["last_activity_at"]; found {
 		err = json.Unmarshal(raw, &a.LastActivityAt)
 		if err != nil {
@@ -60395,6 +60463,13 @@ func (a Contact) MarshalJSON() ([]byte, error) {
 	object["id"], err = json.Marshal(a.Id)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling 'id': %w", err)
+	}
+
+	if a.ImportedFrom != nil {
+		object["imported_from"], err = json.Marshal(a.ImportedFrom)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'imported_from': %w", err)
+		}
 	}
 
 	if a.LastActivityAt != nil {
@@ -63337,6 +63412,14 @@ func (a *Deal) UnmarshalJSON(b []byte) error {
 		delete(object, "id")
 	}
 
+	if raw, found := object["imported_from"]; found {
+		err = json.Unmarshal(raw, &a.ImportedFrom)
+		if err != nil {
+			return fmt.Errorf("error reading 'imported_from': %w", err)
+		}
+		delete(object, "imported_from")
+	}
+
 	if raw, found := object["last_activity_at"]; found {
 		err = json.Unmarshal(raw, &a.LastActivityAt)
 		if err != nil {
@@ -63680,6 +63763,13 @@ func (a Deal) MarshalJSON() ([]byte, error) {
 	object["id"], err = json.Marshal(a.Id)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling 'id': %w", err)
+	}
+
+	if a.ImportedFrom != nil {
+		object["imported_from"], err = json.Marshal(a.ImportedFrom)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'imported_from': %w", err)
+		}
 	}
 
 	if a.LastActivityAt != nil {
@@ -64912,6 +65002,14 @@ func (a *Lead) UnmarshalJSON(b []byte) error {
 		delete(object, "id")
 	}
 
+	if raw, found := object["imported_from"]; found {
+		err = json.Unmarshal(raw, &a.ImportedFrom)
+		if err != nil {
+			return fmt.Errorf("error reading 'imported_from': %w", err)
+		}
+		delete(object, "imported_from")
+	}
+
 	if raw, found := object["last_activity_at"]; found {
 		err = json.Unmarshal(raw, &a.LastActivityAt)
 		if err != nil {
@@ -65285,6 +65383,13 @@ func (a Lead) MarshalJSON() ([]byte, error) {
 	object["id"], err = json.Marshal(a.Id)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling 'id': %w", err)
+	}
+
+	if a.ImportedFrom != nil {
+		object["imported_from"], err = json.Marshal(a.ImportedFrom)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'imported_from': %w", err)
+		}
 	}
 
 	if a.LastActivityAt != nil {

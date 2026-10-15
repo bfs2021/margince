@@ -53,7 +53,7 @@ These skip the row:
 - a record type you may not create, or a change to a record you may not edit.
 
 These stop nothing. The row lands, and the problem is listed:
-- an owner email that no user has (**Unknown owner**): you become the owner;
+- an owner email that no user has (**Unknown owner**): you become the owner, except for a lead, which stays unassigned;
 - a tag that does not exist yet (**New tag**): the import creates it;
 - a company name that is already in Margince: the import creates a second company and files the pair for review (**Duplicate**).
 Also called: rows skipped, import errors, why was my row not imported.
@@ -91,10 +91,16 @@ A row without a `ref` is matched by a company's display name, or by a contact's 
 Also called: ID from another system, key column, record ID from my old system.
 
 ### How do owners, tags and custom fields import?
-- **Owner:** put the email of a Margince user in `owner_email`. If no user has it, you become the owner, and the test run says so.
+- **Owner:** put the email of a Margince user in `owner_email`. If no user has it, you become the owner; a lead stays unassigned. The test run lists each such address once, with the number of rows that name it.
 - **Tags:** separate tags with `;` in `tags`. A new tag is created, and the test run lists it. A tag column only adds tags, and never removes one. **Tag for this import** files every record the import creates under one more tag. Records it only updates keep their own tags.
 - **Custom fields:** a custom field has its own column. A list field takes one of its allowed values. A field that takes several values has them split by `;`.
 Also called: record owner, tag a group of records, import custom fields.
+
+### How do I set a prospect's status?
+A `leads.csv` row can carry a `status`: `new`, `contacted` or `engaged`. Case does not matter. An empty box leaves a new prospect as `new`, and an existing one as it is.
+
+A file cannot set a prospect to qualified or disqualified. Use **Qualify** or **Disqualify** on the prospect. A row with another word is skipped, and the problem lists the allowed values.
+Also called: import lead status, set the stage of a lead.
 
 ### How do I import deals?
 A `deals.csv` row is one deal. Each row needs a `ref`. A new deal also needs a `name` and a `stage`.
@@ -150,7 +156,7 @@ Also called: import a contact's history, add past calls to a contact.
 ### What if a link is broken?
 A contact's or deal's `company_ref` names its company. It is the company's `ref` in this upload or an earlier one, its domain, its exact name, or its Margince ID. A row whose link finds no company is skipped and listed as **Broken link**. See **Import anyway** above.
 
-An activity's `links` name a record the same way, by `ref` or Margince ID, or for a contact by email. A link that finds no record is a **Broken link**. With **Import anyway** the activity keeps its other links, and one with none left is still skipped.
+An activity's `links` name a record the same way, by `ref` or Margince ID, or for a contact by email. A link that finds no record is a **Broken link**. With **Import anyway** the activity keeps its other links, and one with none left is still skipped. A link to a row that this import skipped, such as a deal with no exchange rate, is a broken link too. The problem says the row was skipped.
 
 Also called: missing company, link not found.
 
@@ -158,6 +164,10 @@ Also called: missing company, link not found.
 A company that Margince already holds, and that no import made, is not matched by its name. The import creates a second company and files the two for review as a possible duplicate. A contact whose email address is already held is skipped.
 To change companies you already have, correct them by their ID. A company you cannot see is not counted or named in the test run.
 Also called: duplicates on import, import made copies.
+
+### Does an import file contacts with the same first name as duplicates?
+No. Two contacts that share only a first name are not filed, even at one company. Their last names must match and their first names must be close.
+Also called: duplicate queue too long after import, same name flagged.
 
 ### How do I correct companies with a spreadsheet?
 To correct companies in Margince from a CSV, give each row the company's ID and map that column to **id**.
@@ -174,7 +184,7 @@ Also called: bulk edit companies, update companies from Excel, fix company data.
 ### What happens if I import the same file again?
 Importing a file again with the same source name updates the records the file made. It does not copy them. These rules hold for every record type:
 - **Rows are matched on the `ref`** within the source name and the record type.
-- **A row that did not change writes nothing.** The test run counts it as the same.
+- **A row that did not change writes nothing.** The test run counts it as the same. When every row is the same or skipped, the test run says **Nothing to import**. **Done** closes the run, and there is nothing to undo.
 - **A changed row updates only its changed fields.** Every other field of the record stays as it is.
 - **A new `ref` creates a new record.**
 - **A missing row is left alone.** A re-import never archives or deletes a record because its row is gone.
@@ -201,8 +211,8 @@ Also called: re-import, upload again, update from a spreadsheet, import twice, d
 Undo reverses one import, in reverse order: activities, then deals, then prospects, then contacts, then companies. The steps are in [What is kept, what is destroyed](retention-exports-and-deletion.md). These are the rules:
 - Undo archives only the records that import created. A prospect is disqualified instead.
 - Records the import only updated keep their new values. Undo never puts back the old values.
-- A record someone edited after the import stays, and is listed under "Kept because they were edited after the import:".
-- A company that a live deal or contact still names stays, and is listed as one that could not be reversed. A company the import only matched by its ID is never archived.
+- A record someone edited after the import stays. It is listed under "Left in place by the undo:", with the reason beside it.
+- A company that a live deal or contact still names stays too. It is listed under the same heading, with the number of deals and contacts that name it. A company the import only matched by its ID is never archived.
 - New tags stay, because they may be in use.
 - A finished undo frees the `ref` values of that import. The same file can be imported again, and it creates the records again.
 - A record that undo kept is still found by its `ref`, so a later import updates it.

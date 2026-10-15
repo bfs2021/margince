@@ -5692,7 +5692,8 @@ export const vi = {
   "import.profiled": "Số dòng đã phân tích từ đầu tệp: {rows}.",
   "import.mappingTable": "Ánh xạ cột",
   "import.col.column": "Cột",
-  "import.col.filled": "Có dữ liệu",
+  "import.col.filled": "Đã điền",
+  "import.col.filledHint": "Tỷ lệ dòng trong tệp này có giá trị ở cột",
   "import.col.samples": "Giá trị",
   "import.col.destination": "Trường",
   "import.dontImport": "Không nhập",
@@ -5715,7 +5716,7 @@ export const vi = {
   "import.undone": "Đã hoàn tác lần nhập",
   "import.undoReversed_one": "Đã hoàn tác 1 dòng.",
   "import.undoReversed_other": "Đã hoàn tác {rows} dòng.",
-  "import.undoKeptLead": "Giữ nguyên vì đã được sửa sau khi nhập:",
+  "import.undoKeptLead": "Được giữ nguyên khi hoàn tác:",
   "import.undoErroredLead": "Không thể hoàn tác, giữ nguyên:",
   "import.hub.title": "Lần nhập mới",
   "import.hub.templateTitle": "Mẫu",
@@ -5780,7 +5781,8 @@ export const vi = {
   "import.guide.custom": "trường tùy chỉnh",
   "import.guide.required": "Cần cho dòng mới",
   "import.guide.example": "Ví dụ: {example}",
-  "import.guide.whatGoesIn": "Nội dung của cột {column}",
+  "import.guide.button": "Hướng dẫn",
+  "import.guide.buttonFor": "Hướng dẫn cho {column}",
   "import.template.title": "Bản xem trước mẫu",
   "import.template.download": "Tải mẫu xuống",
   "import.template.lead":
@@ -5822,7 +5824,6 @@ export const vi = {
     "Mọi dòng được gắn vào liên hệ này, nên tệp không cần cột links.",
   "import.files.ignoredTitle": "Tệp bị bỏ qua",
   "import.files.ignored.unknown_name": "tên tệp không khớp loại hồ sơ nào",
-  "import.files.ignored.not_yet_importable": "loại hồ sơ này chưa nhập được",
   "import.files.sourceName": "Tên nguồn",
   "import.files.sourceNameHint":
     "Dùng cùng tên ở lần tải lên sau để cập nhật các hồ sơ này thay vì thêm lại.",
@@ -5841,6 +5842,7 @@ export const vi = {
   "import.map.testStopped": "Chạy thử đã dừng",
   "import.step.hintStaged":
     "Đã tạo lần chạy thử nên tệp và ánh xạ đã cố định. Sửa và tải lại sẽ bắt đầu lại.",
+  "import.step.hintDone": "Lần nhập đã hoàn tất nên tệp và ánh xạ đã cố định.",
   "import.progress.waiting": "Đang chờ",
   "import.progress.running": "Đang chạy",
   "import.progress.done": "Xong",
@@ -5851,6 +5853,7 @@ export const vi = {
   "import.progress.links": "Liên kết",
   "import.progress.overall": "Tất cả tệp",
   "import.progress.total": "{done} trên {total} dòng",
+  "import.progress.reversed": "Đã xử lý {done} trên {total} dòng",
   "import.progress.rate": "{rate} dòng/giây",
   "import.progress.elapsed": "đã qua {span}",
   "import.progress.etaObject": "còn khoảng {minutes} phút cho {type}",
@@ -5880,7 +5883,9 @@ export const vi = {
   "import.result.skipped_other":
     "Đã bỏ qua {count} dòng. problems.csv liệt kê từng dòng.",
   "import.result.undoing":
-    "Đang hoàn tác. Nếu bị dừng, Tiếp tục hoàn tác sẽ chạy tiếp từ đó.",
+    "Đang hoàn tác. Quá trình tự chạy tiếp và trang này tự cập nhật.",
+  "import.result.undoStopped":
+    "Việc hoàn tác đã dừng. Tiếp tục hoàn tác sẽ chạy tiếp từ chỗ dừng.",
   "import.result.problemsFile": "problems.csv",
   "import.result.undo": "Hoàn tác lần nhập này",
   "import.result.done": "Xong",
@@ -5899,7 +5904,14 @@ export const vi = {
     "Vẫn nhập 1 dòng có liên kết hỏng, bỏ liên kết đó. Kết quả liệt kê mọi liên kết bị bỏ.",
   "import.test.anyway_other":
     "Vẫn nhập {count} dòng có liên kết hỏng, bỏ các liên kết đó. Kết quả liệt kê mọi liên kết bị bỏ.",
+  "import.test.nothing.title": "Không có gì để nhập",
+  "import.test.nothing.body":
+    "Mọi hàng đã có trong CRM hoặc được liệt kê ở trên như một vấn đề. Chưa ghi gì cả.",
+  "import.test.nothing.skipped":
+    "Hãy tải problems.csv trước khi bấm Xong: tệp liệt kê các hàng bị bỏ qua và lý do.",
+  "import.test.nothing.done": "Xong",
   "import.test.reupload": "Sửa và tải lại",
+  "import.test.issuesUnit": "vấn đề",
   "import.test.import_one": "Nhập 1 dòng",
   "import.test.import_other": "Nhập {count} dòng",
   "import.test.importAnyway": "Vẫn nhập",
@@ -5927,6 +5939,8 @@ export const vi = {
   "import.reason.undo_not_visible": "Bạn không còn thấy bản ghi này.",
   "import.reason.undo_rule_protects":
     "Bản ghi từ chối hoàn tác vì có một quy tắc nghiệp vụ bảo vệ nó.",
+  "import.reason.run_in_flight":
+    "Lần nhập này đang chạy. Nó tự hoàn tất và trang này tự cập nhật.",
   "import.reason.undo_failed": "Không thể hoàn tác bản ghi này.",
   "import.reason.author_too_long": "Tác giả dài hơn {max} ký tự.",
   "import.reason.cannot_create":
@@ -6009,7 +6023,7 @@ export const vi = {
   "import.reason.owner_refused":
     "Bạn không thể đặt thành viên này làm chủ sở hữu nên bạn trở thành chủ sở hữu các hàng của họ.",
   "import.reason.owner_unknown":
-    "Không có thành viên nào có email này nên bạn trở thành chủ sở hữu.",
+    "Không có thành viên nào có email này nên bạn trở thành chủ sở hữu; lead vẫn chưa giao. Số hàng nêu email này: {rows}.",
   "import.reason.phone_needs_country":
     "“{value}” cần mã quốc gia, ví dụ +49 30 1234567.",
   "import.reason.record_archived":
@@ -6105,6 +6119,18 @@ export const vi = {
     "Không có lead nào với “{ref}” trong tệp này, trong lần nhập trước hoặc trong Margince. Hàng đã được nhập mà không có liên kết.",
   "import.reason.deal_not_found":
     "Không có deal nào với “{ref}” trong tệp này, trong lần nhập trước hoặc trong Margince.",
+  "import.reason.link_row_skipped":
+    "Hàng “{ref}” đã bị bỏ qua trong lần nhập này nên không có gì để liên kết.",
+  "import.reason.link_row_skipped_dropped":
+    "Hàng “{ref}” đã bị bỏ qua trong lần nhập này nên không có gì để liên kết. Hàng đã được nhập mà không có liên kết.",
+  "import.reason.undo_edited":
+    "Hồ sơ này đã được sửa sau khi nhập nên được giữ nguyên.",
+  "import.reason.undo_still_referenced":
+    "Vẫn còn deal hoặc liên hệ đang dùng công ty này (deal: {deals}, liên hệ: {contacts}) nên công ty được giữ nguyên.",
+  "import.reason.lead_status_unknown":
+    "“{value}” không phải trạng thái lead. Các trạng thái: {allowed}.",
+  "import.reason.lead_status_not_importable":
+    "Tệp không thể đặt trạng thái “{value}”. Dùng Xác nhận đủ điều kiện hoặc Loại lead trên lead. Trạng thái tệp được đặt: {allowed}.",
   "import.reason.deal_not_found_dropped":
     "Không có deal nào với “{ref}” trong tệp này, trong lần nhập trước hoặc trong Margince. Hàng đã được nhập mà không có liên kết.",
   "import.reason.activity_link_ambiguous":
