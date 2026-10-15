@@ -3025,11 +3025,11 @@ export const en = {
     "Someone already decided this suggestion. Reload to see where it stands.",
   "tagSuggestion.unavailable":
     "The suggestion could not be read. Try again later.",
-  "tagAdmin.descriptionLabel": "Words that show interest",
+  "tagAdmin.descriptionLabel": "What shows interest",
   "tagAdmin.descriptionHint":
-    "Separate words or phrases with commas, for example: pricing for Product X, Product X demo.",
+    "For example, asks about pricing or a Product X demo. Without AI, each comma-separated phrase counts as a match.",
   "tagAdmin.suggestibleLabel":
-    "Suggest this tag when mail or meeting notes use these words",
+    "Suggest this tag when mail, meetings, notes or calls show this interest",
   "tagAdmin.colorNone": "No color",
   "tagAdmin.color.teal": "Teal",
   "tagAdmin.color.amber": "Amber",
