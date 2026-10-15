@@ -10364,6 +10364,7 @@ export const de = {
   "aicalls.outcome.failed": "Fehlgeschlagen",
   "aicalls.model.afterDecision": "Entscheidungsmodell, dann {tier}",
   "aicalls.filter.servedProvider": "Ausgeliefert von",
+  "aicalls.filter.servedModel": "Beantwortet von",
   "aicalls.sentinel.provider_quota": "Kontingent erschöpft",
   "aicalls.sentinel.provider_throttled": "Gedrosselt",
   "aicalls.sentinel.provider_refused": "Vom Anbieter abgelehnt",
@@ -13420,7 +13421,7 @@ export const de = {
   "aiRates.refresh.keptCount_one": "{count} manueller Preis beibehalten",
   "aiRates.refresh.keptCount_other": "{count} manuelle Preise beibehalten",
   "aiProviders.setByHand": "Manuell",
-  "aiRates.refresh.unlisted": "Nicht in der Liste des Brokers: {ids}",
+  "aiRates.refresh.unlisted": "Nicht in der Preisliste: {ids}",
   "aiRates.refresh.updatedCount_one": "{count} Preis geschrieben",
   "aiRates.refresh.updatedCount_other": "{count} Preise geschrieben",
   "aiRates.refresh.unchangedCount_one": "{count} Preis bereits aktuell",
@@ -13864,6 +13865,11 @@ export const de = {
   "aiFigures.line.timeoutCount_one": "{count} Zeitüberschreitung",
   "aiFigures.line.timeoutCount_other": "{count} Zeitüberschreitungen",
   "aiFigures.line.p50": "p50 {latency}",
+  "aiFigures.switched_one":
+    "Der Anbieter hat {count} von {total} Aufrufen mit einem anderen als dem zugeordneten Modell beantwortet, meist mit {model}.",
+  "aiFigures.switched_other":
+    "Der Anbieter hat {count} von {total} Aufrufen mit einem anderen als dem zugeordneten Modell beantwortet, meist mit {model}.",
+  "aiFigures.switchedBadge": "Modell gewechselt",
   "aiFigures.line.sort": "Sortierung: {sort}",
   "aiFigures.line.week": "7 T: {figures}",
   "aiFigures.line.prefix": "7 T: {sentence}",

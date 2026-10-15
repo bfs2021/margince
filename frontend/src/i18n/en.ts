@@ -10448,6 +10448,7 @@ export const en = {
   "aicalls.outcome.failed": "Failed",
   "aicalls.model.afterDecision": "Decision model, then {tier}",
   "aicalls.filter.servedProvider": "Served by",
+  "aicalls.filter.servedModel": "Answered by",
   "aicalls.sentinel.provider_quota": "Out of quota",
   "aicalls.sentinel.provider_throttled": "Throttled",
   "aicalls.sentinel.provider_refused": "Refused by provider",
@@ -13493,7 +13494,7 @@ export const en = {
   "aiRates.refresh.keptCount_one": "{count} hand-set price kept",
   "aiRates.refresh.keptCount_other": "{count} hand-set prices kept",
   "aiProviders.setByHand": "Hand-set",
-  "aiRates.refresh.unlisted": "Not in the broker’s list: {ids}",
+  "aiRates.refresh.unlisted": "Not in the price list: {ids}",
   "aiRates.refresh.updatedCount_one": "{count} price written",
   "aiRates.refresh.updatedCount_other": "{count} prices written",
   "aiRates.refresh.unchangedCount_one": "{count} price already current",
@@ -13933,6 +13934,11 @@ export const en = {
   "aiFigures.line.timeoutCount_one": "{count} timeout",
   "aiFigures.line.timeoutCount_other": "{count} timeouts",
   "aiFigures.line.p50": "p50 {latency}",
+  "aiFigures.switched_one":
+    "The provider answered {count} of {total} calls with another model than the bound one, most often {model}.",
+  "aiFigures.switched_other":
+    "The provider answered {count} of {total} calls with another model than the bound one, most often {model}.",
+  "aiFigures.switchedBadge": "Model switched",
   "aiFigures.line.sort": "sort: {sort}",
   "aiFigures.line.week": "7 d: {figures}",
   "aiFigures.line.prefix": "7 d: {sentence}",

@@ -10116,6 +10116,7 @@ export const vi = {
   "aicalls.outcome.failed": "Không thành công",
   "aicalls.model.afterDecision": "Mô hình quyết định, rồi {tier}",
   "aicalls.filter.servedProvider": "Nhà cung cấp phục vụ",
+  "aicalls.filter.servedModel": "Mô hình trả lời",
   "aicalls.sentinel.provider_quota": "Hết hạn mức",
   "aicalls.sentinel.provider_throttled": "Bị giới hạn tốc độ",
   "aicalls.sentinel.provider_refused": "Nhà cung cấp từ chối",
@@ -13097,7 +13098,7 @@ export const vi = {
   "aiRates.refresh.keptCount_one": "Đã giữ {count} giá nhập thủ công",
   "aiRates.refresh.keptCount_other": "Đã giữ {count} giá nhập thủ công",
   "aiProviders.setByHand": "Nhập thủ công",
-  "aiRates.refresh.unlisted": "Không có trong danh sách của broker: {ids}",
+  "aiRates.refresh.unlisted": "Không có trong bảng giá: {ids}",
   "aiRates.refresh.updatedCount_one": "Đã ghi {count} giá",
   "aiRates.refresh.updatedCount_other": "Đã ghi {count} giá",
   "aiRates.refresh.unchangedCount_one": "{count} giá đã mới nhất",
@@ -13524,6 +13525,11 @@ export const vi = {
   "aiFigures.line.timeoutCount_one": "{count} lần hết thời gian",
   "aiFigures.line.timeoutCount_other": "{count} lần hết thời gian",
   "aiFigures.line.p50": "p50 {latency}",
+  "aiFigures.switched_one":
+    "Nhà cung cấp đã trả lời {count} trong {total} lượt gọi bằng mô hình khác với mô hình đã gán, thường nhất là {model}.",
+  "aiFigures.switched_other":
+    "Nhà cung cấp đã trả lời {count} trong {total} lượt gọi bằng mô hình khác với mô hình đã gán, thường nhất là {model}.",
+  "aiFigures.switchedBadge": "Đã đổi mô hình",
   "aiFigures.line.sort": "sắp xếp: {sort}",
   "aiFigures.line.week": "7 ngày: {figures}",
   "aiFigures.line.prefix": "7 ngày: {sentence}",
