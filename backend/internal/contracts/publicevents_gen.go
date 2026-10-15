@@ -912,13 +912,25 @@ func (e UserReactivatedStatus) Valid() bool {
 	}
 }
 
-// PublicEventActivityArchived Payload for activity.archived — an activity was archived. Carries no data.
-type PublicEventActivityArchived struct{}
+// PublicEventActivityArchived Payload for activity.archived: an activity was archived. Carries only the import mark, when an import's undo wrote the event.
+type PublicEventActivityArchived struct {
+	// ImportRunId The import run that wrote the event. Present when `imported` is true.
+	ImportRunId *openapi_types.UUID `json:"import_run_id,omitempty"`
+
+	// Imported True when a data import wrote the event. Absent otherwise.
+	Imported *bool `json:"imported,omitempty"`
+}
 
 // PublicEventActivityCaptured Payload for activity.captured — the first-class capture verb, emitted instead of (never alongside) a generic activity.created (events.md §1). Two emit sites: the direct-log path (activities/activity.go) that sets kind only, and the capture ingestion path (capture/sink.go) that also names its originating source system.
 type PublicEventActivityCaptured struct {
 	// ChannelProvider Which transport carried the message — present exactly when kind is `message`, absent otherwise. Without this field a consumer could no longer tell a Telegram message from any other, which the pre-ADR-0107 `kind` told them for free; the envelope is additionalProperties:false, so it has to be named here to be sayable at all.
 	ChannelProvider *string `json:"channel_provider,omitempty"`
+
+	// ImportRunId The import run that wrote the event. Present when `imported` is true.
+	ImportRunId *openapi_types.UUID `json:"import_run_id,omitempty"`
+
+	// Imported True when a data import wrote the event. Absent otherwise.
+	Imported *bool `json:"imported,omitempty"`
 
 	// Kind The activity kind (email | call | meeting | note | task | message). Decoded by automation/handlers_event.go's post_meeting_recap trigger — this field's JSON key is a binding contract, not just documentation. Since ADR-0107/A158 the kind no longer names a messaging transport: every channel message is `message`, and channel_provider says what carried it.
 	Kind string `json:"kind"`
@@ -1016,6 +1028,12 @@ type PublicEventActivityRelinkedRef struct {
 type PublicEventActivityUpdated struct {
 	// ChangedFields The bounded delta of activity.updated. Each field is carried only when this update touched it. The key set is fixed, so it is typed rather than an open map.
 	ChangedFields PublicEventActivityChangedFields `json:"changed_fields"`
+
+	// ImportRunId The import run that wrote the event. Present when `imported` is true.
+	ImportRunId *openapi_types.UUID `json:"import_run_id,omitempty"`
+
+	// Imported True when a data import wrote the event. Absent otherwise.
+	Imported *bool `json:"imported,omitempty"`
 }
 
 // PublicEventActor Who or what caused the event, as exposed publicly.
@@ -3349,11 +3367,11 @@ var PublicEventVersions = map[string]int{
 // PublicEventSamples maps every event type carrying a PublicEvent<Event>
 // schema to a sample of its data, built from the schema's properties.
 var PublicEventSamples = map[string]string{
-	"activity.archived":                         "{}",
-	"activity.captured":                         "{\"channel_provider\":\"Sample channel provider\",\"kind\":\"Sample kind\",\"source_system\":\"Sample source system\"}",
+	"activity.archived":                         "{\"import_run_id\":\"0190a7f2-0000-7000-8000-000000000010\",\"imported\":true}",
+	"activity.captured":                         "{\"channel_provider\":\"Sample channel provider\",\"import_run_id\":\"0190a7f2-0000-7000-8000-000000000010\",\"imported\":true,\"kind\":\"Sample kind\",\"source_system\":\"Sample source system\"}",
 	"activity.disposition_recorded":             "{\"activity_id\":\"0190a7f2-0000-7000-8000-000000000010\",\"disposition\":\"not_sales\"}",
 	"activity.marked_handled":                   "{\"activity_id\":\"0190a7f2-0000-7000-8000-000000000010\"}",
-	"activity.updated":                          "{\"changed_fields\":{\"assignee_id\":\"0190a7f2-0000-7000-8000-000000000010\",\"audience\":\"workspace\",\"body\":true,\"calendar_method\":\"PUBLISH\",\"direction\":\"outbound\",\"due_at\":\"2026-10-14T09:12:00Z\",\"is_done\":true,\"meeting_status\":\"booked\",\"occurred_at\":\"2026-10-14T09:12:00Z\",\"outbound_attested\":true,\"project_filing_undone\":true,\"relinked\":{\"entity_id\":\"0190a7f2-0000-7000-8000-000000000010\",\"entity_type\":\"Sample entity type\"},\"remind_at\":\"2026-10-14T09:12:00Z\",\"restored\":true,\"subject\":\"Sample subject\"}}",
+	"activity.updated":                          "{\"changed_fields\":{\"assignee_id\":\"0190a7f2-0000-7000-8000-000000000010\",\"audience\":\"workspace\",\"body\":true,\"calendar_method\":\"PUBLISH\",\"direction\":\"outbound\",\"due_at\":\"2026-10-14T09:12:00Z\",\"is_done\":true,\"meeting_status\":\"booked\",\"occurred_at\":\"2026-10-14T09:12:00Z\",\"outbound_attested\":true,\"project_filing_undone\":true,\"relinked\":{\"entity_id\":\"0190a7f2-0000-7000-8000-000000000010\",\"entity_type\":\"Sample entity type\"},\"remind_at\":\"2026-10-14T09:12:00Z\",\"restored\":true,\"subject\":\"Sample subject\"},\"import_run_id\":\"0190a7f2-0000-7000-8000-000000000010\",\"imported\":true}",
 	"approval.decided":                          "{\"decided_by\":\"0190a7f2-0000-7000-8000-000000000010\",\"decided_by_system\":true,\"diff_hash\":\"Sample diff hash\",\"edited\":true,\"edited_change\":{},\"kind\":\"Sample kind\",\"verdict\":\"approved\"}",
 	"approval.failure_acknowledged":             "{\"failed_at\":\"2026-10-14T09:12:00Z\",\"kind\":\"Sample kind\"}",
 	"approval.requested":                        "{\"expires_at\":\"2026-10-14T09:12:00Z\",\"kind\":\"Sample kind\",\"summary\":\"Sample summary\",\"target_entity_id\":\"0190a7f2-0000-7000-8000-000000000010\",\"target_entity_type\":\"Sample target entity type\"}",
