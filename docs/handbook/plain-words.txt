@@ -1257,7 +1257,6 @@ trail
 training
 transcript
 transfer
-transition
 translation
 trash
 trend
