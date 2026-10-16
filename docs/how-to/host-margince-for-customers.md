@@ -13,21 +13,21 @@ flowchart TB
         api["api<br/>HTTP, migrates at start"]
         worker["worker<br/>jobs, mail, AI tasks"]
         pg[("Postgres 16<br/>records, pgvector")]
-        redis[("Redis 7.2<br/>events, counters")]
+        redis[("Redis 7<br/>events, counters")]
         s3[("Object store<br/>S3 API, files")]
     end
     outside["Optional, outside: AI model endpoint, SMTP relay, mail providers"]
 
     users --> proxy
     proxy -- pages --> web
-    proxy -- "/v1, /mcp, /oauth" --> api
+    proxy -- "api paths" --> api
     api --> pg & redis & s3
     worker --> pg & redis & s3
     api -.-> outside
     worker -.-> outside
 ```
 
-The proxy sends `/v1`, `/mcp` and `/oauth` to the api, and the app pages to web. The api and worker
+The proxy sends the api paths to the api, and the app pages to web. The api and worker
 read and write all three data stores. They can also connect to the optional services outside.
 
 ## Choose a route
@@ -36,7 +36,7 @@ read and write all three data stores. They can also connect to the optional serv
 | --- | --- | --- | --- |
 | Suits | Proofs of concept and small pilots | Mid-sized production | Kubernetes, Nomad or a container runtime you already run |
 | Application | Docker Compose on one Ubuntu 24.04 VM, Caddy for HTTPS in front of nginx | Managed containers: api, worker, web | The three images, one namespace per customer |
-| Postgres and Redis | Containers on the VM, data on its own disk, daily snapshots | Managed Postgres 16, Redis 7.2 | Managed or self-run Postgres 16 with pgvector, and Redis 7.2 |
+| Postgres and Redis | Containers on the VM, data on its own disk, daily snapshots | Managed Postgres 16; Redis 7.2 (a container on Azure, ElastiCache Valkey 7.2 on AWS) | Managed or self-run Postgres 16 with pgvector, and Redis 7.2 |
 | Template | Terraform for Azure and AWS; on other clouds, the `host` adapter reuses the Compose setup | Terraform for Azure and AWS | None. Follow the steps on this page |
 
 The templates are in the [template repository](https://github.com/margince/template/tree/main/deploy/production).
@@ -55,15 +55,8 @@ They create the infrastructure. You still run Margince: upgrades, backups and mo
 | Optional: an SMTP relay | For invitations, password resets and privacy notices |
 | Optional: a model endpoint | For AI features: a cloud API key, or your own OpenAI-compatible endpoint (vLLM, Ollama or a gateway) |
 
-| Size, one node | vCPU | RAM | Disk |
-| --- | --- | --- | --- |
-| Small (10,000 contacts), AI search off | 2 | 4 GB | 20 GB |
-| Small, AI search on | 2 | 8 GB | 40 GB |
-| Mid-market (250,000 contacts), AI search off | 4 | 8 GB | 50 GB |
-| Mid-market, AI search on | 8 | 32 GB | 200 GB |
-
 The api, worker and web containers keep no state. All state is in Postgres, Redis and the object store.
-Sizes with separate nodes are in [system-requirements.md](../reference/system-requirements.md).
+Size each installation from [the single-node table](../reference/system-requirements.md#single-node).
 
 ## Install for a new customer
 
@@ -74,21 +67,20 @@ The full steps are in [deploy-margince.md](deploy-margince.md).
 2. **Create the database** with [`db-bootstrap.sql`](../../scripts/deploy/db-bootstrap.sql), as a
    Postgres superuser. It creates `margince_owner` for migrations and `margince_app` for the services.
    Neither role may be a superuser.
-3. **Set the environment** for the two database connections, Redis, the public URL, the admin
-   password and the license token. Start from [`.env.example`](../../.env.example).
+3. **Set the environment** for the two database connections, Redis, the public URL, the key vault
+   root key (`MARGINCE_KEYVAULT_ROOT_KEY`), the admin password and the license token. Start from [`.env.example`](../../.env.example).
 4. **Write `margince.yaml`** from [the example](../../config/margince.example.yaml). Give the customer's
-   company, the first admin and the country (`de` for Germany). Margince reads this file only on the
-   first start.
-5. **Route the customer's host name**: send `/v1`, `/healthz`, `/readyz`, `/metrics` and the OAuth and
-   MCP paths to the api, and all other paths to web.
-6. **Set health checks**: `/healthz` for liveness, `/readyz` for readiness and `/v1/status` for uptime
-   monitoring.
+   company, the first admin and the country (`de` for Germany). Margince reads this file at every start.
+   The `workspace`, `bootstrap_admin` and `seeds` blocks apply only on the first start.
+5. **Route the customer's host name** as
+   [Route one host to two services](deploy-margince.md#route-one-host-to-two-services) says.
+6. **Set health checks** as [Point the health checks](deploy-margince.md#point-the-health-checks) says.
 7. **Start the api first.** It applies the migrations. Then start the worker and web.
 8. **Set up outbound mail** with [set-up-outbound-mail.md](set-up-outbound-mail.md).
-9. **Hand over and clean up.** After the customer's admin signs in, remove the `bootstrap_admin` block
-   from `margince.yaml` and unset `MARGINCE_ADMIN_PASSWORD`.
+9. **Hand over and clean up** as [After the first boot](deploy-margince.md#after-the-first-boot) says.
 
-Never set `MARGINCE_ENV=dev` on a customer's installation. It changes which licenses Margince accepts.
+Never set `MARGINCE_ENV=dev` on a customer's installation. With it, Margince starts with no license,
+accepts test licenses, and accepts a public URL that is not https.
 
 ## License
 
@@ -96,7 +88,7 @@ Each production installation needs its own license token from Gradion. Without o
 refuse to start in production.
 
 - **Where it goes:** in a secret file named in `margince.yaml`
-  (`token: ${file:/run/secrets/margince-license}`), or in `MARGINCE_LICENSE`. Margince refuses a token
+  (`license.token: ${file:/run/secrets/margince-license}`), or in `MARGINCE_LICENSE`. Margince refuses a token
   written into the config file itself.
 - **How it is checked:** offline, in the running process. The installation does not contact Gradion,
   so the check works with no outbound network.
@@ -117,8 +109,8 @@ separate migration step.
    workers refuse to start on mixed releases.
 
 On one node, all services restart together, so an upgrade causes a short outage. Agree on a
-maintenance window with the customer. Settings the admin changes in the app stay; Margince does not read
-`margince.yaml` again.
+maintenance window with the customer. Settings the admin changes in the app stay. Margince does not apply the
+`workspace`, `bootstrap_admin` or `seeds` blocks again.
 
 ## Back up
 
