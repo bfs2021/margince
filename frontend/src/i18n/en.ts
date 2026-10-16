@@ -2438,6 +2438,8 @@ export const en = {
   "approval.kind.archive_record": "Archive record",
   "approval.kind.merge_records": "Merge records",
   "approval.kind.merge_tags": "Merge tags",
+  "approval.kind.archive_tag": "Retire a tag",
+  "approval.kind.change_record_parts": "Change a record’s parts",
   "approval.kind.update_record": "Update record",
   "approval.kind.create_record": "Create record",
   "approval.kind.send_email": "Send email",

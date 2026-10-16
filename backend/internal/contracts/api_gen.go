@@ -11956,6 +11956,33 @@ func (e ListDependencyRole) Valid() bool {
 	}
 }
 
+// Defines values for ListFilterOperand.
+const (
+	ListFilterOperandArray   ListFilterOperand = "array"
+	ListFilterOperandBoolean ListFilterOperand = "boolean"
+	ListFilterOperandInteger ListFilterOperand = "integer"
+	ListFilterOperandNumber  ListFilterOperand = "number"
+	ListFilterOperandString  ListFilterOperand = "string"
+)
+
+// Valid indicates whether the value is a known member of the ListFilterOperand enum.
+func (e ListFilterOperand) Valid() bool {
+	switch e {
+	case ListFilterOperandArray:
+		return true
+	case ListFilterOperandBoolean:
+		return true
+	case ListFilterOperandInteger:
+		return true
+	case ListFilterOperandNumber:
+		return true
+	case ListFilterOperandString:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ListHistoryEntryKind.
 const (
 	ListHistoryEntryKindMemberAdded   ListHistoryEntryKind = "member_added"
@@ -23566,6 +23593,9 @@ type AgentRecordRef struct {
 
 // AgentTool defines model for AgentTool.
 type AgentTool struct {
+	// Actions A router's choices. Each runs one verb and is admitted at that verb's tier, so a router whose actions differ lists its own tier as dynamic. Absent on a tool that is not a router.
+	Actions *[]AgentToolAction `json:"actions,omitempty"`
+
 	// Description What the tool is for, as an MCP client is told it: the outcome it produces, its limits, when a neighbouring tool is the better call, and what to keep from its result — followed by this server's own governance clause, which is absent for a tool that runs immediately and needs only the read scope.
 	Description string `json:"description"`
 
@@ -23576,20 +23606,34 @@ type AgentTool struct {
 	Name string `json:"name"`
 
 	// RequiredScope Passport scope required to call it.
-	RequiredScope *string       `json:"required_scope,omitempty"`
-	Tier          AgentToolTier `json:"tier"`
+	RequiredScope *string `json:"required_scope,omitempty"`
+
+	// Tier Runs at once, waits for a human, or decides per call from its arguments.
+	Tier AgentToolTier `json:"tier"`
 
 	// Title The written display name a client shows in place of the name.
 	Title string `json:"title"`
 }
 
-// AgentToolTier defines model for AgentTool.Tier.
-type AgentToolTier string
+// AgentToolAction defines model for AgentToolAction.
+type AgentToolAction struct {
+	// Action The value the router's action argument takes.
+	Action string `json:"action"`
+
+	// Tier Runs at once, waits for a human, or decides per call from its arguments.
+	Tier AgentToolTier `json:"tier"`
+
+	// Verb The tool the action runs as; approvals and tasks name it.
+	Verb string `json:"verb"`
+}
 
 // AgentToolListResponse defines model for AgentToolListResponse.
 type AgentToolListResponse struct {
 	Data []AgentTool `json:"data"`
 }
+
+// AgentToolTier Runs at once, waits for a human, or decides per call from its arguments.
+type AgentToolTier string
 
 // AgentUsage One window's use of the three agent allowances, and when they reset.
 type AgentUsage struct {
@@ -25273,9 +25317,6 @@ type ApplyTagRequestEntityType string
 
 // Approval A staged 🟡 confirm-first action awaiting human decision.
 type Approval struct {
-	// ApprovalToken Signed single-use token minted on approve (schema ApprovalToken, serialized as compact JWS); authorizes exactly the downstream 🟡 operation it is bound to.
-	ApprovalToken *string `json:"approval_token,omitempty"`
-
 	// BundleId The act that staged this proposal together with its siblings: today, a website read's company facts and the leads it published. Null for a proposal staged on its own. It is a grouping id, not a foreign key: there is no
 	// bundle entity, and every member keeps its own diff hash, version pin, expiry and
 	// verdict (ADR-0036 — the staged row IS the authority object). Decide the whole set with
@@ -25290,7 +25331,7 @@ type Approval struct {
 	DecidedAt  *time.Time          `json:"decided_at,omitempty"`
 	DecidedBy  *openapi_types.UUID `json:"decided_by,omitempty"`
 
-	// DiffHash Hash of the staged proposed_change; the minted approval_token is bound to this hash so a token cannot authorize a different effect.
+	// DiffHash Hash of the staged proposed_change. A redemption whose call hashes differently is refused, so an approval cannot authorize a different effect.
 	DiffHash *string `json:"diff_hash,omitempty"`
 
 	// EffectFailedAt When the work an APPROVED decision released failed to run. Absent on every
@@ -39910,6 +39951,27 @@ type ListFieldValue struct {
 	Value *string `json:"value,omitempty"`
 }
 
+// ListFilter One filter a record list may be narrowed by.
+type ListFilter struct {
+	// Name The filter's key in list_records' filters object, and the list route's query parameter.
+	Name string `json:"name"`
+
+	// Operand What the string operand spells: a boolean is "true" or "false", an array is comma-separated.
+	Operand ListFilterOperand `json:"operand"`
+
+	// Values The closed vocabulary the filter takes, when it has one.
+	Values *[]string `json:"values,omitempty"`
+}
+
+// ListFilterOperand What the string operand spells: a boolean is "true" or "false", an array is comma-separated.
+type ListFilterOperand string
+
+// ListFiltersVocabulary What `describe_list_filters` answers.
+type ListFiltersVocabulary struct {
+	// RecordTypes For each record type list_records takes, the filters it may be narrowed by.
+	RecordTypes map[string][]ListFilter `json:"record_types"`
+}
+
 // ListHistoryEntry defines model for ListHistoryEntry.
 type ListHistoryEntry struct {
 	Actor      string                  `json:"actor"`
@@ -52362,13 +52424,12 @@ type SendEmailParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
@@ -52390,13 +52451,12 @@ type SendMessageParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
@@ -52970,13 +53030,12 @@ type BookMeetingParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
@@ -53551,13 +53610,12 @@ type CreateCompanyFactParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
@@ -53579,13 +53637,12 @@ type DeleteCompanyFactParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 
 	// IfMatch Optional optimistic-concurrency precondition for a mutating request (PATCH/advance/merge):
@@ -53614,13 +53671,12 @@ type UpdateCompanyFactParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 
 	// IfMatch Optional optimistic-concurrency precondition for a mutating request (PATCH/advance/merge):
@@ -53649,13 +53705,12 @@ type ConfirmCompanyFactParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 
 	// IfMatch Optional optimistic-concurrency precondition for a mutating request (PATCH/advance/merge):
@@ -53711,13 +53766,12 @@ type MergeCompanyParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 
 	// IfMatch Optional optimistic-concurrency precondition for a mutating request (PATCH/advance/merge):
@@ -53756,13 +53810,12 @@ type UpdateCompanyProfileFieldParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 
 	// IfMatch Optional optimistic-concurrency precondition for a mutating request (PATCH/advance/merge):
@@ -53791,13 +53844,12 @@ type ConfirmCompanyProfileFieldParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 
 	// IfMatch Optional optimistic-concurrency precondition for a mutating request (PATCH/advance/merge):
@@ -54941,13 +54993,12 @@ type DraftDealFollowUpsParams struct {
 	// tool answers `409 conflict`, and a key spent on the tool over MCP replays that answer here.
 	IdempotencyKey *ToolIdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
@@ -55014,13 +55065,12 @@ type AdvanceDealParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 
 	// IfMatch Optional optimistic-concurrency precondition for a mutating request (PATCH/advance/merge):
@@ -55109,13 +55159,12 @@ type ProgressDealParams struct {
 	// tool answers `409 conflict`, and a key spent on the tool over MCP replays that answer here.
 	IdempotencyKey *ToolIdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
@@ -55187,13 +55236,12 @@ type SendCompanyEmailParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
@@ -55719,13 +55767,12 @@ type PromoteLeadParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
@@ -55736,13 +55783,12 @@ type QualifyLeadParams struct {
 	// tool answers `409 conflict`, and a key spent on the tool over MCP replays that answer here.
 	IdempotencyKey *ToolIdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
@@ -56486,13 +56532,12 @@ type CreateProjectParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
@@ -56524,13 +56569,12 @@ type ArchiveProjectParams struct {
 	// Accepted on every native (SoR-mode) mutating endpoint that returns a versioned entity.
 	IfMatch *IfMatch `json:"If-Match,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
@@ -56559,13 +56603,12 @@ type UpdateProjectParams struct {
 	// Accepted on every native (SoR-mode) mutating endpoint that returns a versioned entity.
 	IfMatch *IfMatch `json:"If-Match,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
@@ -56587,13 +56630,12 @@ type AdvanceProjectPhaseParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 
 	// IfMatch Optional optimistic-concurrency precondition for a mutating request (PATCH/advance/merge):
@@ -56606,25 +56648,23 @@ type AdvanceProjectPhaseParams struct {
 
 // SetProjectCompanyParams defines parameters for SetProjectCompany.
 type SetProjectCompanyParams struct {
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
 // RemoveProjectCompanyParams defines parameters for RemoveProjectCompany.
 type RemoveProjectCompanyParams struct {
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
@@ -56684,25 +56724,23 @@ type CorrectProjectHealthAssessmentParams struct {
 
 // SetProjectStakeholderParams defines parameters for SetProjectStakeholder.
 type SetProjectStakeholderParams struct {
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
 // RemoveProjectStakeholderParams defines parameters for RemoveProjectStakeholder.
 type RemoveProjectStakeholderParams struct {
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
@@ -57310,13 +57348,12 @@ type CreateMeetingInvitationParams struct {
 	// to retry blind.
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 
-	// XApprovalToken A signed, single-use approval token (see schema `ApprovalToken`) minted by
-	// POST /approvals/{id}/approve, authorizing exactly one 🟡 confirm-first operation. It is a
-	// compact JWS whose claims **bind** the token to a specific approval, effect, tenant and
-	// principal — it is NOT a bare opaque string (ADR-0036). The server rejects a token that is
-	// expired, already consumed, or whose `diff_hash`/`workspace_id`/`passport_id`/`tool` does not
-	// match the operation being executed (`403 code: approval_token_invalid`). Required when an
-	// AGENT principal invokes a 🟡 operation; a human's direct call is itself the approval.
+	// XApprovalToken The id of the approval that authorizes this one 🟡 call — the id the `403 approval_required`
+	// answer named. MCP takes the same id as `approval_id`. The server checks it against the
+	// stored approval: same tool, same diff hash, same staging passport, decided as approved,
+	// not yet used, and within 15 minutes of the decision. Anything else is refused with
+	// `403 code: approval_token_invalid`. Required when an AGENT principal repeats a 🟡 call; a
+	// human's direct call is itself the approval.
 	XApprovalToken *ApprovalToken `json:"X-Approval-Token,omitempty"`
 }
 
@@ -70180,7 +70217,7 @@ type ServerInterface interface {
 	// Get a single approval item (full proposed diff + evidence).
 	// (GET /approvals/{id})
 	GetApproval(w http.ResponseWriter, r *http.Request, id Id)
-	// Approve a staged action (commits it; mints the approval token).
+	// Approve a staged action (commits it).
 	// (POST /approvals/{id}/approve)
 	ApproveApproval(w http.ResponseWriter, r *http.Request, id Id, params ApproveApprovalParams)
 	// Say you have seen that an approved change did not run, so it leaves your Worklist.
@@ -71428,6 +71465,9 @@ type ServerInterface interface {
 	// Take back an open request.
 	// (POST /legal-reviews/{id}/withdraw)
 	WithdrawLegalReview(w http.ResponseWriter, r *http.Request, id Id)
+	// The filters a record list may be narrowed by, for each record type.
+	// (GET /list-filters)
+	DescribeListFilters(w http.ResponseWriter, r *http.Request)
 	// Find the lists this caller may see, by name.
 	// (GET /lists)
 	ListLists(w http.ResponseWriter, r *http.Request, params ListListsParams)
@@ -73075,7 +73115,7 @@ func (_ Unimplemented) GetApproval(w http.ResponseWriter, r *http.Request, id Id
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Approve a staged action (commits it; mints the approval token).
+// Approve a staged action (commits it).
 // (POST /approvals/{id}/approve)
 func (_ Unimplemented) ApproveApproval(w http.ResponseWriter, r *http.Request, id Id, params ApproveApprovalParams) {
 	w.WriteHeader(http.StatusNotImplemented)
@@ -75568,6 +75608,12 @@ func (_ Unimplemented) DecideLegalReview(w http.ResponseWriter, r *http.Request,
 // Take back an open request.
 // (POST /legal-reviews/{id}/withdraw)
 func (_ Unimplemented) WithdrawLegalReview(w http.ResponseWriter, r *http.Request, id Id) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// The filters a record list may be narrowed by, for each record type.
+// (GET /list-filters)
+func (_ Unimplemented) DescribeListFilters(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -86756,8 +86802,6 @@ func (siw *ServerInterfaceWrapper) GetCompanyAccess(w http.ResponseWriter, r *ht
 
 	ctx := r.Context()
 
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
-
 	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
 
 	r = r.WithContext(ctx)
@@ -90678,8 +90722,6 @@ func (siw *ServerInterfaceWrapper) GetContactAccess(w http.ResponseWriter, r *ht
 
 	ctx := r.Context()
 
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
-
 	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
 
 	r = r.WithContext(ctx)
@@ -90836,8 +90878,6 @@ func (siw *ServerInterfaceWrapper) GetContactConsent(w http.ResponseWriter, r *h
 	}
 
 	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
 
 	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
 
@@ -91065,8 +91105,6 @@ func (siw *ServerInterfaceWrapper) GetContactConsentGuard(w http.ResponseWriter,
 	ctx := r.Context()
 
 	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
-
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -96088,6 +96126,8 @@ func (siw *ServerInterfaceWrapper) ListDedupeCandidates(w http.ResponseWriter, r
 
 	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
 
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
 	r = r.WithContext(ctx)
 
 	// Parameter object where we will unmarshal all parameters from the context
@@ -96174,6 +96214,8 @@ func (siw *ServerInterfaceWrapper) GetDedupeCandidate(w http.ResponseWriter, r *
 	ctx := r.Context()
 
 	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
 
 	r = r.WithContext(ctx)
 
@@ -98028,8 +98070,6 @@ func (siw *ServerInterfaceWrapper) GetSeatUsage(w http.ResponseWriter, r *http.R
 func (siw *ServerInterfaceWrapper) GetInstallationSettings(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
 
 	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
 
@@ -100053,6 +100093,28 @@ func (siw *ServerInterfaceWrapper) WithdrawLegalReview(w http.ResponseWriter, r 
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.WithdrawLegalReview(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DescribeListFilters operation middleware
+func (siw *ServerInterfaceWrapper) DescribeListFilters(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DescribeListFilters(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -114880,6 +114942,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/legal-reviews/{id}/withdraw", wrapper.WithdrawLegalReview)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/list-filters", wrapper.DescribeListFilters)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/lists", wrapper.ListLists)

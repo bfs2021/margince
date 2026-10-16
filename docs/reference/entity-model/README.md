@@ -28,8 +28,8 @@ module to put a change in, read [modules.md](../modules.md).
 
 | | |
 |---|--:|
-| Tables | 312 |
-| Columns | 3686 |
+| Tables | 311 |
+| Columns | 3681 |
 | Foreign keys | 515 |
 | Owning areas | 36 |
 
@@ -92,7 +92,7 @@ erDiagram
 | [agents](agents.md) | 3 |
 | [ai](ai.md) | 12 |
 | [aiactivity](aiactivity.md) | 1 |
-| [approvals](approvals.md) | 3 |
+| [approvals](approvals.md) | 2 |
 | [assignments](assignments.md) | 2 |
 | [assurance](assurance.md) | 7 |
 | [automation](automation.md) | 3 |
@@ -388,7 +388,6 @@ erDiagram
 | [`signal`](signals.md#signal) | signals | 24 | 3 |
 | [`signal_resolution`](signals.md#signal_resolution) | signals | 12 | 0 |
 | [`signal_thread_scan`](compose.md#signal_thread_scan) | compose | 10 | 0 |
-| [`signing_key`](approvals.md#signing_key) | approvals | 5 | 0 |
 | [`site_read`](contacts.md#site_read) | contacts | 36 | 3 |
 | [`stage`](deals.md#stage) | deals | 10 | 10 |
 | [`stage_exit_criterion`](deals.md#stage_exit_criterion) | deals | 12 | 1 |
