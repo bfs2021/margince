@@ -9165,7 +9165,7 @@ export interface paths {
         };
         /**
          * Cross-object search (contacts, companies, deals, activities, leads).
-         * @description Hybrid full-text search. Results are scoped by RBAC; leads are a distinct result type.
+         * @description Lexical full-text search, ranked by relevance: the query's words and prefixes matched against each record's own text, with no meaning match. Results are scoped by RBAC; leads are a distinct result type.
          */
         get: operations["search"];
         put?: never;
@@ -46762,7 +46762,7 @@ export interface components {
         AnchorRecordType: "contact" | "company" | "deal" | "lead" | "project" | "activity";
         /** @description The record to build around. Give this or `record_name`, not both. */
         AnchorRecordId: string;
-        /** @description The record named in words, found as `search_records` finds it. A name matching more than one record is refused with the candidate ids rather than guessed at. */
+        /** @description The record named in words, found the way `search_records` finds the same words. A name matching more than one record is refused with the candidate ids rather than guessed at. */
         AnchorRecordName: string;
         /** @description Cap the items in each section. */
         AnchorMaxItems: number;
@@ -62275,7 +62275,7 @@ export interface operations {
                 record_type: components["parameters"]["AnchorRecordType"];
                 /** @description The record to build around. Give this or `record_name`, not both. */
                 record_id?: components["parameters"]["AnchorRecordId"];
-                /** @description The record named in words, found as `search_records` finds it. A name matching more than one record is refused with the candidate ids rather than guessed at. */
+                /** @description The record named in words, found the way `search_records` finds the same words. A name matching more than one record is refused with the candidate ids rather than guessed at. */
                 record_name?: components["parameters"]["AnchorRecordName"];
                 /** @description Cap the items in each section. */
                 max_items?: components["parameters"]["AnchorMaxItems"];
@@ -62310,7 +62310,7 @@ export interface operations {
                 record_type: components["parameters"]["AnchorRecordType"];
                 /** @description The record to build around. Give this or `record_name`, not both. */
                 record_id?: components["parameters"]["AnchorRecordId"];
-                /** @description The record named in words, found as `search_records` finds it. A name matching more than one record is refused with the candidate ids rather than guessed at. */
+                /** @description The record named in words, found the way `search_records` finds the same words. A name matching more than one record is refused with the candidate ids rather than guessed at. */
                 record_name?: components["parameters"]["AnchorRecordName"];
                 /** @description Cap the items in each section. */
                 max_items?: components["parameters"]["AnchorMaxItems"];

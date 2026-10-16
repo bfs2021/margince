@@ -5620,7 +5620,7 @@ paths:
       tags: [Search]
       operationId: search
       summary: Cross-object search (contacts, companies, deals, activities, leads).
-      description: Hybrid full-text search. Results are scoped by RBAC; leads are a distinct result type.
+      description: 'Lexical full-text search, ranked by relevance: the query''s words and prefixes matched against each record''s own text, with no meaning match. Results are scoped by RBAC; leads are a distinct result type.'
       parameters:
         - name: q
           in: query
@@ -7866,7 +7866,7 @@ components:
       in: query
       schema: {type: string}
       description: >-
-        The record named in words, found as `search_records` finds it. A name matching more than one record is refused with the candidate ids rather than guessed at.
+        The record named in words, found the way `search_records` finds the same words. A name matching more than one record is refused with the candidate ids rather than guessed at.
     AnchorMaxItems:
       name: max_items
       in: query
