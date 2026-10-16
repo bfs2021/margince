@@ -31,7 +31,7 @@
 1072 frontend/src/screens/analytics.test.tsx
 1030 frontend/src/screens/company-context.tsx
 1264 frontend/src/screens/offers.tsx
-1504 frontend/src/screens/onboarding-conversation/confirm-card.tsx
+1488 frontend/src/screens/onboarding-conversation/confirm-card.tsx
 1725 frontend/src/screens/onboarding-facts.test.tsx
 1902 frontend/src/features/contacts/contactpage.stories.tsx
 1122 frontend/src/screens/analytics.tsx
