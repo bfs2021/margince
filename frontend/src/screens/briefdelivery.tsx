@@ -1,15 +1,16 @@
 // What the product may send this reader about their day and their week.
 //
-// The brief and the weekly are on their screen either way; these rows are about
-// the NUDGE toward them, which is the one part a contact is entitled to switch
-// off. So they sit under the account's own settings beside the display
-// language, not under anything an admin configures for the team.
+// The brief and the weekly show on Home either way. These rows switch off only
+// the email that points to them, so they sit with the reader's own notifications.
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useId } from "react";
 import { api } from "../api/client";
 import type { components } from "../api/schema";
+import { Panel } from "../design-system/panel";
+import { PanelNotices } from "../design-system/panelnotices";
 import { Select } from "../design-system/select";
-import { SettingRow } from "../design-system/settingrow";
+import { SettingList, SettingRow } from "../design-system/settingrow";
 import { useT } from "../i18n";
 import { unwrap } from "../lib/problem";
 
@@ -19,8 +20,17 @@ type BriefDelivery = components["schemas"]["BriefDelivery"];
 const CHOICES = ["email", "none"] as const;
 type Choice = (typeof CHOICES)[number];
 
+export function BriefDeliveryPanel() {
+  const t = useT();
+  return (
+    <Panel title={t("delivery.panelTitle")}>
+      <BriefDeliveryRows />
+    </Panel>
+  );
+}
+
 /**
- * The delivery settings, as rows in the account panel.
+ * The delivery settings, as rows in the summaries panel.
  *
  * A member who has never chosen sees the dropdown on its DEFAULT rather than on
  * a blank: the server distinguishes "never chose" from "chose none", and the
@@ -28,9 +38,10 @@ type Choice = (typeof CHOICES)[number];
  * whatever the installation does. Sending is that default, so the control shows
  * it — and touching the control is what turns a default into a decision.
  */
-export function BriefDeliveryRows() {
+function BriefDeliveryRows() {
   const t = useT();
   const queryClient = useQueryClient();
+  const refusalId = useId();
   const settings = useQuery({
     queryKey: ["me", "brief-delivery"],
     queryFn: async () => {
@@ -53,6 +64,8 @@ export function BriefDeliveryRows() {
   });
 
   const chosen = (value: Choice | undefined): Choice => value ?? "email";
+  const describedBy = (own: string | undefined) =>
+    [own, save.isError && refusalId].filter(Boolean).join(" ") || undefined;
   const options = CHOICES.map((choice) => ({
     value: choice,
     label: t(choice === "email" ? "delivery.byEmail" : "delivery.none"),
@@ -60,45 +73,60 @@ export function BriefDeliveryRows() {
 
   return (
     <>
-      <SettingRow
-        label={t("delivery.morningLabel")}
-        description={t("delivery.morningHelp")}
-        testId="delivery-morning"
-        control={(control) => (
-          <Select
-            {...control}
-            className="settingrow-measure"
-            value={chosen(settings.data?.morning_brief_delivery)}
-            onChange={(next) => {
-              // Narrowed through the same list the options are built from, so
-              // nothing is acted on that the control was never offering.
-              const picked = CHOICES.find((option) => option === next);
-              if (picked) {
-                save.mutate({ morning_brief_delivery: picked });
+      <SettingList bleed="settings">
+        <SettingRow
+          label={t("delivery.morningLabel")}
+          description={t("delivery.morningHelp")}
+          testId="delivery-morning"
+          control={(control) => (
+            <Select
+              {...control}
+              aria-describedby={describedBy(control["aria-describedby"])}
+              className="settingrow-measure"
+              value={chosen(settings.data?.morning_brief_delivery)}
+              onChange={(next) => {
+                // Narrowed through the same list the options are built from, so
+                // nothing is acted on that the control was never offering.
+                const picked = CHOICES.find((option) => option === next);
+                if (picked) {
+                  save.mutate({ morning_brief_delivery: picked });
+                }
+              }}
+              options={options}
+            />
+          )}
+        />
+        <SettingRow
+          label={t("delivery.weeklyLabel")}
+          description={t("delivery.weeklyHelp")}
+          testId="delivery-weekly"
+          control={(control) => (
+            <Select
+              {...control}
+              aria-describedby={describedBy(control["aria-describedby"])}
+              className="settingrow-measure"
+              value={chosen(settings.data?.weekly_delivery)}
+              onChange={(next) => {
+                const picked = CHOICES.find((option) => option === next);
+                if (picked) {
+                  save.mutate({ weekly_delivery: picked });
+                }
+              }}
+              options={options}
+            />
+          )}
+        />
+      </SettingList>
+      <PanelNotices
+        refused={
+          save.isError
+            ? {
+                title: t("settings.saveFailed"),
+                error: save.error,
+                id: refusalId,
               }
-            }}
-            options={options}
-          />
-        )}
-      />
-      <SettingRow
-        label={t("delivery.weeklyLabel")}
-        description={t("delivery.weeklyHelp")}
-        testId="delivery-weekly"
-        control={(control) => (
-          <Select
-            {...control}
-            className="settingrow-measure"
-            value={chosen(settings.data?.weekly_delivery)}
-            onChange={(next) => {
-              const picked = CHOICES.find((option) => option === next);
-              if (picked) {
-                save.mutate({ weekly_delivery: picked });
-              }
-            }}
-            options={options}
-          />
-        )}
+            : undefined
+        }
       />
     </>
   );

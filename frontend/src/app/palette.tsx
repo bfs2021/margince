@@ -12,12 +12,13 @@ import { liveDialogs, useDialogFocus } from "../design-system/dialogfocus";
 import { usePresence } from "../design-system/presence";
 import { useLocale, useT } from "../i18n";
 import { useHoldsAdminRole } from "../lib/capability";
+import { isImeCommit } from "../lib/imecommit";
 import { navigate, type Route } from "../lib/router";
 import { openAsk } from "../lib/urlstate";
 import { SCHEDULED_SCREEN } from "../screens/scheduledsends";
-import type { SettingsPageId } from "../screens/settingscatalog";
 import { useVisibleSettingsPages } from "../screens/settingsnav";
 import { settingsHref } from "../screens/settingsrouting";
+import { settingsPageAliases } from "../screens/settingssearch";
 import {
   CUSTOM_SCREEN,
   customPaletteScreens,
@@ -58,48 +59,24 @@ export type Command = {
   route?: Route;
 };
 
-// The words a settings entry answers to beyond its own label. A reader types the
-// THING they are looking for — "webhook", "products", "password" — and almost
-// never the name of the page it was filed under, which is a shelving decision
-// they were not present for.
-//
-// Three of these carry words the product no longer prints anywhere: three
-// screens of their own collapsed into the data-model page and the automations
-// editor into the AI page, and somebody who learned "custom fields" or
-// "automations" must not be told the product no longer has one.
-const SETTINGS_ALIASES: Readonly<
-  Partial<Record<SettingsPageId, readonly string[]>>
-> = {
-  account: ["password", "profile", "language", "theme"],
-  voice: ["tone", "writing style"],
-  agents: ["passport", "api key", "token"],
-  connections: ["oauth", "mailbox", "calendar"],
-  "capture-activity": ["capture log", "trace"],
-  company: ["general", "currency", "workspace", "fx"],
-  authentication: ["sign-in", "sso", "oauth app", "login"],
-  members: ["users", "contacts", "roster", "invite"],
-  teams: ["team"],
-  seats: ["license", "billing", "plan", "subscription"],
-  pipelines: ["stages", "deal stages"],
-  leads: ["lead sources", "disqualify"],
-  fields: ["custom-fields", "data model", "schema"],
-  tags: ["labels", "vocabulary"],
-  products: ["price list", "rate card", "offer-templates"],
-  capture: ["email capture", "inbox"],
-  integrations: ["webhook", "api"],
-  knowledge: ["handbook", "corpus", "documents"],
-  import: ["csv", "upload", "migration"],
-  models: ["routing", "providers", "keys", "embeddings"],
-  automations: ["rules", "triggers"],
-  usage: ["spend", "cost", "budget", "tokens"],
-  "model-calls": ["logs", "trace", "calls"],
-  privacy: ["gdpr", "consent", "retention", "erasure"],
-  jurisdiction: ["country", "law", "legal"],
-  audit: ["trail", "log", "history"],
-  "system-health": ["jobs", "health", "reindex", "maintenance"],
-  extensions: ["units", "plugins"],
-  reset: ["danger", "wipe", "delete everything"],
-};
+/** The commands whose label, subtitle or one keyword holds the whole query. */
+export function matchingCommands(
+  commands: readonly Command[],
+  query: string,
+): readonly Command[] {
+  const needle = query.trim().toLowerCase();
+  if (!needle) {
+    return commands;
+  }
+  return commands.filter(
+    (command) =>
+      command.label.toLowerCase().includes(needle) ||
+      (command.subtitle ?? "").toLowerCase().includes(needle) ||
+      (command.keywords ?? []).some((word) =>
+        word.toLowerCase().includes(needle),
+      ),
+  );
+}
 
 export function useBuiltinCommands(): Command[] {
   const t = useT();
@@ -164,7 +141,7 @@ export function useBuiltinCommands(): Command[] {
       label: t(`settings.tab.${page.id}`),
       keywords: [
         page.id,
-        ...(SETTINGS_ALIASES[page.id] ?? []),
+        ...settingsPageAliases(page.id, { holdsAdminRole: isAdmin }),
         ...(page.id === "company" && isAdmin
           ? [t("settings.companyRefresh")]
           : []),
@@ -250,20 +227,10 @@ export function CommandPalette({
     }
   }, [open]);
 
-  const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    if (!needle) {
-      return commands;
-    }
-    return commands.filter(
-      (command) =>
-        command.label.toLowerCase().includes(needle) ||
-        (command.subtitle ?? "").toLowerCase().includes(needle) ||
-        (command.keywords ?? []).some((word) =>
-          word.toLowerCase().includes(needle),
-        ),
-    );
-  }, [commands, query]);
+  const filtered = useMemo(
+    () => matchingCommands(commands, query),
+    [commands, query],
+  );
 
   // RS-1: live record hits from /search, plus a "see all" row that lands
   // on the full results screen. Row order: builtin matches, then see-all,
@@ -364,7 +331,11 @@ export function CommandPalette({
               } else if (event.key === "ArrowUp") {
                 event.preventDefault();
                 setPicked(clamp(selected - 1));
-              } else if (event.key === "Enter" && rows[selected]) {
+              } else if (
+                event.key === "Enter" &&
+                !isImeCommit(event) &&
+                rows[selected]
+              ) {
                 run(rows[selected]);
               }
             }}

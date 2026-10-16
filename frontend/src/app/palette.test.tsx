@@ -199,6 +199,19 @@ describe("CommandPalette (AC-shell-3/4/5/6)", () => {
     expect(window.location.hash).toBe("#/deals");
   });
 
+  it("runs nothing on an input method's Enter", async () => {
+    window.location.hash = "#/home";
+    const onClose = vi.fn();
+    render(<CommandPalette open onClose={onClose} commands={commands} />);
+    const input = screen.getByRole("searchbox");
+    await userEvent.type(input, "deals");
+
+    fireEvent.keyDown(input, { key: "Enter", keyCode: 229 });
+
+    expect(window.location.hash).toBe("#/home");
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it("closes on a selection that lands on the address it is already at", async () => {
     window.location.hash = "#/deals";
     const onClose = vi.fn();

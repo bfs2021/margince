@@ -1,21 +1,27 @@
 // SPDX-License-Identifier: BUSL-1.1
 // SPDX-FileCopyrightText: 2026 Gradion
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Lock } from "lucide-react";
 import type { MouseEvent } from "react";
-import { Badge, EmptyState } from "../design-system/atoms";
-import { Heading } from "../design-system/heading";
+import { EmptyState } from "../design-system/atoms";
 import { Panel, PanelBody } from "../design-system/panel";
+import { QueryGate } from "../design-system/querystates";
 import { RoleBadge } from "../design-system/rbac";
+import { useTooltip } from "../design-system/tooltip";
 import { useT } from "../i18n";
 import { navigate } from "../lib/router";
 import { useMe } from "../lib/session";
-import type {
-  SettingsGroupId,
-  SettingsPage,
-  SettingsReach,
+import { usePhoneViewport } from "../lib/viewport";
+import {
+  groupHeadingKey,
+  readsOnly,
+  SETTINGS_GROUPS,
+  SETTINGS_PAGES,
+  type SettingsGroupId,
+  type SettingsPage,
+  type SettingsReach,
 } from "./settingscatalog";
-import { SETTINGS_GROUPS } from "./settingscatalog";
+import { PAGE_ICONS } from "./settingsnavicons";
 import { settingsHref } from "./settingsrouting";
 import { SettingsSearchBox } from "./settingssearchbox";
 
@@ -105,163 +111,145 @@ function routeHashOf(): string {
 }
 
 /**
- * The settings landing page.
+ * The settings landing page: every page this reader may open, by topic, then
+ * who they are here.
  *
- * Four questions, in the order a reader asks them: what is mine, what can I
- * change, what can I only look at, and who am I here. The middle two are the
- * `settingsReach` partition — the same one the sidebar is built from — so a page
- * cannot be in the rail and missing here, or listed here as manageable while its
- * every control is disabled.
- *
- * The "look up" panel is load-bearing rather than a courtesy. The rail carries
- * only pages a reader can act on, so this is where a page they may read and not
- * change goes on living: without it, dropping a page from the rail would read as
- * taking it away.
+ * Built from the `settingsReach` partition the rail reads. A page the reader may
+ * only consult is not in the rail, so this is where it stays reachable, marked
+ * read-only.
  */
 export function SettingsHome({ reach }: Readonly<{ reach: SettingsReach }>) {
   const t = useT();
   const me = useMe();
-  const personal = reach.acts.filter((page) => page.group === "me");
-  const manageable = groupsOf(reach.acts.filter((page) => page.group !== "me"));
-  const consultable = groupsOf(reach.looksUp);
+  const phone = usePhoneViewport();
+  const openable = [...reach.acts, ...reach.looksUp];
 
   return (
     <div className="settings-stack arrive-stack">
-      {/* At every viewport, not only where the rail is. The rail owns the
-          desktop search box and the rail is gone at phone width, so this is the
-          one a reader on a phone reaches. */}
-      <SettingsSearchBox pages={[...reach.acts, ...reach.looksUp]} />
+      {/* The rail holds this box above phone width; below it this page is the
+          directory, so the box comes here. */}
+      {phone && <SettingsSearchBox pages={openable} />}
 
-      <Panel title={t("settings.home.yours")}>
-        <PanelBody>
-          <PageRows pages={personal} />
-        </PanelBody>
-      </Panel>
-
-      {manageable.length > 0 && (
-        <Panel title={t("settings.home.manage")}>
+      {groupsOf(openable).map(({ group, items }) => (
+        <Panel key={group} title={t(groupHeadingKey(group))}>
           <PanelBody>
-            {manageable.map(({ group, items }) => (
-              <GroupRows key={group} group={group} items={items} />
-            ))}
+            <div className="settings-home-links">
+              {items.map((page) => (
+                <PageRow key={page.id} page={page} reach={reach} />
+              ))}
+            </div>
           </PanelBody>
         </Panel>
-      )}
-
-      {consultable.length > 0 && (
-        <Panel title={t("settings.home.lookUp")}>
-          <PanelBody>
-            {consultable.map(({ group, items }) => (
-              <GroupRows key={group} group={group} items={items} />
-            ))}
-          </PanelBody>
-        </Panel>
-      )}
+      ))}
 
       <Panel title={t("settings.home.access")}>
         <PanelBody>
-          {/* Facts, not settings: a definition list rather than SettingRow,
-              which requires a control because every row of it is something a
-              reader can operate. Nothing here is operable — this panel answers
-              "who am I here", and the way to change any of it is to ask. */}
-          <dl className="settings-facts">
-            <dt>{t("settings.home.rolesLabel")}</dt>
-            <dd>
-              {/* The roles as the server resolved them, not as a role name this
-                  screen guessed. A reader with a custom role sees its key,
-                  which is the word they would quote when asking for more. */}
-              <div className="settings-home-roles">
-                {(me.data?.roles ?? []).map((role) => (
-                  <RoleBadge key={role} roleKey={role} />
-                ))}
-              </div>
-            </dd>
-            {/* Seat and reach in words. Both are on the snapshot already and
-                neither was shown: a reader told "read seat" by a disabled
-                button has to guess whether it is their seat, their role or a
-                bug. `authorization` is absent while /me is in flight, and an
-                absent answer says nothing rather than guessing the narrowest —
-                a wrong claim about someone's own access is worse than a gap. */}
-            {me.data?.authorization && (
-              <>
-                <dt>{t("settings.home.seatLabel")}</dt>
+          <QueryGate query={me} pendingLabel={t("settings.home.accessLoading")}>
+            {(snapshot) => (
+              /* Facts, not settings: a definition list rather than SettingRow,
+                 which requires a control. The way to change any of it is to ask. */
+              <dl className="settings-facts">
+                <dt>{t("settings.home.rolesLabel")}</dt>
                 <dd>
-                  {t(
-                    me.data.authorization.seat_type === "full"
-                      ? "settings.home.seat.full"
-                      : "settings.home.seat.read",
-                  )}
+                  {/* The server's role keys, so a custom role shows the word a
+                      reader would quote when asking for more. */}
+                  <div className="settings-home-roles">
+                    {(snapshot.roles ?? []).map((role) => (
+                      <RoleBadge key={role} roleKey={role} />
+                    ))}
+                  </div>
                 </dd>
-                <dt>{t("settings.home.reachLabel")}</dt>
-                <dd>
-                  {t(`settings.home.reach.${me.data.authorization.row_scope}`)}
-                </dd>
-              </>
+                {/* An absent answer says nothing rather than guessing the
+                    narrowest: a wrong claim about someone's access is worse. */}
+                {snapshot.authorization && (
+                  <>
+                    <dt>{t("settings.home.seatLabel")}</dt>
+                    <dd>
+                      {t(
+                        snapshot.authorization.seat_type === "full"
+                          ? "settings.home.seat.full"
+                          : "settings.home.seat.read",
+                      )}
+                    </dd>
+                    <dt>{t("settings.home.reachLabel")}</dt>
+                    <dd>
+                      {t(
+                        `settings.home.reach.${snapshot.authorization.row_scope}`,
+                      )}
+                    </dd>
+                  </>
+                )}
+              </dl>
             )}
-          </dl>
+          </QueryGate>
         </PanelBody>
       </Panel>
     </div>
   );
 }
 
-/** The pages of one half, bucketed by group in the catalog's own order. */
+/** The pages by group, both in the catalog's own order. */
 function groupsOf(
   pages: readonly SettingsPage[],
 ): readonly { group: SettingsGroupId; items: readonly SettingsPage[] }[] {
+  const open = new Set(pages);
   return SETTINGS_GROUPS.map((group) => ({
     group,
-    items: pages.filter((page) => page.group === group),
+    items: SETTINGS_PAGES.filter(
+      (page) => page.group === group && open.has(page),
+    ),
   })).filter((entry) => entry.items.length > 0);
 }
 
-function GroupRows({
-  group,
-  items,
-}: Readonly<{ group: SettingsGroupId; items: readonly SettingsPage[] }>) {
+/** One row per page: its glyph, its name and what it is for. */
+function PageRow({
+  page,
+  reach,
+}: Readonly<{ page: SettingsPage; reach: SettingsReach }>) {
   const t = useT();
-  return (
-    <section className="settings-home-group">
-      <Heading size="small" as="h3" className="settings-home-groupname">
-        {t(`settings.group.${group}`)}
-      </Heading>
-      <PageRows pages={items} />
-    </section>
+  const Glyph = PAGE_ICONS[page.id];
+  const { ref, trigger, tip } = useTooltip<HTMLSpanElement>(
+    t("settings.home.readOnly"),
   );
-}
-
-/**
- * One row per page: its name, what it is for, and whose state it changes.
- *
- * A title-only link was the whole defect this replaces — it made the home a
- * second copy of the menu, so a reader who could not tell two pages apart in
- * the rail could not tell them apart here either. The subtitle and the scope
- * are already in the catalog and were being thrown away.
- */
-function PageRows({ pages }: Readonly<{ pages: readonly SettingsPage[] }>) {
-  const t = useT();
+  // The tip opens over the lock for a pointer and on the row for a keyboard.
+  // The hidden word already names the lock, so the tip adds no description.
+  const {
+    onPointerEnter,
+    onPointerLeave,
+    "aria-describedby": _spoken,
+    ...onRowFocus
+  } = trigger;
+  const locked = readsOnly(reach, page.id);
   return (
-    <div className="settings-home-links">
-      {pages.map((page) => (
-        <a
-          key={page.id}
-          className="settings-home-row"
-          href={`#/settings/${page.id}`}
-          onClick={(event) => {
-            if (!opensInThisTab(event)) {
-              return;
-            }
-            event.preventDefault();
-            navigate(settingsHref(page.id));
-          }}
-        >
-          <span className="settings-home-rowhead">
-            <span>{t(`settings.tab.${page.id}`)}</span>
-            <Badge>{t(`settings.scope.${page.scope}`)}</Badge>
+    <a
+      className="settings-home-row"
+      href={`#/settings/${page.id}`}
+      {...(locked ? onRowFocus : {})}
+      onClick={(event) => {
+        if (!opensInThisTab(event)) {
+          return;
+        }
+        event.preventDefault();
+        navigate(settingsHref(page.id));
+      }}
+    >
+      <Glyph size={16} aria-hidden className="settings-home-glyph" />
+      <span className="settings-home-name">
+        {t(`settings.tab.${page.id}`)}
+        {locked && (
+          <span
+            ref={ref}
+            className="settings-home-lock"
+            onPointerEnter={onPointerEnter}
+            onPointerLeave={onPointerLeave}
+          >
+            <Lock size={14} aria-hidden />
+            <span className="sr-only">{t("settings.home.readOnly")}</span>
+            {tip}
           </span>
-          <span className="t-caption">{t(`settings.page.${page.id}.sub`)}</span>
-        </a>
-      ))}
-    </div>
+        )}
+      </span>
+      <span className="t-caption">{t(`settings.page.${page.id}.sub`)}</span>
+    </a>
   );
 }

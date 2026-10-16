@@ -53,6 +53,30 @@ export function BusyMark({ className }: Readonly<{ className?: string }>) {
   );
 }
 
+/**
+ * `bare` is the catalog's `.iconbtn` reached through this component: no fill and
+ * no edge, for a glyph among glyphs such as the top strip's. With no edge to
+ * hold a word it compiles only as a square glyph button.
+ */
+type ButtonShape =
+  | {
+      variant: "bare";
+      /** The whole label is the glyph; see the other arm. */
+      iconOnly: true;
+    }
+  | {
+      variant?: ButtonVariant;
+      /**
+       * This button's whole label is its icon, so it drops the width floor that
+       * keeps a short word readable and becomes square. The caller still owes
+       * it an accessible name (`aria-label` or a visually-hidden child),
+       * because a glyph announces as nothing.
+       */
+      iconOnly?: boolean;
+    };
+
+type ButtonBase = ComponentPropsWithRef<"button"> & ButtonShape;
+
 export function Button({
   variant = "ghost",
   iconOnly,
@@ -69,15 +93,7 @@ export function Button({
   // needs the node. So does one restoring focus here after a dialog its own
   // mutation removed the opener of. React 19 passes `ref` as an ordinary prop
   // to a function component, so this costs nothing but the type.
-}: ComponentPropsWithRef<"button"> & {
-  variant?: ButtonVariant;
-  /**
-   * This button's whole label is its icon, so it drops the width floor that
-   * keeps a short word readable and becomes square. The caller still owes it an
-   * accessible name (`aria-label` or a visually-hidden child), because a
-   * glyph announces as nothing.
-   */
-  iconOnly?: boolean;
+}: ButtonBase & {
   /**
    * Why this action is unavailable. Passing it disables the button and points
    * the control at the explanation with `aria-describedby`. No screen reader

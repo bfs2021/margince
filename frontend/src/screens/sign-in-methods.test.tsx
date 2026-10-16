@@ -13,6 +13,7 @@ import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LocaleProvider } from "../i18n";
 import { type GrantSpec, meFixture } from "../testing/mefixture";
+import { MAX_GROUP_GRANTS } from "./group-role-grants";
 import { SEEDED_ASSIGNABLE_ROLES } from "./roles.testkit";
 import { SignInMethodsCard } from "./sign-in-methods";
 
@@ -38,29 +39,34 @@ function jsonResponse(body: unknown, status = 200) {
 const fullSignInGrants: GrantSpec = {
   installation_settings: ["read", "update"],
   authentication_policy: ["read", "update"],
+  capture_settings: ["read"],
 };
 
 function mount(
   providers: { key: string; label: string; enabled: boolean }[],
   groupRoleMap: Record<string, string> = {},
   allow: GrantSpec = fullSignInGrants,
-  mfa: {
+  server: {
     required?: boolean;
     ownConfirmed?: boolean;
     ownAnswer?: Promise<Response>;
+    app?: "none" | "stored";
+    appAnswered?: Promise<void>;
   } = {},
 ) {
   const calls: unknown[] = [];
+  const appReads: string[] = [];
   const refusing = { writes: false, reads: false };
+  let storedMap = groupRoleMap;
   const fetchMock = vi.fn(async (request: Request) => {
     if (request.url.endsWith("/v1/me")) {
       return jsonResponse(meFixture({ allow }));
     }
     if (request.url.endsWith("/v1/me/mfa")) {
-      if (mfa.ownAnswer) {
-        return mfa.ownAnswer;
+      if (server.ownAnswer) {
+        return server.ownAnswer;
       }
-      const confirmed = mfa.ownConfirmed ?? true;
+      const confirmed = server.ownConfirmed ?? true;
       return jsonResponse({
         enrolled: confirmed,
         confirmed,
@@ -68,10 +74,15 @@ function mount(
       });
     }
     if (request.method === "PATCH" ? refusing.writes : refusing.reads) {
-      return jsonResponse({ title: "Unavailable", status: 503 }, 503);
+      return jsonResponse(
+        { title: "Unavailable", status: 503, code: "service_unavailable" },
+        503,
+      );
     }
     if (request.method === "PATCH") {
-      calls.push(JSON.parse(await request.text()));
+      const change = JSON.parse(await request.text());
+      calls.push(change);
+      storedMap = change.oidc_group_role_map ?? storedMap;
       return new Response(null, { status: 204 });
     }
     // The grant editor picks from the roles the server says this reader may
@@ -79,13 +90,29 @@ function mount(
     if (request.url.includes("/users/assignable-roles")) {
       return jsonResponse({ roles: SEEDED_ASSIGNABLE_ROLES });
     }
+    if (request.url.includes("/installation/oauth-apps/")) {
+      appReads.push(request.url);
+      await server.appAnswered;
+      return server.app
+        ? jsonResponse({
+            provider: "google",
+            configured: server.app === "stored",
+            source: server.app,
+            client_id: server.app === "stored" ? "client-1" : "",
+            redirect_uris: [],
+          })
+        : jsonResponse(
+            { title: "Forbidden", status: 403, code: "permission_denied" },
+            403,
+          );
+    }
     // The narrow authentication-policy projection this card reads — not the
     // installation aggregate, which answers a different route.
     return jsonResponse({
       sign_in_providers: providers,
       require_sso: false,
-      require_mfa: mfa.required ?? false,
-      oidc_group_role_map: groupRoleMap,
+      require_mfa: server.required ?? false,
+      oidc_group_role_map: storedMap,
     });
   });
   vi.stubGlobal("fetch", fetchMock);
@@ -96,7 +123,7 @@ function mount(
     </QueryClientProvider>
   );
   render(<SignInMethodsCard />, { wrapper: Wrap });
-  return { calls, refusing, qc };
+  return { calls, appReads, refusing, qc };
 }
 
 describe("the sign-in methods card", () => {
@@ -109,9 +136,9 @@ describe("the sign-in methods card", () => {
       name: /email and password/i,
     });
     expect(control.getAttribute("aria-checked")).toBe("true");
-    // Natively disabled, which is what `reason` does — aria-disabled is
-    // reserved for a write in flight, and a control that is merely busy would
-    // become flippable again a moment later. This one never does.
+    // Natively disabled: aria-disabled is reserved for a write in flight, and a
+    // control that is merely busy would become flippable again a moment later.
+    // This one never does.
     expect(control.hasAttribute("disabled")).toBe(true);
   });
 
@@ -164,6 +191,84 @@ describe("the sign-in methods card", () => {
       await screen.findByText("Could not load this view. Reload the page."),
     ).toBeTruthy();
     expect(screen.queryByText("Change not saved")).toBeNull();
+  });
+
+  // The switch is the admin's choice. The sign-in screen also needs the
+  // provider's app, so the row says when that is missing.
+  it("says a provider stays off the sign-in screen until its app exists", async () => {
+    mount([{ key: "google", label: "Google", enabled: true }], {}, undefined, {
+      app: "none",
+    });
+    expect(
+      await screen.findByText(/not on the sign-in screen yet/i),
+    ).toBeTruthy();
+    const control = screen.getByRole("switch", { name: /google/i });
+    expect(control.getAttribute("aria-checked")).toBe("true");
+  });
+
+  it("shows no hint on a switched-on provider until its app read answers", async () => {
+    let answer = () => {};
+    const appAnswered = new Promise<void>((resolve) => {
+      answer = resolve;
+    });
+    mount([{ key: "google", label: "Google", enabled: true }], {}, undefined, {
+      app: "none",
+      appAnswered,
+    });
+    expect(await screen.findByRole("switch", { name: /google/i })).toBeTruthy();
+    expect(
+      screen.queryByText(/shows this provider on the sign-in screen/i),
+    ).toBeNull();
+    expect(screen.queryByText(/not on the sign-in screen yet/i)).toBeNull();
+    answer();
+    expect(
+      await screen.findByText(/not on the sign-in screen yet/i),
+    ).toBeTruthy();
+  });
+
+  it("keeps the plain hint on a switched-off provider and asks for no app", async () => {
+    const { appReads } = mount(
+      [
+        { key: "google", label: "Google", enabled: false },
+        { key: "microsoft", label: "Microsoft", enabled: true },
+      ],
+      {},
+      undefined,
+      { app: "none" },
+    );
+    expect(
+      await screen.findByText(/not on the sign-in screen yet/i),
+    ).toBeTruthy();
+    expect(screen.getAllByText(/not on the sign-in screen yet/i)).toHaveLength(
+      1,
+    );
+    expect(appReads.some((url) => url.endsWith("/google"))).toBe(false);
+  });
+
+  it("asks for no app when the reader may not read capture settings", async () => {
+    const { appReads } = mount(
+      [{ key: "google", label: "Google", enabled: true }],
+      {},
+      {
+        installation_settings: ["read", "update"],
+        authentication_policy: ["read", "update"],
+      },
+      { app: "none" },
+    );
+    expect(
+      await screen.findByText(/shows this provider on the sign-in screen/i),
+    ).toBeTruthy();
+    expect(appReads).toEqual([]);
+  });
+
+  it("describes a provider whose app is stored as shown on sign-in", async () => {
+    mount([{ key: "google", label: "Google", enabled: true }], {}, undefined, {
+      app: "stored",
+    });
+    expect(
+      await screen.findByText(/shows this provider on the sign-in screen/i),
+    ).toBeTruthy();
+    expect(screen.queryByText(/not on the sign-in screen yet/i)).toBeNull();
   });
 
   // An admin cannot add a provider here, so a deployment with none has nothing
@@ -358,6 +463,57 @@ describe("the group role grant editor", () => {
     );
   });
 
+  it("hands focus to Add group once the saved map clears Save away", async () => {
+    mount([], { sales: "rep", engineering: "manager" });
+    const user = userEvent.setup();
+    await user.click(
+      await screen.findByRole("button", { name: "Remove the sales mapping" }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: /save group grants/i }),
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: /save group grants/i }),
+      ).toBeNull(),
+    );
+    await waitFor(() =>
+      expect(document.activeElement).toBe(
+        screen.getByRole("button", { name: /add group/i }),
+      ),
+    );
+  });
+
+  it("hands focus to the first group when a full map leaves Add disabled", async () => {
+    const full = Object.fromEntries(
+      Array.from({ length: MAX_GROUP_GRANTS }, (_, index) => [
+        `team-${index}`,
+        "rep",
+      ]),
+    );
+    mount([], full);
+    const user = userEvent.setup();
+    const groups = await screen.findAllByRole("textbox", {
+      name: /idp group/i,
+    });
+    const last = groups.at(-1);
+    if (!last) {
+      throw new Error("the full map rendered no group input");
+    }
+    await user.type(last, "x");
+    await user.click(
+      screen.getByRole("button", { name: /save group grants/i }),
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: /save group grants/i }),
+      ).toBeNull(),
+    );
+    await waitFor(() => expect(document.activeElement).toBe(groups[0]));
+    const add = screen.getByRole("button", { name: /add group/i });
+    expect(add.hasAttribute("disabled")).toBe(true);
+  });
+
   // Mirrors the server's refusal so it reaches the admin before a request
   // does: the save is barred and says why, and nothing is sent.
   it("refuses a blank group name before any request is made", async () => {
@@ -373,13 +529,14 @@ describe("the group role grant editor", () => {
     expect(calls).toEqual([]);
   });
 
-  // The setting's honest cost stands beside the editor, not in a tooltip: the
-  // directory only ever grants here, and mapping a group onto Admin is a grant
-  // of admin.
-  it("carries the grant-only warning where the map is edited", async () => {
+  // The directory only ever grants, and mapping a group onto Admin grants
+  // admin. That cost stands beside the editor once a row exists to weigh.
+  it("carries the grant-only warning once a mapping is drafted", async () => {
     mount([], {});
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: /add group/i }));
     expect(
-      await screen.findByText(/grants the mapped roles and never removes any/i),
+      screen.getByText(/grants the mapped roles and never removes any/i),
     ).toBeTruthy();
     expect(
       screen.getByText(/removing a member from an idp group does not take/i),
@@ -399,15 +556,23 @@ describe("the group role grant editor", () => {
     mount([], { sales: "rep" }, { installation_settings: ["read", "update"] });
     const group = await screen.findByRole("textbox", { name: /idp group/i });
     expect(group.hasAttribute("disabled")).toBe(true);
+    expect(screen.queryByRole("button", { name: /add group/i })).toBeNull();
     expect(
-      screen
-        .getByRole("button", { name: /add group/i })
-        .hasAttribute("disabled"),
-    ).toBe(true);
+      screen.queryByRole("button", { name: /save group grants/i }),
+    ).toBeNull();
+  });
+
+  // Save stands only while the draft differs from what is stored.
+  it("offers save only once the draft changes", async () => {
+    mount([], { sales: "rep" });
+    const user = userEvent.setup();
+    expect(await screen.findByDisplayValue("sales")).toBeTruthy();
     expect(
-      screen
-        .getByRole("button", { name: /save group grants/i })
-        .hasAttribute("disabled"),
-    ).toBe(true);
+      screen.queryByRole("button", { name: /save group grants/i }),
+    ).toBeNull();
+    await user.click(screen.getByRole("button", { name: /add group/i }));
+    expect(
+      screen.getByRole("button", { name: /save group grants/i }),
+    ).toBeTruthy();
   });
 });

@@ -86,7 +86,10 @@ export function NotificationBell() {
 
   return (
     <div className="notifbell">
+      {/* Bare, like the sidebar toggle and the narrow search glyph: the strip's
+          controls are glyphs, and a boxed one read as a field. */}
       <Button
+        variant="bare"
         iconOnly
         ref={trigger}
         // The count joins the NAME, not only the box. `aria-label` replaces the

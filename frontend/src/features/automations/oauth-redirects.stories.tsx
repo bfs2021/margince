@@ -2,13 +2,17 @@
 // SPDX-FileCopyrightText: 2026 Gradion
 
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Panel } from "../../design-system/panel";
-import { StoryProviders } from "../../testing/story-utils";
+import { expect, userEvent, within } from "storybook/test";
+import { Panel, PanelBody } from "../../design-system/panel";
+import {
+  expectFoldedRowsUnderSummary,
+  StoryProviders,
+} from "../../testing/story-utils";
 import { RedirectUriGroup, RedirectUris } from "./oauth-redirects";
 
-// The callback addresses on their own, two ways. In a section of a vendor's
-// panel the table runs edge to edge. Bare, they render as the first-run step
-// draws them.
+// The callback addresses on their own, two ways. In a vendor's panel they fold
+// behind a summary with their count, open until the vendor has an app. Bare,
+// they render as the first-run step draws them.
 
 const SUB =
   "Register every URI below on the OAuth client in the Google console.";
@@ -39,16 +43,63 @@ export const InAPanel: Story = {
   render: () => (
     <StoryProviders>
       <Panel title="Google app">
-        <RedirectUriGroup uris={URIS} sub={SUB} />
+        <PanelBody>
+          <RedirectUriGroup uris={URIS} sub={SUB} open={false} />
+        </PanelBody>
       </Panel>
     </StoryProviders>
   ),
 };
 
+export const InAPanelNoApp: Story = {
+  render: () => (
+    <StoryProviders>
+      <Panel title="Google app">
+        <PanelBody>
+          <RedirectUriGroup uris={URIS} sub={SUB} open />
+        </PanelBody>
+      </Panel>
+    </StoryProviders>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByRole("table");
+    await expect(
+      canvas.getByText("Authorized redirect URIs").closest("summary"),
+    ).toHaveAttribute("aria-expanded", "true");
+  },
+};
+
+export const InAPanelNoAppPhone: Story = {
+  globals: { viewport: { value: "phone" } },
+  tags: ["uat-phone"],
+  render: InAPanelNoApp.render,
+  play: InAPanelNoApp.play,
+};
+
+const openFold = async ({
+  canvasElement,
+}: Readonly<{ canvasElement: HTMLElement }>) => {
+  await userEvent.click(
+    await within(canvasElement).findByText("Authorized redirect URIs"),
+  );
+  await within(canvasElement).findByRole("table");
+};
+
+export const InAPanelOpen: Story = {
+  render: InAPanel.render,
+  play: openFold,
+};
+
+// Folded, each address row starts where the summary above it starts.
 export const InAPanelPhone: Story = {
   globals: { viewport: { value: "phone" } },
   tags: ["uat-phone"],
   render: InAPanel.render,
+  play: async (context) => {
+    await openFold(context);
+    await expectFoldedRowsUnderSummary(context.canvasElement);
+  },
 };
 
 export const Bare: Story = {

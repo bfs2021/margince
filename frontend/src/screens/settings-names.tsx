@@ -1,11 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { api } from "../api/client";
 import { Button, Field, TextInput } from "../design-system/atoms";
 import { SettingRow } from "../design-system/settingrow";
 import type { Toast } from "../design-system/toast";
 import { greetingNameOf } from "../format/greetingname";
 import { useT } from "../i18n";
+import { isImeCommit } from "../lib/imecommit";
 import { problemMessageOf, unwrap } from "../lib/problem";
 import { useMe } from "../lib/session";
 
@@ -113,6 +114,8 @@ function NameSettingRow({
   // null means "not editing" — the row shows the stored name until the reader
   // types, so a `/me` refetch cannot overwrite what they are in the middle of.
   const [draft, setDraft] = useState<string | null>(null);
+  const input = useRef<HTMLInputElement>(null);
+  const actions = useRef<HTMLDivElement>(null);
   const shown = draft ?? stored;
   const save = useMutation({
     mutationFn: send,
@@ -131,18 +134,30 @@ function NameSettingRow({
   // count UTF-16 units and refuse a name the server admits.
   const tooLong = [...trimmed].length > maxRunes;
   const refusal = save.error ? problemMessageOf(save.error, t) : undefined;
+  const savable = dirty && (emptyAllowed || trimmed !== "") && !tooLong;
+  // The Save button leaves once the name lands. Focus left on it, or dropped
+  // to the page, goes back to the field; focus the reader moved stays put.
+  const commit = () =>
+    save.mutate(trimmed, {
+      onSettled: () => {
+        const active = document.activeElement;
+        if (active === document.body || actions.current?.contains(active)) {
+          input.current?.focus();
+        }
+      },
+    });
   return (
     <SettingRow
       label={label}
       description={description}
-      layout="stack"
       control={(row) => (
-        // The catalogued pairing of field and verb, as the pipeline rows use.
+        // Save appears once the name moves, so a settled row is the field alone.
         <div className="form-stack settingrow-measure">
           <Field label={label} labelHidden error={refusal}>
             {(field) => (
               <TextInput
                 {...field}
+                ref={input}
                 aria-labelledby={row["aria-labelledby"]}
                 aria-describedby={[field, row]
                   .map((owner) => owner["aria-describedby"])
@@ -152,16 +167,32 @@ function NameSettingRow({
                 placeholder={placeholder}
                 // No `maxLength`: UTF-16 units, not the runes `tooLong` counts.
                 onChange={(event) => setDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  // An Enter that ends an IME composition picks the word.
+                  if (
+                    event.key === "Enter" &&
+                    !isImeCommit(event) &&
+                    savable &&
+                    !save.isPending
+                  ) {
+                    commit();
+                  }
+                }}
               />
             )}
           </Field>
-          <Button
-            disabled={!dirty || (!emptyAllowed && trimmed === "") || tooLong}
-            pending={save.isPending}
-            onClick={() => save.mutate(trimmed)}
-          >
-            {saveLabel}
-          </Button>
+          {dirty && (
+            <div className="form-actions" ref={actions}>
+              <Button
+                variant="primary"
+                disabled={!savable}
+                pending={save.isPending}
+                onClick={commit}
+              >
+                {saveLabel}
+              </Button>
+            </div>
+          )}
         </div>
       )}
     />

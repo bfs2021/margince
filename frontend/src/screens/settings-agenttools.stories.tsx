@@ -5,6 +5,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { userEvent, within } from "storybook/test";
 import { pickOption } from "../design-system/select-testing";
 import {
+  expectFoldedRowsUnderSummary,
   installFetchStub,
   jsonResponse,
   meRoute,
@@ -76,24 +77,52 @@ const meta: Meta<typeof AgentToolsCard> = {
 export default meta;
 type Story = StoryObj<typeof AgentToolsCard>;
 
+// The groups at rest: one summary per permission, each with its count.
 export const Tools: Story = { render: story() };
+
+const openSendGroup = async ({
+  canvasElement,
+}: Readonly<{ canvasElement: HTMLElement }>) => {
+  await userEvent.click(
+    await within(canvasElement).findByText("Send messages"),
+  );
+};
 
 export const ToolsDark: Story = {
   globals: { theme: "dark" },
   render: story(),
 };
 
+// Folded, each row's first cell starts where its group's summary starts.
 export const ToolsPhone: Story = {
   globals: { viewport: { value: "phone" } },
   tags: ["uat-phone"],
   render: story(),
+  play: async (context) => {
+    await openSendGroup(context);
+    await expectFoldedRowsUnderSummary(context.canvasElement);
+  },
 };
 
-// A row opened: its whole description, governance clause included.
-export const DescriptionOpen: Story = {
+// Found by its key alone, a closed row shows the key it matched on.
+export const SearchByKey: Story = {
   render: story(),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    await userEvent.type(
+      await canvas.findByRole("searchbox", { name: "Search tools" }),
+      "search_rec",
+    );
+    await canvas.findByText("search_records");
+  },
+};
+
+// A row opened: its whole description, governance clause included, and the key.
+export const DescriptionOpen: Story = {
+  render: story(),
+  play: async (context) => {
+    await openSendGroup(context);
+    const canvas = within(context.canvasElement);
     await userEvent.click(
       await canvas.findByRole("button", {
         name: "Full description of Send email",
@@ -127,12 +156,13 @@ export const SearchFindsNothing: Story = {
 // Scoped to a read-only passport, the send tool is struck and says why.
 export const ScopedToPassport: Story = {
   render: story([SCOUT]),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
+  play: async (context) => {
+    const canvas = within(context.canvasElement);
     await pickOption(
       userEvent.setup(),
       await canvas.findByRole("combobox", { name: "All passports" }),
       "Reachable by Scout",
     );
+    await openSendGroup(context);
   },
 };

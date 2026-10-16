@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { en } from "../i18n/en";
 import { jsonResponse, render, stubApi } from "./brief.testkit";
-import { BriefDeliveryRows } from "./briefdelivery";
+import { BriefDeliveryPanel } from "./briefdelivery";
 
 // What a reader may switch off, and what the control must not claim on their
 // behalf. The server tells "never chose" from "chose none", and the screen has
@@ -21,7 +21,7 @@ describe("the delivery settings", () => {
     // behaviour for an unchosen setting is that the mail is sent. A blank
     // control would tell the reader nothing about what actually happens.
     stubApi({ "GET /me/brief-delivery": () => jsonResponse({}) });
-    render(<BriefDeliveryRows />);
+    render(<BriefDeliveryPanel />);
 
     const morning = await screen.findByTestId("delivery-morning");
     await waitFor(() =>
@@ -42,7 +42,7 @@ describe("the delivery settings", () => {
         }),
       "PUT /me/brief-delivery": () => jsonResponse({}),
     });
-    render(<BriefDeliveryRows />);
+    render(<BriefDeliveryPanel />);
 
     const weekly = await screen.findByTestId("delivery-weekly");
     const user = userEvent.setup();
@@ -60,5 +60,39 @@ describe("the delivery settings", () => {
       // stale render of that dropdown overwrite a choice made elsewhere.
       expect(saves[0].body).toEqual({ weekly_delivery: "none" });
     });
+  });
+
+  it("says so in the panel when a choice is not saved", async () => {
+    stubApi({
+      "GET /me/brief-delivery": () => jsonResponse({}),
+      "PUT /me/brief-delivery": () =>
+        new Response(
+          JSON.stringify({ status: 503, code: "service_unavailable" }),
+          {
+            status: 503,
+            headers: { "content-type": "application/problem+json" },
+          },
+        ),
+    });
+    render(<BriefDeliveryPanel />);
+    const user = userEvent.setup();
+    await user.click(
+      within(await screen.findByTestId("delivery-morning")).getByRole(
+        "combobox",
+      ),
+    );
+    await user.click(
+      within(screen.getByRole("listbox")).getByRole("option", {
+        name: en["delivery.none"],
+      }),
+    );
+    const refusal = await screen.findByRole("alert");
+    expect(refusal.textContent).toContain(en["settings.saveFailed"]);
+    expect(refusal.id).not.toBe("");
+    expect(
+      within(screen.getByTestId("delivery-morning"))
+        .getByRole("combobox")
+        .getAttribute("aria-describedby"),
+    ).toContain(refusal.id);
   });
 });

@@ -8,6 +8,8 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
+import type { components } from "../api/schema";
+import { stubClipboard } from "../design-system/clipboard-testing";
 import { mount, view } from "../features/contacts/contactpage.testkit";
 import {
   installFetchStub,
@@ -26,6 +28,8 @@ import { BookingGuestScreen } from "./booking-guest";
 import { BookingInviteScreen } from "./booking-invite";
 import { BookingMeetingScreen } from "./booking-meeting";
 import { BookingProfileScreen } from "./booking-profile";
+
+type SchedulingProfile = components["schemas"]["SchedulingProfile"];
 
 afterEach(() => {
   cleanup();
@@ -215,7 +219,11 @@ it("warns when an active public page cannot send calendar invitations", async ()
       "Your booking page is active, but calendar invitations are unavailable. Open meeting settings to check the connection or pause the page.",
     ),
   ).toBeTruthy();
-  expect(screen.getByRole("button", { name: "Pause bookings" })).toBeTruthy();
+  expect(
+    screen
+      .getByRole("switch", { name: "Accept bookings" })
+      .getAttribute("aria-checked"),
+  ).toBe("true");
 });
 
 it("pauses a public link without overwriting meeting settings saved in another tab", async () => {
@@ -235,7 +243,7 @@ it("pauses a public link without overwriting meeting settings saved in another t
       <BookingProfileScreen />
     </StoryProviders>,
   );
-  const pause = await screen.findByRole("button", { name: "Pause bookings" });
+  const pause = await screen.findByRole("switch", { name: "Accept bookings" });
   latest = { ...latest, horizon_days: 90, calendar_id: "another-calendar" };
   await user.click(pause);
   await waitFor(() => expect(writes).toHaveLength(1));
@@ -244,4 +252,142 @@ it("pauses a public link without overwriting meeting settings saved in another t
     horizon_days: 90,
     calendar_id: "another-calendar",
   });
+});
+
+it("keeps focus on Accept bookings after its answer comes back", async () => {
+  const user = userEvent.setup();
+  let latest = { ...bookingProfile, enabled: true };
+  installFetchStub({
+    "GET /connectors": () => jsonResponse({ data: [bookingConnection] }),
+    "GET /scheduling/profile": () => jsonResponse(latest),
+    "PUT /scheduling/profile": () => {
+      latest = { ...latest, enabled: false };
+      return jsonResponse(latest);
+    },
+  });
+  render(
+    <StoryProviders>
+      <BookingProfileScreen />
+    </StoryProviders>,
+  );
+  const accept = await screen.findByRole("switch", { name: "Accept bookings" });
+  await user.click(accept);
+  await waitFor(() =>
+    expect(accept.getAttribute("aria-checked")).toBe("false"),
+  );
+  expect(document.activeElement).toBe(accept);
+});
+
+it("names the link once on its own page, in the heading and not again on the card", async () => {
+  installFetchStub({
+    "GET /connectors": () => jsonResponse({ data: [bookingConnection] }),
+    "GET /scheduling/profile": () => jsonResponse(bookingProfile),
+  });
+  render(
+    <StoryProviders>
+      <BookingProfileScreen />
+    </StoryProviders>,
+  );
+  await screen.findByRole("switch", { name: "Accept bookings" });
+  expect(
+    screen.getAllByRole("heading", { name: "My booking link" }),
+  ).toHaveLength(1);
+  expect(screen.getAllByText(/One link for your email signature/)).toHaveLength(
+    1,
+  );
+});
+
+it("keeps focus on Accept bookings when the answer brings the first link", async () => {
+  const user = userEvent.setup();
+  let latest: SchedulingProfile = {
+    ...bookingProfile,
+    enabled: false,
+    public_url: undefined,
+  };
+  installFetchStub({
+    "GET /connectors": () => jsonResponse({ data: [bookingConnection] }),
+    "GET /scheduling/profile": () => jsonResponse(latest),
+    "PUT /scheduling/profile": () => {
+      latest = { ...bookingProfile, enabled: true };
+      return jsonResponse(latest);
+    },
+  });
+  render(
+    <StoryProviders>
+      <BookingProfileScreen />
+    </StoryProviders>,
+  );
+  const accept = await screen.findByRole("switch", { name: "Accept bookings" });
+  await user.click(accept);
+  await screen.findByRole("textbox", { name: "My booking link" });
+  expect(accept.getAttribute("aria-checked")).toBe("true");
+  expect(document.activeElement).toBe(accept);
+});
+
+it("hands focus back to Replace link once the new link lands", async () => {
+  const user = userEvent.setup();
+  let latest = { ...bookingProfile };
+  installFetchStub({
+    "GET /connectors": () => jsonResponse({ data: [bookingConnection] }),
+    "GET /scheduling/profile": () => jsonResponse(latest),
+    "PUT /scheduling/profile": () => {
+      latest = { ...latest, public_url: "https://book.example/new-link" };
+      return jsonResponse(latest);
+    },
+  });
+  render(
+    <StoryProviders>
+      <BookingProfileScreen />
+    </StoryProviders>,
+  );
+  const replace = await screen.findByRole("button", { name: "Replace link" });
+  await user.click(replace);
+  const dialog = await screen.findByRole("dialog");
+  await user.click(
+    within(dialog).getByRole("button", { name: "Replace booking link" }),
+  );
+  await waitFor(() =>
+    expect(
+      screen.getByRole("textbox", { name: "My booking link" }),
+    ).toHaveProperty("value", "https://book.example/new-link"),
+  );
+  await waitFor(() => expect(document.activeElement).toBe(replace));
+});
+
+it("keeps a failed copy's remedy over a replaced link until the next copy", async () => {
+  const user = userEvent.setup();
+  let latest = { ...bookingProfile };
+  installFetchStub({
+    "GET /connectors": () => jsonResponse({ data: [bookingConnection] }),
+    "GET /scheduling/profile": () => jsonResponse(latest),
+    "PUT /scheduling/profile": () => {
+      latest = { ...latest, public_url: "https://book.example/new-link" };
+      return jsonResponse(latest);
+    },
+  });
+  render(
+    <StoryProviders>
+      <BookingProfileScreen />
+    </StoryProviders>,
+  );
+  stubClipboard("refuses");
+  await user.click(await screen.findByRole("button", { name: "Copy link" }));
+  await screen.findByText(/clipboard access denied/i);
+  await user.click(screen.getByRole("button", { name: "Replace link" }));
+  await user.click(
+    within(await screen.findByRole("dialog")).getByRole("button", {
+      name: "Replace booking link",
+    }),
+  );
+  await waitFor(() =>
+    expect(
+      screen.getByRole("textbox", { name: "My booking link" }),
+    ).toHaveProperty("value", "https://book.example/new-link"),
+  );
+  expect(screen.getByText(/clipboard access denied/i)).toBeTruthy();
+  const accepted = stubClipboard("accepts");
+  await user.click(screen.getByRole("button", { name: "Copy link" }));
+  expect(await screen.findByRole("button", { name: "Copied" })).toBeTruthy();
+  expect(screen.queryByText(/clipboard access denied/i)).toBeNull();
+  expect(accepted.written).toEqual(["https://book.example/new-link"]);
 });

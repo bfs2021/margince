@@ -51,6 +51,8 @@ export function useClipboardCopy(
 }> {
   const t = useT();
   const [written, setWritten] = useState<string | null>(null);
+  // Kept while the reader edits the text, since the remedy is to copy it by
+  // hand; the next attempt takes it away.
   const [failed, setFailed] = useState(false);
   // Which attempt the reader is waiting on. Two presses are two independent
   // writes that can settle in either order, and an older one landing last would
@@ -65,6 +67,7 @@ export function useClipboardCopy(
     // `.writeText(…).catch(…)` never reaches its handler. An email-less
     // installation served over plain http is that deployment, not an edge case.
     const mine = ++attempt.current;
+    setFailed(false);
     const writer = navigator.clipboard;
     if (!writer) {
       // Dropping the claim as the rejection branch does: a control that had
@@ -78,7 +81,6 @@ export function useClipboardCopy(
       () => {
         if (mine !== attempt.current) return;
         setWritten(text);
-        setFailed(false);
         onCopied?.();
       },
       () => {

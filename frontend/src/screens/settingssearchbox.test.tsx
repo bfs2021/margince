@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: 2026 Gradion
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LocaleProvider } from "../i18n";
@@ -129,6 +129,18 @@ describe("the settings search box", () => {
     expect(navigate).toHaveBeenCalledWith({ screen: "settings", id: "audit" });
   });
 
+  it("opens nothing on an input method's Enter", async () => {
+    const user = userEvent.setup();
+    const navigate = vi.spyOn(router, "navigate").mockImplementation(() => {});
+    mount();
+    await user.type(box(), "audit");
+    await user.keyboard("{ArrowDown}");
+
+    fireEvent.keyDown(box(), { key: "Enter", keyCode: 229 });
+
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
   // Enter on an untouched query opens nothing: the first row is a candidate,
   // not a choice the reader has made.
   it("opens nothing on Enter before an option is chosen", async () => {
@@ -153,6 +165,22 @@ describe("the settings search box", () => {
     expect(options()).toHaveLength(0);
     expect((box() as HTMLInputElement).value).toBe("");
     expect(document.activeElement).toBe(box());
+  });
+
+  // The phone drawer hosting the box closes on Escape only if the empty box
+  // leaves the key unhandled.
+  it("leaves Escape to its host once the box is empty", async () => {
+    const user = userEvent.setup();
+    mount();
+    const seen: boolean[] = [];
+    const record = (event: KeyboardEvent) => seen.push(event.defaultPrevented);
+    globalThis.addEventListener("keydown", record);
+    await user.type(box(), "audit");
+    await user.keyboard("{Escape}");
+    await user.keyboard("{Escape}");
+    globalThis.removeEventListener("keydown", record);
+
+    expect(seen.slice(-2)).toEqual([true, false]);
   });
 
   // Pointer and keyboard reach the same place, by the same route.

@@ -4,6 +4,7 @@ import { api } from "../api/client";
 import type { components } from "../api/schema";
 import { useUnsavedGuard } from "../components/unsaved";
 import { Button, EmptyState, PendingBody } from "../design-system/atoms";
+import { Callout } from "../design-system/callout";
 import { ErrorLine } from "../design-system/errorline";
 import { Panel, PanelBody, PanelIntro } from "../design-system/panel";
 import { QueryGate } from "../design-system/querystates";
@@ -51,7 +52,11 @@ export function MeetingSettings() {
     return (
       <>
         <WorkingHoursCard />
-        <ErrorLine>{t("scheduling.bookRefused")}</ErrorLine>
+        <Callout
+          tone="danger"
+          kind="standing"
+          title={t("scheduling.bookRefused")}
+        />
       </>
     );
   return <MeetingPreferences />;
@@ -144,7 +149,7 @@ function MeetingSettingsForm({
         }}
       >
         <Panel title={t("scheduling.calendarTitle")}>
-          <PanelBody className="book-form">
+          <PanelBody className="form-stack">
             <PanelIntro>{t("scheduling.calendarIntro")}</PanelIntro>
             <CalendarSection
               providers={calendar.providers}
@@ -185,8 +190,7 @@ function MeetingSettingsForm({
           </PanelBody>
         </Panel>
         <Panel title={t("scheduling.availabilityTitle")}>
-          <PanelBody className="book-form">
-            <PanelIntro>{t("workingHours.sub")}</PanelIntro>
+          <PanelBody className="form-stack">
             {hoursDraft ? (
               <WorkingHoursFields
                 chosen={chosen}
@@ -215,7 +219,7 @@ function MeetingSettingsForm({
           </PanelBody>
         </Panel>
         <Panel title={t("scheduling.defaultsTitle")}>
-          <PanelBody className="book-form">
+          <PanelBody className="form-stack">
             <PanelIntro>{t("scheduling.defaultsIntro")}</PanelIntro>
             <DefaultFields form={form} provider={provider} onChange={setForm} />
           </PanelBody>

@@ -186,11 +186,10 @@ describe("the Settings Voice DNA card with no profile yet", () => {
     expect(await screen.findByLabelText("First writing sample")).toBe(
       fileInput(),
     );
-    // What to add, why, and how much: the part onboarding narrates and a bare
-    // row used to leave out.
+    // What to add and how much, as onboarding says it.
     expect(screen.getByText("Best samples")).toBeTruthy();
-    expect(screen.getByText("Why add samples")).toBeTruthy();
     expect(screen.getByText(/at least 800 words/)).toBeTruthy();
+    expect(screen.getByText(/which only you can see/)).toBeTruthy();
     // No paste box: files are the one way in here.
     expect(screen.queryByRole("textbox")).toBeNull();
   });
@@ -296,6 +295,9 @@ describe("the Settings Voice DNA card with a profile", () => {
     }
     expect(within(voice).getByText("Preferences")).toBeTruthy();
     expect(within(voice).getByText("Derived voice")).toBeTruthy();
+    expect(
+      within(voice).getByText("Only you can see your Voice DNA."),
+    ).toBeTruthy();
   });
 
   it("keeps the corpus and the way to add to it in one card", async () => {

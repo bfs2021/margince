@@ -4,7 +4,9 @@
 
 import "@testing-library/jest-dom/vitest";
 import {
+  act,
   cleanup,
+  fireEvent,
   render,
   screen,
   waitFor,
@@ -192,6 +194,21 @@ it("undoes a proposal back to the calm start, and sends a description on Enter",
   expect(document.activeElement).toBe(
     screen.getByRole("button", { name: en["filters.addClause"] }),
   );
+});
+
+it("sends nothing on the Enter Safari reports for an input method", async () => {
+  const { seen } = mount();
+  const user = userEvent.setup();
+  const box = await screen.findByLabelText("Describe the contacts you want");
+  await user.type(box, ASKED);
+
+  fireEvent.keyDown(box, { key: "Enter", keyCode: 229 });
+  await act(async () => {});
+  expect(sentTo(seen, "/filters/propose")).toEqual([]);
+
+  fireEvent.keyDown(box, { key: "Enter" });
+  expect(await screen.findByText(barTitle(2))).toBeTruthy();
+  expect(sentTo(seen, "/filters/propose")).toHaveLength(1);
 });
 
 it("appends a proposal to the reader's own condition and replaces it only when asked", async () => {

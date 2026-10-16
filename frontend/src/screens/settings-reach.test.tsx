@@ -1,8 +1,9 @@
 /** @vitest-environment happy-dom */
-import { cleanup, screen, waitFor, within } from "@testing-library/react";
+import { act, cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SettingsRail } from "../app/shell";
+import { armHoverIntent } from "../design-system/hoverintent-testing";
 import { translate } from "../i18n";
 import type { Route } from "../lib/router";
 import * as router from "../lib/router";
@@ -141,25 +142,75 @@ describe("a page the rail does not carry is still the reader's to reach", () => 
     ).toBeNull();
   });
 
-  it("lists it on the settings home, under what you can look up", async () => {
+  it("lists it on the settings home, marked read-only", async () => {
     vi.stubGlobal("fetch", settingsNavBackend(consultingRep));
     renderHome();
     await expectSnapshotResolved();
-    const heading = await screen.findByRole("heading", {
-      name: translate("en", "settings.home.lookUp"),
+    // The row's name runs on into its marker and subtitle, so the match is on
+    // the label it starts with.
+    const row = await screen.findByRole("link", {
+      name: new RegExp(`^${labelOf("pipelines")}`),
     });
-    const panel = heading.closest("section") ?? heading.parentElement;
-    if (!panel) {
-      throw new Error("the look-up panel has no container");
-    }
-    // The home row names the page, its scope and its subtitle in one accessible
-    // name — that is the whole point of the row, so the match is on the label it
-    // starts with rather than on the label alone.
     expect(
-      within(panel).getByRole("link", {
-        name: new RegExp(`^${labelOf("pipelines")}`),
-      }),
+      within(row).getByText(translate("en", "settings.home.readOnly")),
     ).toBeTruthy();
+  });
+
+  it("names the lock in a tip when the row takes focus", async () => {
+    vi.stubGlobal("fetch", settingsNavBackend(consultingRep));
+    renderHome();
+    await expectSnapshotResolved();
+    const row = await screen.findByRole("link", {
+      name: new RegExp(`^${labelOf("pipelines")}`),
+    });
+    act(() => row.focus());
+    expect((await screen.findByRole("tooltip")).textContent).toBe(
+      translate("en", "settings.home.readOnly"),
+    );
+
+    await userEvent.setup().keyboard("{Escape}");
+
+    expect(screen.queryByRole("tooltip")).toBeNull();
+    expect(document.activeElement).toBe(row);
+  });
+
+  it("names the lock in a tip when the pointer rests on it", async () => {
+    armHoverIntent();
+    const user = userEvent.setup();
+    vi.stubGlobal("fetch", settingsNavBackend(consultingRep));
+    renderHome();
+    await expectSnapshotResolved();
+    const row = await screen.findByRole("link", {
+      name: new RegExp(`^${labelOf("pipelines")}`),
+    });
+    const lock = row.querySelector(".settings-home-lock");
+    if (!(lock instanceof HTMLElement)) {
+      throw new Error("the read-only row drew no lock");
+    }
+
+    await user.hover(lock);
+
+    expect((await screen.findByRole("tooltip")).textContent).toBe(
+      translate("en", "settings.home.readOnly"),
+    );
+    await user.unhover(lock);
+    await waitFor(() => expect(screen.queryByRole("tooltip")).toBeNull());
+  });
+
+  // The control: a page this rep can change carries no marker.
+  it("marks no page the reader can change", async () => {
+    vi.stubGlobal("fetch", settingsNavBackend(consultingRep));
+    renderHome();
+    await expectSnapshotResolved();
+    // Named through to its subtitle, which tells this row from the rail's.
+    const row = await screen.findByRole("link", {
+      name: new RegExp(
+        `^${labelOf("account")}.*${translate("en", "settings.page.account.sub")}`,
+      ),
+    });
+    expect(
+      within(row).queryByText(translate("en", "settings.home.readOnly")),
+    ).toBeNull();
   });
 
   it("finds it in the search", async () => {
@@ -184,6 +235,19 @@ describe("a page the rail does not carry is still the reader's to reach", () => 
     expect(
       screen.queryByText(translate("en", "settings.boundary.deniedTitle")),
     ).toBeNull();
+  });
+
+  it("joins the rail while open, inside its own group", async () => {
+    vi.stubGlobal("fetch", settingsNavBackend(consultingRep));
+    render(<SettingsRail route={settingsHref("pipelines")} />);
+    const group = await screen.findByRole("group", {
+      name: translate("en", "settings.group.sales"),
+    });
+    expect(
+      within(group)
+        .getByRole("link", { name: labelOf("pipelines") })
+        .getAttribute("aria-current"),
+    ).toBe("page");
   });
 
   it("says once that it is theirs to read and not to change", async () => {
@@ -211,5 +275,18 @@ describe("a page the rail does not carry is still the reader's to reach", () => 
     expect(
       screen.queryByText(translate("en", "settings.readOnlyPage")),
     ).toBeNull();
+  });
+});
+
+describe("the settings home's access panel", () => {
+  it("says it is loading while the session is still out", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => new Promise<Response>(() => {})),
+    );
+    renderHome();
+    expect(
+      await screen.findByText(translate("en", "settings.home.accessLoading")),
+    ).toBeTruthy();
   });
 });
