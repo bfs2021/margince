@@ -5032,12 +5032,10 @@ export const vi = {
   "analytics.field.direction": "Hướng",
   "analytics.field.forecast_category": "Danh mục dự báo",
   "analytics.field.host_user_id": "Chủ trì cuộc họp",
-  "analytics.field.key": "Mã dự án",
   "analytics.field.kind": "Loại hoạt động",
   "analytics.field.last_activity_at": "Hoạt động gần nhất",
   "analytics.field.lost_reason": "Lý do thua",
   "analytics.field.meeting_status": "Trạng thái cuộc họp",
-  "analytics.field.name": "Tên dự án",
   "analytics.field.open_commitments": "Cam kết đang mở",
   "analytics.field.open_deal_value_minor": "Giá trị deal đang mở",
   "analytics.field.overdue_commitments": "Cam kết quá hạn",
@@ -8911,7 +8909,7 @@ export const vi = {
   "cf.edit": "Sửa nhãn",
   "cf.archive": "Chuyển trường vào kho lưu trữ",
   "cf.archived":
-    "Đã chuyển “{label}” vào kho lưu trữ. Trường bị ẩn khỏi hồ sơ mới, vẫn giữ trong nhật ký hoạt động và lịch sử, và có thể khôi phục.",
+    "Đã chuyển “{label}” vào kho lưu trữ. Trường bị ẩn khỏi hồ sơ mới, vẫn giữ trong nhật ký hoạt động và lịch sử. Không thể hoàn tác việc lưu trữ.",
   "cf.renamePrompt": "Nhãn mới",
   "cf.renamed": "Đã đổi tên thành “{label}”",
   "cf.audit.title": "Thay đổi trường gần đây",
@@ -8922,7 +8920,7 @@ export const vi = {
   "cf.retired": "Đã ngừng dùng",
   "cf.retire.title": "Chuyển “{label}” vào kho lưu trữ?",
   "cf.retire.body":
-    "Trường sẽ bị ẩn khỏi hồ sơ mới và bộ lọc. Giá trị đã lưu vẫn được giữ.",
+    "Trường sẽ bị ẩn khỏi hồ sơ mới và bộ lọc. Giá trị đã lưu vẫn được giữ. Không thể hoàn tác việc lưu trữ.",
   "cf.retire.lists":
     "Các danh sách động này lọc theo trường này. Các danh sách này vẫn hoạt động với giá trị đã lưu, và mỗi danh sách sẽ nhắc thành viên phụ trách thay điều kiện lọc:",
   "cf.retire.unseen_one":

@@ -5139,12 +5139,10 @@ export const de = {
   "analytics.field.direction": "Richtung",
   "analytics.field.forecast_category": "Prognosekategorie",
   "analytics.field.host_user_id": "Organisiert von",
-  "analytics.field.key": "Projektschlüssel",
   "analytics.field.kind": "Aktivitätstyp",
   "analytics.field.last_activity_at": "Letzte Aktivität",
   "analytics.field.lost_reason": "Verlustgrund",
   "analytics.field.meeting_status": "Terminstatus",
-  "analytics.field.name": "Projektname",
   "analytics.field.open_commitments": "Offene Zusagen",
   "analytics.field.open_deal_value_minor": "Offener Deal-Wert",
   "analytics.field.overdue_commitments": "Überfällige Zusagen",
@@ -9132,7 +9130,7 @@ export const de = {
   "cf.edit": "Bezeichnung bearbeiten",
   "cf.archive": "Feld archivieren",
   "cf.archived":
-    "„{label}“ archiviert. Das Feld ist bei neuen Datensätzen ausgeblendet, bleibt in Audit-Log und Verlauf erhalten und lässt sich wiederherstellen.",
+    "„{label}“ archiviert. Das Feld ist bei neuen Datensätzen ausgeblendet, bleibt in Audit-Log und Verlauf erhalten. Das Archivieren lässt sich nicht rückgängig machen.",
   "cf.renamePrompt": "Neue Bezeichnung",
   "cf.renamed": "Umbenannt in „{label}“",
   "cf.audit.title": "Letzte Feldänderungen",
@@ -9143,7 +9141,7 @@ export const de = {
   "cf.retired": "Stillgelegt",
   "cf.retire.title": "„{label}“ archivieren?",
   "cf.retire.body":
-    "Das Feld verschwindet aus neuen Datensätzen und Filtern. Gespeicherte Werte bleiben erhalten.",
+    "Das Feld verschwindet aus neuen Datensätzen und Filtern. Gespeicherte Werte bleiben erhalten. Das Archivieren lässt sich nicht rückgängig machen.",
   "cf.retire.lists":
     "Diese Live-Listen filtern danach. Mit den gespeicherten Werten funktionieren sie weiter und bitten ihre Verantwortlichen, die Bedingung zu ersetzen:",
   "cf.retire.unseen_one":

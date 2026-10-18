@@ -5218,12 +5218,10 @@ export const en = {
   "analytics.field.direction": "Direction",
   "analytics.field.forecast_category": "Forecast category",
   "analytics.field.host_user_id": "Meeting host",
-  "analytics.field.key": "Project key",
   "analytics.field.kind": "Activity type",
   "analytics.field.last_activity_at": "Last activity",
   "analytics.field.lost_reason": "Lost reason",
   "analytics.field.meeting_status": "Meeting status",
-  "analytics.field.name": "Project name",
   "analytics.field.open_commitments": "Open commitments",
   "analytics.field.open_deal_value_minor": "Open deal value",
   "analytics.field.overdue_commitments": "Overdue commitments",
@@ -9245,7 +9243,7 @@ export const en = {
   "cf.edit": "Edit label",
   "cf.archive": "Archive field",
   "cf.archived":
-    "“{label}” archived. It is hidden from new records, kept in audit and history, and can be restored.",
+    "“{label}” archived. It is hidden from new records and kept in audit and history. Archiving cannot be undone.",
   "cf.renamePrompt": "New label",
   "cf.renamed": "Renamed to “{label}”",
   "cf.audit.title": "Recent field changes",
@@ -9256,7 +9254,7 @@ export const en = {
   "cf.retired": "Retired",
   "cf.retire.title": "Archive “{label}”?",
   "cf.retire.body":
-    "It is hidden from new records and filters. The values already stored are kept.",
+    "It is hidden from new records and filters. The values already stored are kept. Archiving cannot be undone.",
   "cf.retire.lists":
     "These Live Lists filter on it. They keep working on the stored values, and each asks its steward to replace the clause:",
   "cf.retire.unseen_one":
