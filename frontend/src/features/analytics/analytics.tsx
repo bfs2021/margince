@@ -348,7 +348,12 @@ function SectionBody({
         />
       ) : null;
     case "reports":
-      return <ReportingLibrary />;
+      return (
+        <ReportingLibrary
+          scope={selection?.scope}
+          ownLens={context?.default_scope.kind === "owner"}
+        />
+      );
     case "targets":
       return <ReportingTargets />;
     case "definitions":
