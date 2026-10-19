@@ -203,7 +203,7 @@ func TestAnAgentDoesNotReplaceAnOpenDraft(t *testing.T) {
 	}
 }
 
-// An agent reaches what its human reaches: a team manager who edits a team
+// An agent reaches what its human reaches. A team manager who edits a team
 // report they do not own can have an agent draft on it.
 func TestAnAgentDraftsForAnEditorWhoDoesNotOwnTheReport(t *testing.T) {
 	f := agentDraftsFixture(t)
