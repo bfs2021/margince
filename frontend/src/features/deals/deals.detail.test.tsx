@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { components } from "../../api/schema";
 import { RecordShell } from "../../app/testing/recordshell.testkit";
 import { formatMoney } from "../../format/format";
+import { translate } from "../../i18n";
 import { meFixture } from "../../testing/mefixture";
 import { DealScreen } from "./deals";
 import {
@@ -70,6 +71,7 @@ function stubDealBackend(
             id: "h1",
             actor_type: "human",
             actor_id: "u1",
+            actor_name: "Demo Admin",
             action: "update",
             occurred_at: "2026-07-13T10:00:00Z",
             summary: "Deal amount changed",
@@ -762,8 +764,8 @@ describe("DealScreen — History tab", () => {
     await userEvent.click(screen.getByRole("button", { name: /history/i }));
     await userEvent.click(screen.getByRole("button", { name: "Changes" }));
 
-    await waitFor(() =>
-      expect(screen.getByText("Deal amount changed")).toBeTruthy(),
+    await screen.findByText(
+      translate("en", "history.verb.update", { subject: "Demo Admin" }),
     );
   });
 });
