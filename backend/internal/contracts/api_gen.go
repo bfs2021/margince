@@ -33964,8 +33964,11 @@ type CreateCustomFieldRequest struct {
 	Label    string                         `json:"label"`
 	Object   CreateCustomFieldRequestObject `json:"object"`
 	Options  *[]string                      `json:"options,omitempty"`
-	Source   string                         `json:"source"`
-	Type     CreateCustomFieldRequestType   `json:"type"`
+
+	// ShowInCreate Whether the field is offered in create dialogs. Omitted means true. An import that keeps provenance from a previous system creates its field with this off.
+	ShowInCreate *bool                        `json:"show_in_create,omitempty"`
+	Source       string                       `json:"source"`
+	Type         CreateCustomFieldRequestType `json:"type"`
 }
 
 // CreateCustomFieldRequestObject defines model for CreateCustomFieldRequest.Object.
@@ -34718,7 +34721,7 @@ type CustomField struct {
 	Currency *string            `json:"currency,omitempty"`
 	Id       openapi_types.UUID `json:"id"`
 
-	// Label Display label; the only thing a rename updates.
+	// Label Display label; a rename changes it, and never the slug or column_name.
 	Label string `json:"label"`
 
 	// Object The existing core object this field is added to.
@@ -34726,6 +34729,9 @@ type CustomField struct {
 
 	// Options Allowed picklist values; present (non-empty) when `type=picklist`, null otherwise.
 	Options *[]string `json:"options,omitempty"`
+
+	// ShowInCreate Whether the field is offered in the create dialog of its object. Off keeps it out of create dialogs only: the record page still shows the field and edits its value.
+	ShowInCreate bool `json:"show_in_create"`
 
 	// Slug Admin-facing key the column_name derives from.
 	Slug string `json:"slug"`
@@ -44826,9 +44832,10 @@ type RemovalUndo struct {
 	AuditId openapi_types.UUID `json:"audit_id"`
 }
 
-// RenameCustomFieldRequest Merge-PATCH; `label` only — `column_name`, `object`, and `type` are absent from this request schema entirely (immutable, not just ignored if sent).
+// RenameCustomFieldRequest Merge-PATCH of the two settings a live field may change: `label` and `show_in_create`. At least one is required. `column_name`, `object`, and `type` are absent from this request schema entirely (immutable, not just ignored if sent).
 type RenameCustomFieldRequest struct {
-	Label *string `json:"label,omitempty"`
+	Label        *string `json:"label,omitempty"`
+	ShowInCreate *bool   `json:"show_in_create,omitempty"`
 }
 
 // RenderedBlock defines model for RenderedBlock.
@@ -71352,7 +71359,7 @@ type ServerInterface interface {
 	// Define a new custom field on an existing core object (a schema change).
 	// (POST /custom-fields)
 	CreateCustomField(w http.ResponseWriter, r *http.Request, params CreateCustomFieldParams)
-	// Rename a custom field's display label (not a schema change).
+	// Rename a custom field or change whether create dialogs offer it (not a schema change).
 	// (PATCH /custom-fields/{id})
 	RenameCustomField(w http.ResponseWriter, r *http.Request, id Id, params RenameCustomFieldParams)
 	// The Live Lists whose filter names this custom field.
@@ -75003,7 +75010,7 @@ func (_ Unimplemented) CreateCustomField(w http.ResponseWriter, r *http.Request,
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Rename a custom field's display label (not a schema change).
+// Rename a custom field or change whether create dialogs offer it (not a schema change).
 // (PATCH /custom-fields/{id})
 func (_ Unimplemented) RenameCustomField(w http.ResponseWriter, r *http.Request, id Id, params RenameCustomFieldParams) {
 	w.WriteHeader(http.StatusNotImplemented)

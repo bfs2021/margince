@@ -20,7 +20,7 @@ export function useProjectCreateForm({
   create: (values: Record<string, string>) => Promise<Project>;
 } {
   const t = useT();
-  const cf = useObjectCustomFields("project");
+  const cf = useObjectCustomFields("project", "create");
   const owner = useOwnerPicker(null);
   const core = projectFields(t, {
     owner,

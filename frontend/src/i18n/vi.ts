@@ -9101,6 +9101,14 @@ export const vi = {
     "Đã chuyển “{label}” vào kho lưu trữ. Trường bị ẩn khỏi hồ sơ mới, vẫn giữ trong nhật ký hoạt động và lịch sử. Không thể hoàn tác việc lưu trữ.",
   "cf.renamePrompt": "Nhãn mới",
   "cf.renamed": "Đã đổi tên thành “{label}”",
+  "cf.showInCreate": "Trong biểu mẫu tạo mới",
+  "cf.showInCreateHint":
+    "Khi tắt, trường chỉ hiện trên trang bản ghi và vẫn chỉnh sửa được ở đó.",
+  "cf.col.inCreate": "Trong biểu mẫu tạo mới",
+  "cf.showInCreateFor": "Hiện “{label}” trong biểu mẫu tạo mới",
+  "cf.shownInCreate": "Đã hiện “{label}” trong biểu mẫu tạo mới",
+  "cf.hiddenFromCreate":
+    "Đã ẩn “{label}” khỏi biểu mẫu tạo mới, vẫn còn trên trang bản ghi",
   "cf.audit.title": "Thay đổi trường gần đây",
   "audit.kind.customField": "Trường tùy chỉnh",
   "cf.audit.empty": "Chưa có thay đổi nào về trường tùy chỉnh.",

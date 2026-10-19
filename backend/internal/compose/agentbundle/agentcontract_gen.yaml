@@ -18093,14 +18093,14 @@ components:
         and filtering while the column and its values are preserved. Deliberately carries no
         `source`/`captured_by` — the catalog row itself has no such columns; provenance
         on create lives in the audit row.
-      required: [id, object, label, slug, type, status, column_name, created_by, created_at, updated_at]
+      required: [id, object, label, slug, type, status, column_name, show_in_create, created_by, created_at, updated_at]
       properties:
         id: {type: string, format: uuid}
         object:
           type: string
           enum: [contact, company, deal, lead, project, contract]
           description: The existing core object this field is added to.
-        label: {type: string, description: Display label; the only thing a rename updates.}
+        label: {type: string, description: 'Display label; a rename changes it, and never the slug or column_name.'}
         slug: {type: string, description: Admin-facing key the column_name derives from.}
         type:
           type: string
@@ -18123,6 +18123,10 @@ components:
           type: [array, 'null']
           items: {type: string}
           description: Allowed picklist values; present (non-empty) when `type=picklist`, null otherwise.
+        show_in_create:
+          type: boolean
+          description: >-
+            Whether the field is offered in the create dialog of its object. Off keeps it out of create dialogs only: the record page still shows the field and edits its value.
         created_by: {type: string, format: uuid}
         created_at: {type: string, format: date-time}
         updated_at: {type: string, format: date-time}

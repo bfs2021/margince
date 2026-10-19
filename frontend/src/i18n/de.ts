@@ -9339,6 +9339,14 @@ export const de = {
     "„{label}“ archiviert. Das Feld ist bei neuen Datensätzen ausgeblendet, bleibt in Audit-Log und Verlauf erhalten. Das Archivieren lässt sich nicht rückgängig machen.",
   "cf.renamePrompt": "Neue Bezeichnung",
   "cf.renamed": "Umbenannt in „{label}“",
+  "cf.showInCreate": "Beim Anlegen",
+  "cf.showInCreateHint":
+    "Ist es aus, steht das Feld nur auf der Datensatzseite und bleibt dort bearbeitbar.",
+  "cf.col.inCreate": "Beim Anlegen",
+  "cf.showInCreateFor": "„{label}“ beim Anlegen zeigen",
+  "cf.shownInCreate": "„{label}“ beim Anlegen eingeblendet",
+  "cf.hiddenFromCreate":
+    "„{label}“ beim Anlegen ausgeblendet, weiter auf der Datensatzseite",
   "cf.audit.title": "Letzte Feldänderungen",
   "audit.kind.customField": "Eigenes Feld",
   "cf.audit.empty": "Noch keine Änderungen an eigenen Feldern.",
