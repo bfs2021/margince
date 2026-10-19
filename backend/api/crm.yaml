@@ -16305,9 +16305,9 @@ paths:
             message has no assignee, so its owner is the owner of the record it is filed
             under — deal, then lead, then contact, then company, first owner found. A
             thread no owned record attributes to anybody is the customer nobody is looking
-            at, which is exactly what this queue is opened to find. Such a message stays
-            reachable from `mine` as well, on the ground that an unowned customer writing
-            in is everybody's until somebody takes them.
+            at, which is exactly what this queue is opened to find. Unassigned work stays
+            in this queue until somebody takes responsibility for it. `mine` requires
+            a verified personal assignment or an explicitly requested decision.
 
             WHAT A WIDER SCOPE REACHES. The record-bearing sources widen: tasks, deals
             going quiet, meetings and duplicate pairs are read under the caller's row
@@ -54169,6 +54169,11 @@ components:
       description: A staged 🟡 confirm-first action awaiting human decision.
       required: [id, kind, status, proposed_by, created_at]
       properties:
+        requested_decider_id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: The member explicitly asked to decide, independent of who has permission to approve.
         id: { type: string, format: uuid }
         kind: { type: string, description: 'Examples: coldstart | send_email | advance_deal | promote_lead | overnight | deal_follow_up | commitment_task.' }
         status: { type: string, enum: [pending, approved, rejected, expired] }
@@ -58998,6 +59003,11 @@ components:
         adds none.
       required: [id, source, actions]
       properties:
+        requested_decider_id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: The member explicitly asked to decide, independent of who has permission to approve.
         notice_origin: { $ref: '#/components/schemas/NoticeOrigin' }
         id: { type: string, description: "The owning record's id, as its own endpoint spells it." }
         source:

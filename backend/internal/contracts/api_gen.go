@@ -25518,10 +25518,13 @@ type Approval struct {
 	ProposedBy string `json:"proposed_by"`
 
 	// ProposedChange The staged diff/payload that will execute on approve.
-	ProposedChange   *map[string]interface{} `json:"proposed_change,omitempty"`
-	ResultEntityId   *openapi_types.UUID     `json:"result_entity_id,omitempty"`
-	ResultEntityType *string                 `json:"result_entity_type,omitempty"`
-	Status           ApprovalStatus          `json:"status"`
+	ProposedChange *map[string]interface{} `json:"proposed_change,omitempty"`
+
+	// RequestedDeciderId The member explicitly asked to decide, independent of who has permission to approve.
+	RequestedDeciderId *openapi_types.UUID `json:"requested_decider_id,omitempty"`
+	ResultEntityId     *openapi_types.UUID `json:"result_entity_id,omitempty"`
+	ResultEntityType   *string             `json:"result_entity_type,omitempty"`
+	Status             ApprovalStatus      `json:"status"`
 
 	// Summary One-line description of the proposed change.
 	Summary        *string             `json:"summary,omitempty"`
@@ -26573,6 +26576,9 @@ type AttentionItem struct {
 	// The band travels rather than the raw score, because a number between 0 and 100
 	// invites a client to draw a precision the §4 arithmetic does not claim.
 	Relationship *AttentionRelationshipFacts `json:"relationship,omitempty"`
+
+	// RequestedDeciderId The member explicitly asked to decide, independent of who has permission to approve.
+	RequestedDeciderId *openapi_types.UUID `json:"requested_decider_id,omitempty"`
 
 	// Source Which producer raised it, and therefore which endpoint its verbs go to.
 	Source AttentionItemSource `json:"source"`
@@ -58915,9 +58921,9 @@ type GetWorklistParams struct {
 	// message has no assignee, so its owner is the owner of the record it is filed
 	// under — deal, then lead, then contact, then company, first owner found. A
 	// thread no owned record attributes to anybody is the customer nobody is looking
-	// at, which is exactly what this queue is opened to find. Such a message stays
-	// reachable from `mine` as well, on the ground that an unowned customer writing
-	// in is everybody's until somebody takes them.
+	// at, which is exactly what this queue is opened to find. Unassigned work stays
+	// in this queue until somebody takes responsibility for it. `mine` requires
+	// a verified personal assignment or an explicitly requested decision.
 	//
 	// WHAT A WIDER SCOPE REACHES. The record-bearing sources widen: tasks, deals
 	// going quiet, meetings and duplicate pairs are read under the caller's row

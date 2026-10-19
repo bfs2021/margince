@@ -39734,6 +39734,11 @@ export interface components {
         };
         /** @description A staged 🟡 confirm-first action awaiting human decision. */
         Approval: {
+            /**
+             * Format: uuid
+             * @description The member explicitly asked to decide, independent of who has permission to approve.
+             */
+            readonly requested_decider_id?: string;
             /** Format: uuid */
             id: string;
             /** @description Examples: coldstart | send_email | advance_deal | promote_lead | overnight | deal_follow_up | commitment_task. */
@@ -44178,6 +44183,11 @@ export interface components {
          *     adds none.
          */
         AttentionItem: {
+            /**
+             * Format: uuid
+             * @description The member explicitly asked to decide, independent of who has permission to approve.
+             */
+            readonly requested_decider_id?: string;
             notice_origin?: components["schemas"]["NoticeOrigin"];
             /** @description The owning record's id, as its own endpoint spells it. */
             id: string;
@@ -64500,9 +64510,9 @@ export interface operations {
                  *     message has no assignee, so its owner is the owner of the record it is filed
                  *     under — deal, then lead, then contact, then company, first owner found. A
                  *     thread no owned record attributes to anybody is the customer nobody is looking
-                 *     at, which is exactly what this queue is opened to find. Such a message stays
-                 *     reachable from `mine` as well, on the ground that an unowned customer writing
-                 *     in is everybody's until somebody takes them.
+                 *     at, which is exactly what this queue is opened to find. Unassigned work stays
+                 *     in this queue until somebody takes responsibility for it. `mine` requires
+                 *     a verified personal assignment or an explicitly requested decision.
                  *
                  *     WHAT A WIDER SCOPE REACHES. The record-bearing sources widen: tasks, deals
                  *     going quiet, meetings and duplicate pairs are read under the caller's row
