@@ -54,6 +54,7 @@ func (s fixtureSeats) AdmittedAuthority(ctx context.Context, ws, human, _ ids.UU
 type agentDrafts struct {
 	draftsFixture
 	registry *agents.Registry
+	seats    fixtureSeats
 }
 
 func agentDraftsFixture(t *testing.T) agentDrafts {
@@ -69,7 +70,7 @@ func agentDraftsFixture(t *testing.T) agentDrafts {
 	}
 	registry := agents.NewRegistry(nil, auth.NewGate(seats))
 	agents.RegisterReportDraftTool(registry, reportDrafter(f.env.Pool))
-	return agentDrafts{draftsFixture: f, registry: registry}
+	return agentDrafts{draftsFixture: f, registry: registry, seats: seats}
 }
 
 // agentFor is an agent principal holding a write passport lent by human.
@@ -175,5 +176,66 @@ func TestTheDraftToolCannotChangeWhoSeesAReport(t *testing.T) {
 	if err != nil || after.Audience != f.report.Audience || after.DraftRevision != nil {
 		t.Errorf("after the refused call the reader sees audience %q with draft %v (%v), want %q and none",
 			after.Audience, after.DraftRevision, err, f.report.Audience)
+	}
+}
+
+// An agent does not replace a draft a person left open: editors preview it,
+// so it may be unpublished work. The person's draft stays as they saved it.
+func TestAnAgentDoesNotReplaceAnOpenDraft(t *testing.T) {
+	f := agentDraftsFixture(t)
+	id := ids.UUID(f.report.Id)
+	saved, err := f.service.SaveReportDraft(f.human, id, f.report.Version,
+		crmcontracts.ReportingReportDraftInput{Selection: f.shorter()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.draft(f.agentFor(f.human), t, map[string]any{"report_id": f.report.Id, "selection": f.selection()}); err == nil {
+		t.Fatal("an agent replaced a draft a person had open")
+	}
+	revisions, err := f.service.ListReportRevisions(f.human, id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	draft := revisions.Data[0]
+	if draft.State != "draft" || draft.Revision != *saved.DraftRevision ||
+		len(draft.Selection.Blocks) != len(f.shorter().Blocks) {
+		t.Errorf("the person's draft now reads %+v, want it as they saved it", draft)
+	}
+}
+
+// An agent reaches what its human reaches: a team manager who edits a team
+// report they do not own can have an agent draft on it.
+func TestAnAgentDraftsForAnEditorWhoDoesNotOwnTheReport(t *testing.T) {
+	f := agentDraftsFixture(t)
+	teamScope := f.selection()
+	teamScope.Scope = crmcontracts.ReportingScope{Kind: "team", Id: ptrUUID(f.env.Team1)}
+	report, err := f.service.CreateReport(f.human, crmcontracts.ReportingReportInput{
+		Name: "Team review", Audience: "team", AudienceTeamId: ptrUUID(f.env.Team1), Selection: teamScope,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	actor, ok := principal.Actor(f.human)
+	if !ok {
+		t.Fatal("missing actor")
+	}
+	actor.UserID = f.env.Rep3
+	actor.ID = "human:" + f.env.Rep3.String()
+	actor.TeamIDs = []ids.UUID{f.env.Team1}
+	actor.Permissions.RowScope = principal.RowScopeTeam
+	manager := principal.WithActor(f.human, actor)
+	f.seats[f.env.Rep3] = actor
+	opened, err := f.service.GetReport(manager, ids.UUID(report.Id))
+	if err != nil || opened.CanManage == nil || !*opened.CanManage {
+		t.Fatalf("the manager cannot edit the team report (%v), so the draft below proves nothing", err)
+	}
+	shorter := teamScope
+	shorter.Blocks = shorter.Blocks[:len(shorter.Blocks)-1]
+	drafted, err := f.draft(f.agentFor(manager), t, map[string]any{"report_id": report.Id, "selection": shorter})
+	if err != nil {
+		t.Fatalf("the manager's agent could not draft on a report the manager edits: %v", err)
+	}
+	if drafted.DraftRevision == nil {
+		t.Error("the agent's draft names no draft revision")
 	}
 }

@@ -62,6 +62,16 @@ func requireDraftWrite(ctx context.Context, action principal.Action) error {
 	return requireGrants(ctx, "report_definition", action)
 }
 
+// refuseAgentOverDraft keeps an agent from replacing an open draft. Editors
+// preview a draft, so it may be a person's unpublished work.
+func refuseAgentOverDraft(ctx context.Context, report crmcontracts.ReportingReport) error {
+	actor, ok := principal.Actor(ctx)
+	if ok && actor.Type == principal.PrincipalAgent && report.DraftRevision != nil {
+		return invalid("this report already has a draft; a person publishes or discards it before another is prepared")
+	}
+	return nil
+}
+
 // DraftNewReport creates a report only its author sees, so a new report starts
 // as private as a draft does.
 func (s *Service) DraftNewReport(ctx context.Context, name string, selection crmcontracts.ReportingSelection) (crmcontracts.ReportingReport, error) {
@@ -84,6 +94,9 @@ func (s *Service) SaveReportDraft(ctx context.Context, id ids.UUID, version int6
 			return err
 		}
 		if err := s.validateRevision(ctx, tx, &in.Selection); err != nil {
+			return err
+		}
+		if err := refuseAgentOverDraft(ctx, before); err != nil {
 			return err
 		}
 		replaced, err := s.draftSelection(ctx, tx, before)
