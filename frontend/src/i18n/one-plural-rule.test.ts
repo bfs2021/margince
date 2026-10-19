@@ -217,12 +217,12 @@ function findingsIn(path: string, source: string): Finding[] {
  * at 40ms each. The invariant is that the budgeted count stays AHEAD of the
  * real one, and the assertion below is what makes the ceiling arrive as a named
  * count rather than as a timeout when it stops being. The margin rule is the
- * one that survived three raises: size it against this tree's merge rate, never
+ * one that outlasted every raise: size it against this tree's merge rate, never
  * to the round number above today's count. A budget with thirty files of slack
  * fails next week, and every raise that only cleared the current tree was
- * followed by another. Measured at ~3.3ms per file on an idle ten-core machine
- * and unchanged under eight spinners — the cost is the parse, not contention
- * for a core. A CI runner is smaller and saturated by the rest of the suite
+ * followed by another. Measured locally at ~1.2ms per file on an idle ten-core
+ * machine. It was unchanged under eight spinners — the cost is the parse, not
+ * contention for a core. A CI runner is smaller and saturated by the rest of the suite
  * running in parallel, and needed more than 12.5ms per file there, so the
  * allowance is an order of magnitude over the local measurement rather than a
  * margin trimmed to fit.
