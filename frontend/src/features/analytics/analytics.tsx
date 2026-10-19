@@ -7,13 +7,13 @@ import { DataTable } from "../../design-system/datatable";
 import { FilterBar } from "../../design-system/filterbar";
 import { Panel, PanelBody, PanelIntro } from "../../design-system/panel";
 import { Popover } from "../../design-system/popover";
-import { QueryGate } from "../../design-system/querystates";
+import { QueryGate, QueryStates } from "../../design-system/querystates";
 import { RecordTabs } from "../../design-system/recordtabs";
 import { formatDateTime } from "../../format/format";
 import { type Locale, useLocale, useT } from "../../i18n";
 import type { MessageKey } from "../../i18n/en";
 import { useCan } from "../../lib/capability";
-import { unwrap } from "../../lib/problem";
+import { problemStatus, unwrap } from "../../lib/problem";
 import { useRoute } from "../../lib/router";
 import { stagesOfEveryPipeline } from "../deals/pipelinestages";
 import {
@@ -25,6 +25,7 @@ import {
 import type { Stage } from "./analytics.cells";
 import {
   type AnalyticsSelection,
+  scopeKey,
   useAnalyticsContext,
   useAnalyticsSelection,
 } from "./analytics.context";
@@ -259,6 +260,7 @@ export function AnalyticsScreen() {
           section={section}
           locale={locale}
           context={context.data}
+          contextQuery={context}
           selection={selection}
           onSelectScope={selectScope}
           scopeControl={scopeControl}
@@ -311,6 +313,7 @@ function SectionBody({
   section,
   locale,
   context,
+  contextQuery,
   selection,
   onSelectScope,
   scopeControl,
@@ -319,6 +322,7 @@ function SectionBody({
   section: Section;
   locale: Locale;
   context: components["schemas"]["AnalyticsContext"] | undefined;
+  contextQuery: ContextQuery;
   selection: AnalyticsSelection | null;
   onSelectScope: (scope: AnalyticsSelection["scope"]) => void;
   scopeControl: ReactNode;
@@ -367,6 +371,16 @@ function SectionBody({
           scopeControl={scopeControl}
         />
       ) : null;
+    case "pipeline":
+      return (
+        <PipelineSection
+          selection={selection}
+          contextQuery={contextQuery}
+          scopeControl={scopeControl}
+          stages={stages}
+          locale={locale}
+        />
+      );
     default:
       return (
         <>
@@ -381,4 +395,62 @@ function SectionBody({
         </>
       );
   }
+}
+
+type ContextQuery = Readonly<{
+  isPending: boolean;
+  isError: boolean;
+  error: unknown;
+  refetch: () => unknown;
+}>;
+
+// Deals follow the picker so Pipeline and Performance count one set of
+// records; Delivery does not, because a project is read company-wide. The
+// picker needs forecast access, so a deal reader refused it (403) keeps the
+// unscoped cards. Any other context failure is shown, never answered with
+// totals for a scope the link did not ask for.
+function PipelineSection({
+  selection,
+  contextQuery,
+  scopeControl,
+  stages,
+  locale,
+}: Readonly<{
+  selection: AnalyticsSelection | null;
+  contextQuery: ContextQuery;
+  scopeControl: ReactNode;
+  stages: readonly Stage[];
+  locale: Locale;
+}>) {
+  const t = useT();
+  const refused = problemStatus(contextQuery.error) === 403;
+  if (!selection && !refused) {
+    return (
+      <QueryStates
+        query={contextQuery}
+        pendingLabel={t("analytics.sectionPipeline")}
+      >
+        {null}
+      </QueryStates>
+    );
+  }
+  const scope = selection?.scope;
+  return (
+    <>
+      {scope && (
+        <FilterBar label={t("analytics.filters")}>{scopeControl}</FilterBar>
+      )}
+      {SECTION_REPORTS.pipeline.map((report) => (
+        <ReportCard
+          // Keyed by scope too, so an open explanation never outlives the
+          // records it explains.
+          key={scope ? `${report}:${scopeKey(scope)}` : report}
+          report={report}
+          stages={stages}
+          locale={locale}
+          scope={scope}
+        />
+      ))}
+    </>
+  );
 }
