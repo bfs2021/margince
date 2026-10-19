@@ -30,7 +30,7 @@ Also called: team forecast, my team's deals, manager view, team report.
 ### How do I see my pipeline report?
 To see your pipeline report in Margince, click **Analytics** in the sidebar and open the **Pipeline** tab.
 1. Click **Analytics**, then the **Pipeline** tab.
-2. Read the totals at the top. Then read **Open deals by stage** (deals, value and weighted value per stage), **Forecast categories** and **Open deals per company**.
+2. Read the totals at the top. Then read **Open deals by stage**, **Open pipeline by close month**, **Forecast categories** and **Open deals per company**.
 3. Press **Explain this number** on any card to see the deals behind it.
 The **Deals** board itself also shows each stage's total and weighted total at the top of its column. Also called: pipeline report, sales pipeline, deals by stage, funnel report.
 
@@ -169,17 +169,18 @@ this number."
 The **No category** tile appears only when a deal falls in it. A tile with
 nothing in it says **"No deals"**, never an empty mark.
 
+**Open pipeline by close month**: deals, value and weighted value per expected
+close month, in calendar order. **No close date** comes last.
+
 **Open deals per company**: company, currency, open deals, value without
 weighting, and share of open pipeline. These rows stay in their own currency
 and are grouped by company *and* currency. So two currencies on one company are
 two rows.
 
-The share is of the open pipeline in the same currency. It is shown only when
-the list holds every row and no deal is hidden from you. If not, there is no
-true total to take it from.
+The share is of the open pipeline in the same currency. It shows only when the
+list holds every row and no deal is hidden from you.
 
-Where not every deal carries an amount, a note says so:
-"{priced} of {total} priced".
+Where not every deal has an amount, a note says "{priced} of {total} priced".
 
 ## Performance
 

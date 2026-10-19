@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Gradion
 
 /** @vitest-environment happy-dom */
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
 import { formatMoney } from "../../format/format";
@@ -151,6 +151,20 @@ it("asks every pipeline card for the picked record scope, and leaves delivery co
       ),
     ).toEqual(pipelineReports.map(() => ({ kind: "team", id: "t-north" }))),
   );
+  // Two cards ask pipeline-current: by stage and by close month. Both follow
+  // the picker.
+  const byMonth = bodies.find(
+    (sent) =>
+      sent.key === "pipeline-current" &&
+      Array.isArray(sent.body.group_by) &&
+      sent.body.group_by.includes("close_month"),
+  );
+  expect(byMonth?.body.scope).toEqual({ kind: "team", id: "t-north" });
+  expect(byMonth?.body.aggregates).toContainEqual({
+    fn: "count",
+    field: "amount_base_minor",
+    as: "priced_deals",
+  });
 
   await userEvent
     .setup()
@@ -200,4 +214,67 @@ it("shows a failed context read instead of totals for a scope the link did not a
 
   expect(await screen.findByRole("alert", {}, { timeout: 5000 })).toBeTruthy();
   expect(bodies.some((sent) => sent.key === "pipeline-current")).toBe(false);
+});
+
+it("lists open pipeline by close month in calendar order, undated deals last", async () => {
+  vi.stubGlobal(
+    "fetch",
+    reportsStub({
+      closeMonthRows: [
+        {
+          close_month: null,
+          raw_minor: 9_000,
+          weighted_minor: 900,
+          deal_count: 1,
+        },
+        {
+          close_month: "2026-12",
+          raw_minor: 50_000,
+          weighted_minor: 10_000,
+          deal_count: 1,
+        },
+        {
+          close_month: "2026-11",
+          raw_minor: 70_000,
+          weighted_minor: 14_000,
+          deal_count: 2,
+        },
+      ],
+    }),
+  );
+  render(<AnalyticsScreen />);
+  await openPipeline();
+
+  const table = await screen.findByRole("table", {
+    name: "Open pipeline by close month",
+  });
+  const months = within(table)
+    .getAllByRole("row")
+    .slice(1)
+    .map((row) => within(row).getAllByRole("cell")[0]?.textContent);
+  expect(months).toEqual(["November 2026", "December 2026", "No close date"]);
+});
+
+it("says when a month's total leaves out deals without a price", async () => {
+  vi.stubGlobal(
+    "fetch",
+    reportsStub({
+      closeMonthRows: [
+        {
+          close_month: "2026-11",
+          raw_minor: 70_000,
+          weighted_minor: 14_000,
+          deal_count: 2,
+          priced_deals: 1,
+        },
+      ],
+    }),
+  );
+  render(<AnalyticsScreen />);
+  await openPipeline();
+
+  const table = await screen.findByRole("table", {
+    name: "Open pipeline by close month",
+  });
+  expect(within(table).getByText("1 of 2 priced")).toBeTruthy();
 });
