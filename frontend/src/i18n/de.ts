@@ -163,6 +163,28 @@ export const de = {
   "brief.weekly.numericPartial":
     "Einige Nachweise sind nicht verfügbar. Die Werte enthalten nur lesbare Datensätze mit bekanntem Wert.",
   "reporting.edit": "Bericht bearbeiten",
+  "reporting.saveDraft": "Als Entwurf speichern",
+  "reporting.draftKeepsName":
+    "Ein Entwurf behält Namen und Sichtbarkeit des Berichts. Um sie zu ändern, den Bericht direkt speichern.",
+  "reporting.draftEditNote":
+    "Gespeichert werden die Diagramme als Entwurf. Um Namen oder Sichtbarkeit zu ändern, zuerst den Entwurf veröffentlichen oder verwerfen.",
+  "reporting.draftOpen": "Entwurf {revision} ist noch nicht veröffentlicht",
+  "reporting.draftHidden":
+    "Wer den Bericht liest, sieht weiter die veröffentlichte Fassung. Den Entwurf vor dem Veröffentlichen ansehen.",
+  "reporting.draftPreviewing":
+    "Hier steht der Entwurf. Wer den Bericht liest, sieht weiter die veröffentlichte Fassung.",
+  "reporting.previewDraft": "Entwurf ansehen",
+  "reporting.showPublished": "Veröffentlichte Fassung zeigen",
+  "reporting.publishDraft": "Entwurf veröffentlichen",
+  "reporting.discardDraft": "Entwurf verwerfen",
+  "reporting.versions": "Versionen",
+  "reporting.savedBy": "Gespeichert von",
+  "reporting.revisionState.draft": "Entwurf",
+  "reporting.revisionState.published": "veröffentlicht",
+  "reporting.revisionState.earlier": "früher",
+  "reporting.restoreRevision": "Version {revision} wiederherstellen",
+  "reporting.restoreBlocked":
+    "Vor dem Wiederherstellen einer früheren Version den Entwurf veröffentlichen oder verwerfen.",
   "reporting.moveUp": "Nach oben",
   "reporting.moveDown": "Nach unten",
   "reporting.exportCsv": "CSV exportieren",

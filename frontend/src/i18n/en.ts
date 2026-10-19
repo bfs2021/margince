@@ -157,6 +157,28 @@ export const en = {
   "brief.weekly.numericPartial":
     "Some source evidence is unavailable. Figures include only readable, priced records.",
   "reporting.edit": "Edit report",
+  "reporting.saveDraft": "Save as draft",
+  "reporting.draftKeepsName":
+    "A draft keeps the report’s name and who sees it. To change those, save the report directly.",
+  "reporting.draftEditNote":
+    "This saves the charts as a draft. To change the name or who sees the report, publish or discard the draft first.",
+  "reporting.draftOpen": "Draft {revision} is not published yet",
+  "reporting.draftHidden":
+    "Readers still see the published report. Preview the draft before you publish it.",
+  "reporting.draftPreviewing":
+    "You are looking at the draft. Readers still see the published report.",
+  "reporting.previewDraft": "Preview draft",
+  "reporting.showPublished": "Show published report",
+  "reporting.publishDraft": "Publish draft",
+  "reporting.discardDraft": "Discard draft",
+  "reporting.versions": "Versions",
+  "reporting.savedBy": "Saved by",
+  "reporting.revisionState.draft": "draft",
+  "reporting.revisionState.published": "published",
+  "reporting.revisionState.earlier": "earlier",
+  "reporting.restoreRevision": "Restore version {revision}",
+  "reporting.restoreBlocked":
+    "Publish or discard the draft before you restore an earlier version.",
   "reporting.moveUp": "Move up",
   "reporting.moveDown": "Move down",
   "reporting.exportCsv": "Export CSV",
