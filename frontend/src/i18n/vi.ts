@@ -273,6 +273,13 @@ export const vi = {
   "reporting.targetBasis": "Kỳ mục tiêu",
   "reporting.month": "Tháng",
   "reporting.fiscal_quarter": "Quý tài chính",
+  "reporting.creditCapturedOwner":
+    "Ghi nhận cho thành viên chịu trách nhiệm deal lúc lưu bản này",
+  "reporting.creditCurrentOwner":
+    "Ghi nhận cho thành viên đang chịu trách nhiệm deal",
+  "reporting.creditQualifyingOwner":
+    "Ghi nhận cho thành viên chịu trách nhiệm lúc deal đủ điều kiện",
+  "reporting.targetPeriodElapsed": "Đã qua {percent}% thời gian mục tiêu",
   "reporting.closeWindow": "Khoảng dự kiến chốt",
   "reporting.all_open": "Tất cả deal đang mở",
   "reporting.median": "Số ngày trung vị",

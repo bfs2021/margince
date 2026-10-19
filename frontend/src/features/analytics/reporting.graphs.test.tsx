@@ -511,3 +511,81 @@ it("shows how many priced deals make each stage's value", () => {
     screen.getByRole("button", { name: /Proposal: .+ · 7 priced deals$/ }),
   ).toBeInTheDocument();
 });
+
+function ownerChartEvaluation(withTargets: boolean) {
+  return {
+    ...reportingStoryEvaluation,
+    context: {
+      ...reportingStoryEvaluation.context,
+      evaluated_at: "2026-10-16T00:00:00Z",
+      target_interval: {
+        start_at: "2026-10-01T00:00:00Z",
+        end_at: "2026-10-31T00:00:00Z",
+      },
+    },
+    charts: reportingStoryEvaluation.charts
+      .filter(
+        (chart) =>
+          chart.kind === "owner_attainment" && chart.metric === "bookings_won",
+      )
+      .map((chart) => ({
+        ...chart,
+        points: chart.points.map((point) => ({
+          ...point,
+          target: withTargets ? 100_000 : undefined,
+        })),
+      })),
+  } satisfies typeof reportingStoryEvaluation;
+}
+
+it("says whom an owner chart credits and how much of the target period has passed", () => {
+  installFetchStub(reportingStoryRoutes());
+  render(
+    <StoryProviders>
+      <ReportingCharts
+        evaluation={ownerChartEvaluation(true)}
+        onEvidence={() => {}}
+      />
+    </StoryProviders>,
+  );
+  expect(
+    screen.getByText("Credited to each deal’s current owner"),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("50% of the target period has passed"),
+  ).toBeInTheDocument();
+});
+
+it("says nothing about the target period where no target applies to the chart", () => {
+  installFetchStub(reportingStoryRoutes());
+  render(
+    <StoryProviders>
+      <ReportingCharts
+        evaluation={ownerChartEvaluation(false)}
+        onEvidence={() => {}}
+      />
+    </StoryProviders>,
+  );
+  expect(screen.queryByText(/of the target period has passed/)).toBeNull();
+});
+
+it("credits a saved edition's sales to the owner it captured", () => {
+  installFetchStub(reportingStoryRoutes());
+  render(
+    <StoryProviders>
+      <ReportingCharts
+        evaluation={ownerChartEvaluation(true)}
+        editionId="e-1"
+        onEvidence={() => {}}
+      />
+    </StoryProviders>,
+  );
+  expect(
+    screen.getByText(
+      "Credited to each deal’s owner when this edition was captured",
+    ),
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByText("Credited to each deal’s current owner"),
+  ).toBeNull();
+});
