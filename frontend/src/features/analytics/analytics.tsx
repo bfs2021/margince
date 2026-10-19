@@ -30,6 +30,7 @@ import {
   useAnalyticsSelection,
 } from "./analytics.context";
 import { type DataCoverageRow, useDataCoverage } from "./analytics.coverage";
+import { FirstRunNotice } from "./analytics.firstrun";
 import { ForecastView, SharedForecastView } from "./analytics.forecast";
 import { sourceName } from "./analytics.forecast.review";
 import { MyOutcomesView } from "./analytics.outcomes";
@@ -256,6 +257,7 @@ export function AnalyticsScreen() {
         }
       />
       <div className="analytics-body">
+        {DEAL_SECTIONS.includes(section) && <FirstRunNotice />}
         <SectionBody
           section={section}
           locale={locale}
@@ -292,6 +294,14 @@ const SETUP_LABEL: Readonly<Record<SetupSection, MessageKey>> = {
   definitions: "reporting.definitions",
   coverage: "analytics.sectionCoverage",
 };
+
+// The sections whose figures are about deals, where "no deals yet" explains
+// an empty page. Setup, delivery and custom reports measure other things.
+const DEAL_SECTIONS: readonly Section[] = [
+  "performance",
+  "pipeline",
+  "forecast",
+];
 
 function isSetupSection(section: Section): section is SetupSection {
   return section in SETUP_LABEL;
