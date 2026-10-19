@@ -121,6 +121,9 @@ export const en = {
     "Snapshot queued. It will appear here when ready.",
   "reporting.createReport": "Create from Performance",
   "reporting.newCustomReport": "New custom report",
+  "reporting.stageAmountDeals_one": "{amount} · {count} priced deal",
+  "reporting.stageAmountDeals_other": "{amount} · {count} priced deals",
+  "reporting.stageDeals": "Priced deals",
   "reporting.observations_one": "Observation: {count}",
   "reporting.observations_other": "Observations: {count}",
   "reporting.observationsUnavailable": "Sample size unavailable",
@@ -5756,6 +5759,7 @@ export const en = {
   "forecast.confirmed": "Close date confirmed",
   "forecast.fxMissing": "Exchange rate missing",
   "analytics.reportForecast": "Forecast categories",
+  "analytics.shareOfOpenPipeline": "Share of open pipeline",
   "analytics.reportOpenByCompany": "Open deals per company",
   "analytics.retiredPipeline": "{name} (retired)",
   "analytics.forecastBanner":

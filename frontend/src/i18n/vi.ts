@@ -135,6 +135,9 @@ export const vi = {
     "Đang chờ chụp. Ảnh chụp sẽ hiện ở đây khi sẵn sàng.",
   "reporting.createReport": "Tạo từ Hiệu suất",
   "reporting.newCustomReport": "Báo cáo tùy chỉnh mới",
+  "reporting.stageAmountDeals_one": "{amount} · gồm {count} deal có giá",
+  "reporting.stageAmountDeals_other": "{amount} · gồm {count} deal có giá",
+  "reporting.stageDeals": "Deal có giá",
   "reporting.observations_one": "Quan sát: {count}",
   "reporting.observations_other": "Quan sát: {count}",
   "reporting.observationsUnavailable": "Không rõ cỡ mẫu",
@@ -5568,6 +5571,7 @@ export const vi = {
   "forecast.confirmed": "Đã xác nhận ngày chốt",
   "forecast.fxMissing": "Thiếu tỷ giá",
   "analytics.reportForecast": "Danh mục dự báo",
+  "analytics.shareOfOpenPipeline": "Tỷ trọng pipeline đang mở",
   "analytics.reportOpenByCompany": "Deal đang mở theo công ty",
   "analytics.retiredPipeline": "{name} (đã ngừng dùng)",
   "analytics.forecastBanner":

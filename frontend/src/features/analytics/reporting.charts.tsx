@@ -9,9 +9,15 @@ import {
   RangeChart,
 } from "../../design-system/report-charts";
 import { Waterfall } from "../../design-system/waterfall";
-import { formatDateTime, formatMoneyCompact } from "../../format/format";
-import { type Translator, useLocale, useT } from "../../i18n";
+import {
+  formatDateTime,
+  formatMoneyCompact,
+  formatNumber,
+  MONEY_ABSENT,
+} from "../../format/format";
+import { type Translator, useLocale, usePlural, useT } from "../../i18n";
 import { ChartContext } from "./reporting.chartcontext";
+import { withDealCount } from "./reporting.dealcount";
 import { MetricsTable } from "./reporting.metricstable";
 import {
   blockLabel,
@@ -159,6 +165,7 @@ function ChartBody({
   onEvidence: EvidenceAction;
 }>) {
   const t = useT();
+  const plural = usePlural();
   const { locale } = useLocale();
   const format = (value: number | null | undefined) =>
     reportingAmount(value, chart.unit, evaluation.context.currency, locale);
@@ -277,16 +284,21 @@ function ChartBody({
                       key: point.key,
                       label: point.label,
                       value: point.value,
-                      amount: reportingMoneyUnit(
-                        chart.unit,
-                        evaluation.context.currency,
-                      )
-                        ? formatMoneyCompact(
-                            point.value,
-                            evaluation.context.currency,
-                            locale,
-                          )
-                        : point.amount,
+                      amount: withDealCount(
+                        reportingMoneyUnit(
+                          chart.unit,
+                          evaluation.context.currency,
+                        )
+                          ? formatMoneyCompact(
+                              point.value,
+                              evaluation.context.currency,
+                              locale,
+                            )
+                          : point.amount,
+                        point.observations,
+                        plural,
+                        locale,
+                      ),
                     },
                   ],
             )}
@@ -314,6 +326,14 @@ function ChartBody({
                   key: "value",
                   header: t("reporting.actual"),
                   render: (point) => format(point.value),
+                },
+                {
+                  key: "deals",
+                  header: t("reporting.stageDeals"),
+                  render: (point) =>
+                    point.observations == null
+                      ? MONEY_ABSENT
+                      : formatNumber(point.observations, locale),
                 },
               ]}
             />

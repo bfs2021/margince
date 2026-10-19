@@ -127,6 +127,9 @@ export const de = {
     "Der Snapshot ist geplant und wird hier angezeigt, sobald er fertig ist.",
   "reporting.createReport": "Aus Performance erstellen",
   "reporting.newCustomReport": "Neuer eigener Bericht",
+  "reporting.stageAmountDeals_one": "{amount} · {count} bepreister Deal",
+  "reporting.stageAmountDeals_other": "{amount} · {count} bepreiste Deals",
+  "reporting.stageDeals": "Bepreiste Deals",
   "reporting.observations_one": "Beobachtung: {count}",
   "reporting.observations_other": "Beobachtungen: {count}",
   "reporting.observationsUnavailable": "Stichprobengröße nicht verfügbar",
@@ -5702,6 +5705,7 @@ export const de = {
   "forecast.confirmed": "Abschlussdatum bestätigt",
   "forecast.fxMissing": "Wechselkurs fehlt",
   "analytics.reportForecast": "Prognosekategorien",
+  "analytics.shareOfOpenPipeline": "Anteil an offener Pipeline",
   "analytics.reportOpenByCompany": "Offene Deals pro Unternehmen",
   "analytics.retiredPipeline": "{name} (stillgelegt)",
   "analytics.forecastBanner":
