@@ -5574,6 +5574,17 @@ export const vi = {
   "settings.removedItem": "Đã gỡ “{name}”",
   "settings.removed": "Đã gỡ",
   "settings.saved": "Đã lưu",
+  "settings.lockedBy.flag": "Đặt bởi {name} (dòng lệnh). Đổi giá trị tại đó.",
+  "settings.lockedBy.env":
+    "Đặt bởi {name} (biến môi trường). Đổi giá trị tại đó.",
+  "settings.lockedBy.env_file":
+    "Đặt bởi {name} trong {file}. Đổi giá trị tại đó.",
+  "settings.lockedBy.config_file":
+    "Đặt bởi {name} trong {file}. Đổi giá trị tại đó.",
+  "settings.lockedBy.env_file_unnamed":
+    "Đặt bởi {name} (tệp .env). Đổi giá trị tại đó.",
+  "settings.lockedBy.config_file_unnamed":
+    "Đặt bởi {name} (tệp cấu hình). Đổi giá trị tại đó.",
   "settings.signatureFromTemplate": "Mẫu của công ty",
   "settings.signatureTemplateHint":
     "Thư gửi đi dùng mẫu chữ ký của công ty. Mẫu tự điền tên, chức danh và số điện thoại.",
@@ -9386,6 +9397,35 @@ export const vi = {
   "settings.tab.model-calls": "Nhật ký lượt gọi AI",
   "settings.tab.audit": "Nhật ký hoạt động",
   "settings.tab.system-health": "Tình trạng hệ thống",
+  "settings.page.configuration.sub": "Mọi thiết lập và nguồn của giá trị.",
+  "settings.tab.configuration": "Cấu hình",
+  "configuration.title": "Cấu hình",
+  "configuration.sub":
+    "Mọi thiết lập mà bản cài đặt này đọc, giá trị và nguồn của nó. Trang này chỉ hiển thị. Thiết lập bị khóa được đổi ở nơi nguồn của nó chỉ ra.",
+  "configuration.search": "Lọc theo khóa hoặc biến môi trường",
+  "configuration.noMatch": "Không có thiết lập nào khớp với bộ lọc này.",
+  "configuration.col.key": "Khóa",
+  "configuration.col.value": "Giá trị",
+  "configuration.col.source": "Nguồn",
+  "configuration.col.detail": "Chi tiết",
+  "configuration.secret": "Bí mật",
+  "configuration.unset": "Chưa đặt",
+  "configuration.emptyValue": "Trống",
+  "configuration.source.database": "Đã lưu trong ứng dụng",
+  "configuration.source.default": "Giá trị mặc định",
+  "configuration.source.unset": "Chưa đặt ở đây",
+  "configuration.source.flag": "Dòng lệnh",
+  "configuration.source.env": "Môi trường",
+  "configuration.source.env_file": "Tệp .env",
+  "configuration.source.config_file": "Tệp cấu hình",
+  "configuration.noValue": "Không có giá trị",
+  "configuration.toggle": "Xem chi tiết của {key}",
+  "configuration.detail.value": "Giá trị đầy đủ",
+  "configuration.detail.default": "Mặc định: {value}",
+  "configuration.detail.none": "không có",
+  "configuration.detail.type": "Kiểu: {type}",
+  "configuration.detail.flag": "Cờ: {flag}",
+  "configuration.detail.readBy": "Chương trình đọc: {programs}",
   "settings.tab.reset": "Đặt lại dữ liệu",
   "settings.group.me": "Cá nhân",
   "settings.group.company": "Công ty",
@@ -10820,8 +10860,6 @@ export const vi = {
   "oauthApp.microsoft.removeConfirmBody":
     "Không thể đọc lại client secret, nên muốn khôi phục ứng dụng phải nhập lại client ID và secret từ cổng Entra. Kết nối thư và lịch Outlook dùng ứng dụng này; hộp thư Google và IMAP không bị ảnh hưởng. Bước thiết lập ban đầu sẽ hỏi lại ứng dụng.",
   "oauthApp.configured": "Đang dùng: {clientId}",
-  "oauthApp.fromEnvironment":
-    "Đang dùng theo cấu hình của bản cài đặt này: {clientId}. Ứng dụng lưu tại đây sẽ thay thế cấu hình này cho đến khi bị gỡ.",
   "oauthApp.pinnedToDirectory": "Đã gắn với thư mục {tenant}.",
   "oauthApp.replaceHint":
     "Cặp mới sẽ thay thế cặp đã lưu. Các kết nối hiện có vẫn hoạt động cho đến khi kết nối lại.",

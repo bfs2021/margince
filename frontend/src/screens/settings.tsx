@@ -66,6 +66,7 @@ import { AcquisitionSourcesCard } from "./acquisitionsources";
 import { ConnectionOutcomesCard } from "./connection-outcomes";
 import { FinanceSourceCard } from "./financesource";
 import { FollowUpSettingsCard } from "./followupsettings";
+import { InstallationConfigurationPage } from "./installation-configuration";
 import { LicenseCard } from "./license";
 import { NotificationSettingsCard } from "./notification-settings";
 import { FxRatesCard } from "./rates";
@@ -276,6 +277,8 @@ export function tabContent(id: SettingsPageId, route?: Route): ReactNode {
       return <AuditLogCard />;
     case "system-health":
       return <SystemHealthPage />;
+    case "configuration":
+      return <InstallationConfigurationPage />;
     case "extensions":
       return <ExtensionAccessCard />;
     case "reset":
@@ -285,15 +288,10 @@ export function tabContent(id: SettingsPageId, route?: Route): ReactNode {
   }
 }
 
-// What YOU are connected to. Most surfaces here read a per-user seam — the
-// mail connector list is scoped to the calling human server-side (capture is
-// per-user, RC-8), and both LinkedIn surfaces read `/me`. So this belongs to the
-// personal group, and needs no grant: a mailbox nobody else can see is not
-// company configuration, and the entry that used to hold both kinds could
-// not say so.
-//
-// It is not WHOLLY personal, which is why the catalog marks it `mixed`:
-// ConnectorsCard's second panel is the workspace's Telegram bot, and the
+// What YOU are connected to. Most surfaces here read a per-user seam: the
+// server scopes mail connectors to the caller, and LinkedIn reads `/me`. So it
+// sits in the personal group and needs no grant. The catalog marks it `mixed`:
+// ConnectorsCard's second panel is the workspace's Telegram bot. The
 // mail-sharing row states a rule that is changed on Capture rules.
 function ConnectionsTab() {
   return (

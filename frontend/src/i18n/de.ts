@@ -5707,6 +5707,18 @@ export const de = {
   "settings.removedItem": "„{name}“ entfernt",
   "settings.removed": "Entfernt",
   "settings.saved": "Gespeichert",
+  "settings.lockedBy.flag":
+    "Festgelegt durch {name} (Befehlszeile). Ändere den Wert dort.",
+  "settings.lockedBy.env":
+    "Festgelegt durch {name} (Umgebung). Ändere den Wert dort.",
+  "settings.lockedBy.env_file":
+    "Festgelegt durch {name} in {file}. Ändere den Wert dort.",
+  "settings.lockedBy.config_file":
+    "Festgelegt durch {name} in {file}. Ändere den Wert dort.",
+  "settings.lockedBy.env_file_unnamed":
+    "Festgelegt durch {name} (.env-Datei). Ändere den Wert dort.",
+  "settings.lockedBy.config_file_unnamed":
+    "Festgelegt durch {name} (Konfigurationsdatei). Ändere den Wert dort.",
   "settings.signatureFromTemplate": "Unternehmensvorlage",
   "settings.signatureTemplateHint":
     "Deine E-Mails enden mit der Signaturvorlage deines Unternehmens. Die Vorlage füllt deinen Namen, deinen Jobtitel und deine Telefonnummer ein.",
@@ -9634,6 +9646,36 @@ export const de = {
   "settings.tab.model-calls": "KI-Aufrufprotokoll",
   "settings.tab.audit": "Audit-Log",
   "settings.tab.system-health": "Systemzustand",
+  "settings.page.configuration.sub":
+    "Jede Einstellung und woher ihr Wert stammt.",
+  "settings.tab.configuration": "Konfiguration",
+  "configuration.title": "Konfiguration",
+  "configuration.sub":
+    "Jede Einstellung, die diese Installation liest, mit ihrem Wert und ihrer Herkunft. Diese Seite zeigt sie nur an. Eine gesperrte Einstellung änderst du dort, wo ihre Quelle es sagt.",
+  "configuration.search": "Nach Schlüssel oder Umgebungsvariable filtern",
+  "configuration.noMatch": "Keine Einstellung entspricht diesem Filter.",
+  "configuration.col.key": "Schlüssel",
+  "configuration.col.value": "Wert",
+  "configuration.col.source": "Quelle",
+  "configuration.col.detail": "Details",
+  "configuration.secret": "Geheim",
+  "configuration.unset": "Nicht gesetzt",
+  "configuration.emptyValue": "Leer",
+  "configuration.source.database": "In der App gespeichert",
+  "configuration.source.default": "Standardwert",
+  "configuration.source.unset": "Hier nicht gesetzt",
+  "configuration.source.flag": "Kommandozeile",
+  "configuration.source.env": "Umgebung",
+  "configuration.source.env_file": ".env-Datei",
+  "configuration.source.config_file": "Konfigurationsdatei",
+  "configuration.noValue": "Kein Wert",
+  "configuration.toggle": "Details zu {key} anzeigen",
+  "configuration.detail.value": "Vollständiger Wert",
+  "configuration.detail.default": "Standard: {value}",
+  "configuration.detail.none": "keiner",
+  "configuration.detail.type": "Typ: {type}",
+  "configuration.detail.flag": "Option: {flag}",
+  "configuration.detail.readBy": "Gelesen von: {programs}",
   "settings.tab.reset": "Daten zurücksetzen",
   "settings.group.me": "Du",
   "settings.group.company": "Unternehmen",
@@ -11102,8 +11144,6 @@ export const de = {
   "oauthApp.microsoft.removeConfirmBody":
     "Der Clientschlüssel lässt sich nicht wieder auslesen. Um die App wiederherzustellen, müssen Client-ID und Clientschlüssel erneut aus dem Entra-Portal eingetragen werden. Outlook-E-Mail- und -Kalender-Verbindungen nutzen diese App. Google- und IMAP-Postfächer sind nicht betroffen. Die Ersteinrichtung fragt erneut nach einer App.",
   "oauthApp.configured": "In Verwendung: {clientId}",
-  "oauthApp.fromEnvironment":
-    "Aus der Konfiguration dieser Installation in Verwendung: {clientId}. Eine hier gespeicherte App hat Vorrang, bis sie entfernt wird.",
   "oauthApp.pinnedToDirectory": "An das Verzeichnis {tenant} gebunden.",
   "oauthApp.replaceHint":
     "Ein neues Paar ersetzt das gespeicherte. Bestehende Verbindungen funktionieren weiter, bis sie neu verbunden werden.",
