@@ -23,6 +23,7 @@ import { Select } from "../../design-system/select";
 import { calendarDay } from "../../format/calendarday";
 import { useT } from "../../i18n";
 import {
+  activityFileStaleKeys,
   activityFollowUpsKey,
   loggedActivityKeys,
   TASK_QUEUE_KEY,
@@ -43,6 +44,13 @@ import {
 import { ActivityBodyField } from "./activitybodyfield";
 import "./logactivity.css";
 import { FollowUpTaskFields } from "../../screens/followuptaskfields";
+import {
+  attachLoggedFiles,
+  LogActivityFilesField,
+  type PickedFile,
+  TranscriptUploadField,
+  useReportUnattached,
+} from "./logactivityfiles";
 import { MeetingAttendeeFields } from "./meetingattendees";
 
 const EMPTY_DRAFT: ActivityDraft = {
@@ -53,9 +61,6 @@ const EMPTY_DRAFT: ActivityDraft = {
   asTranscript: false,
   assigneeId: "",
 };
-
-// Plain text keeps transcript citations aligned with spoken lines, without cue headers.
-const ACCEPTED_TRANSCRIPT_EXTENSION = ".txt";
 
 // Meetings arrive through the calendar rather than a preselected form address.
 type OpeningKind = "note" | "task" | "call";
@@ -105,6 +110,7 @@ export function LogActivityForm({
   const formId = useId();
   const queryClient = useQueryClient();
   const recordZone = useRecordZone();
+  const reportUnattached = useReportUnattached();
   const [draft, setDraft] = useState<ActivityDraft>(() =>
     freshDraft(recordZone, askedKind),
   );
@@ -116,7 +122,7 @@ export function LogActivityForm({
       setDraft((current) => ({ ...current, kind: askedKind }));
     }
   }
-  const [fileError, setFileError] = useState<string | null>(null);
+  const [files, setFiles] = useState<readonly PickedFile[]>([]);
   // Who was in the room, asked for the kinds that are with a contact (see
   // KINDS_WITH_A_CONTACT). Only a company page cannot send one without a name.
   const [attendees, setAttendees] = useState<MeetingAttendees>(NO_ATTENDEES);
@@ -137,8 +143,9 @@ export function LogActivityForm({
       zone: string;
       attendees: MeetingAttendees;
       idempotencyKey: string;
+      files: readonly File[];
     }) => {
-      return unwrap(
+      const created = unwrap(
         await api.POST("/activities", {
           params: { header: { "Idempotency-Key": input.idempotencyKey } },
           body: activityRequestBody(
@@ -151,8 +158,12 @@ export function LogActivityForm({
         }),
         t,
       );
+      // After the create: a file needs the activity's id as its parent.
+      const unattached = await attachLoggedFiles(created.id, input.files);
+      return { id: created.id, unattached };
     },
-    onSuccess: (_data, input) => {
+    onSuccess: (logged, input) => {
+      reportUnattached(logged.unattached);
       const keys =
         entityType && entityId
           ? loggedActivityKeys(
@@ -167,9 +178,12 @@ export function LogActivityForm({
       if (input.draft.sourceActivityId)
         keys.push(activityFollowUpsKey(input.draft.sourceActivityId));
       keys.push(worklistKey);
+      if (input.files.length > 0)
+        keys.push(...activityFileStaleKeys(logged.id));
       for (const queryKey of keys) queryClient.invalidateQueries({ queryKey });
       setDraft(freshDraft(input.zone, onlyTasks ? "task" : undefined));
       setAttendees(NO_ATTENDEES);
+      setFiles([]);
       renewKey();
       onLogged?.();
     },
@@ -214,6 +228,7 @@ export function LogActivityForm({
           zone: recordZone,
           attendees,
           idempotencyKey,
+          files: files.map((held) => held.file),
         });
       })}
     >
@@ -328,38 +343,13 @@ export function LogActivityForm({
         />
       )}
       {transcript && (
-        <Field label={t("log.transcriptUpload")} hint={fileError ?? undefined}>
-          {(control) => (
-            <TextInput
-              {...control}
-              type="file"
-              accept={ACCEPTED_TRANSCRIPT_EXTENSION}
-              onChange={async (event) => {
-                const file = event.target.files?.[0];
-                event.target.value = "";
-                if (!file) {
-                  return;
-                }
-                if (
-                  !file.name
-                    .toLowerCase()
-                    .endsWith(ACCEPTED_TRANSCRIPT_EXTENSION)
-                ) {
-                  setFileError(t("log.transcriptUploadRejected"));
-                  return;
-                }
-                try {
-                  const text = await file.text();
-                  setFileError(null);
-                  setField({ body: text });
-                } catch {
-                  setFileError(t("log.transcriptUploadFailed"));
-                }
-              }}
-            />
-          )}
-        </Field>
+        <TranscriptUploadField onText={(body) => setField({ body })} />
       )}
+      <LogActivityFilesField
+        files={files}
+        onChange={setFiles}
+        disabled={log.isPending}
+      />
       <ErrorLine error={log.error} />
       {actions}
     </form>

@@ -2821,6 +2821,8 @@ export const vi = {
   "activity.detail.none": "Hoạt động này",
   "activity.followUps": "Công việc tiếp theo",
   "activity.noFollowUps": "Chưa có công việc tiếp theo",
+  "activity.files.empty": "Hoạt động này chưa có tệp nào.",
+  "activity.files.title": "Tệp của {subject}",
   "activity.followUpOpen": "Chưa hoàn thành",
   "activity.detail.withheldReason": "Nội dung hoạt động bị giữ lại",
   "activity.detail.when": "Thời gian",
@@ -4800,6 +4802,12 @@ export const vi = {
   "log.transcriptUpload": "Hoặc tải lên tệp",
   "log.transcriptUploadRejected": "Chỉ chấp nhận tệp .txt.",
   "log.transcriptUploadFailed": "Không thể đọc tệp. Dán trực tiếp văn bản vào.",
+  "log.files": "Đính kèm tệp",
+  "log.filesEmpty": "Thả tệp vào đây, hoặc bấm để chọn tệp",
+  "log.fileUnattached":
+    "Đã ghi hoạt động, nhưng chưa đính kèm được {filename}. {reason}",
+  "log.fileUncertain":
+    "Đã ghi hoạt động, nhưng việc tải lên {filename} chưa hoàn tất. Hãy kiểm tra tệp của hoạt động trước khi thêm lại.",
   "log.attendee": "Người tham dự",
   "log.otherAttendees": "Người tham dự khác",
   "log.removeAttendee": "Xóa {name}",
