@@ -12879,8 +12879,8 @@ export const de = {
     "{word}: Eine davon muss zutreffen. Drücke, damit alle zutreffen müssen.",
   "filters.group.all": "Alle davon",
   "filters.group.any": "Mindestens eine davon",
-  "filters.rowsMore": "Mehr zu diesen Bedingungen",
-  "filters.groupMore": "Mehr zu dieser Gruppe",
+  "filters.addGroupToGroup": "Untergruppe hinzufügen",
+  "filters.group.match": "Zu erfüllende Bedingungen",
   "filters.proposed": "Vorgeschlagen",
   "filters.switch.title": "Zu {records} wechseln?",
   "filters.switch.body.contacts":
@@ -13310,6 +13310,7 @@ export const de = {
   "filters.loadingVocabulary": "Felder werden geladen…",
   "filters.noFields": "Keine filterbaren Felder f\u00fcr diesen Datensatztyp.",
   "filters.resultsTitle": "Passende Datens\u00e4tze",
+  "filters.resultRefGone": "Entfernt oder für dich nicht sichtbar",
   "filters.resultsCaption":
     "Erste Seite der Treffer, zum Prüfen des Filters. Nicht die vollständige Auswahl.",
   "filters.noMatches":

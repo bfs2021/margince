@@ -12902,8 +12902,8 @@ export const en = {
     "{word}: match any of these. Press to match all.",
   "filters.group.all": "All of these",
   "filters.group.any": "Any of these",
-  "filters.rowsMore": "More for these conditions",
-  "filters.groupMore": "More for this group",
+  "filters.addGroupToGroup": "Add nested group",
+  "filters.group.match": "Conditions to match",
   "filters.proposed": "Proposed",
   "filters.switch.title": "Switch to {records}?",
   "filters.switch.body.contacts":
@@ -13329,6 +13329,7 @@ export const en = {
   "filters.loadingVocabulary": "Loading fields…",
   "filters.noFields": "No filterable fields for this record type.",
   "filters.resultsTitle": "Matching records",
+  "filters.resultRefGone": "Removed, or hidden from you",
   "filters.resultsCaption":
     "First page of matches, for checking the filter. Not the full selection.",
   "filters.noMatches":
