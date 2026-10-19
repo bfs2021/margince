@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	crmcontracts "github.com/margince/margince/backend/internal/contracts"
+	"github.com/margince/margince/backend/internal/platform/auth"
 	"github.com/margince/margince/backend/internal/shared/apperrors"
 	"github.com/margince/margince/backend/internal/shared/kernel/ids"
 	"github.com/margince/margince/backend/internal/shared/kernel/principal"
@@ -48,10 +49,32 @@ func refuseOpenDraft(report crmcontracts.ReportingReport) error {
 	return nil
 }
 
+// requireDraftWrite admits a human whose seat may write, or an agent acting
+// for one. A draft and a new private report change nothing another reader
+// sees, so an agent may prepare them. Publishing and sharing stay a human's.
+func requireDraftWrite(ctx context.Context, action principal.Action) error {
+	if err := auth.RequireActingForAHuman(ctx, "a report draft is prepared"); err != nil {
+		return err
+	}
+	if actor, _ := principal.Actor(ctx); !actor.SeatType.CanMutate() {
+		return apperrors.ErrPermissionDenied
+	}
+	return requireGrants(ctx, "report_definition", action)
+}
+
+// DraftNewReport creates a report only its author sees, so a new report starts
+// as private as a draft does.
+func (s *Service) DraftNewReport(ctx context.Context, name string, selection crmcontracts.ReportingSelection) (crmcontracts.ReportingReport, error) {
+	if err := requireDraftWrite(ctx, principal.ActionCreate); err != nil {
+		return crmcontracts.ReportingReport{}, err
+	}
+	return s.insertReport(ctx, crmcontracts.ReportingReportInput{Name: name, Audience: reportingPrivate, Selection: selection})
+}
+
 // SaveReportDraft stores the next revision as a draft only editors see. A
 // second save replaces the draft, which no reader, edition or schedule holds.
 func (s *Service) SaveReportDraft(ctx context.Context, id ids.UUID, version int64, in crmcontracts.ReportingReportDraftInput) (crmcontracts.ReportingReport, error) {
-	if err := requireReadWrite(ctx, "report_definition", principal.ActionUpdate); err != nil {
+	if err := requireDraftWrite(ctx, principal.ActionUpdate); err != nil {
 		return crmcontracts.ReportingReport{}, err
 	}
 	var out crmcontracts.ReportingReport
