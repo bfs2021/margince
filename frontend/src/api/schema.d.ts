@@ -41698,7 +41698,7 @@ export interface components {
             /** @description Optional; unique per workspace while live. */
             sku?: string | null;
             description?: string | null;
-            /** @description 'unit' | 'hour' | 'day' | …; display only, free text. */
+            /** @description A unit key (`piece`, `hour`, `day`, `month`, `flat_fee`) that a client shows in its reader's language, or any other unit as typed text. A row written before the keys may hold a known spelling such as `Tag`, which a client shows as its key. Display only. */
             unit: string;
             /**
              * Format: int64
@@ -41743,7 +41743,7 @@ export interface components {
             name: string;
             sku?: string | null;
             description?: string | null;
-            /** @description Defaults to 'unit'. */
+            /** @description A unit key (`piece`, `hour`, `day`, `month`, `flat_fee`), or any other unit as typed text. A known spelling such as `Stunde` or `hours` is stored as its key. Defaults to `piece`. */
             unit?: string | null;
             /** Format: int64 */
             unit_price_minor: number;
@@ -42529,6 +42529,7 @@ export interface components {
             /** Format: uuid */
             product_id?: string | null;
             description?: string | null;
+            /** @description A unit key (`piece`, `hour`, `day`, `month`, `flat_fee`), or any other unit as typed text. A known spelling such as `Stunde` or `hours` is stored as its key. Defaults to the product's unit, else `piece`. */
             unit?: string | null;
             /**
              * Format: double
