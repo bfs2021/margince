@@ -63,11 +63,11 @@ func requireDraftWrite(ctx context.Context, action principal.Action) error {
 }
 
 // refuseAgentOverDraft keeps an agent from replacing an open draft. Editors
-// preview a draft, so it may be a person's unpublished work.
+// preview a draft, so it may be a human's unpublished work.
 func refuseAgentOverDraft(ctx context.Context, report crmcontracts.ReportingReport) error {
 	actor, ok := principal.Actor(ctx)
 	if ok && actor.Type == principal.PrincipalAgent && report.DraftRevision != nil {
-		return invalid("this report already has a draft; a person publishes or discards it before another is prepared")
+		return invalid("this report already has a draft; an editor publishes or discards it before another is prepared")
 	}
 	return nil
 }

@@ -179,8 +179,8 @@ func TestTheDraftToolCannotChangeWhoSeesAReport(t *testing.T) {
 	}
 }
 
-// An agent does not replace a draft a person left open: editors preview it,
-// so it may be unpublished work. The person's draft stays as they saved it.
+// An agent does not replace a draft an editor left open: editors preview it,
+// so it may be unpublished work. The editor's draft stays as they saved it.
 func TestAnAgentDoesNotReplaceAnOpenDraft(t *testing.T) {
 	f := agentDraftsFixture(t)
 	id := ids.UUID(f.report.Id)
@@ -190,7 +190,7 @@ func TestAnAgentDoesNotReplaceAnOpenDraft(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := f.draft(f.agentFor(f.human), t, map[string]any{"report_id": f.report.Id, "selection": f.selection()}); err == nil {
-		t.Fatal("an agent replaced a draft a person had open")
+		t.Fatal("an agent replaced a draft an editor had open")
 	}
 	revisions, err := f.service.ListReportRevisions(f.human, id)
 	if err != nil {
@@ -199,7 +199,7 @@ func TestAnAgentDoesNotReplaceAnOpenDraft(t *testing.T) {
 	draft := revisions.Data[0]
 	if draft.State != "draft" || draft.Revision != *saved.DraftRevision ||
 		len(draft.Selection.Blocks) != len(f.shorter().Blocks) {
-		t.Errorf("the person's draft now reads %+v, want it as they saved it", draft)
+		t.Errorf("the editor's draft now reads %+v, want it as they saved it", draft)
 	}
 }
 
