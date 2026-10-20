@@ -185,6 +185,12 @@ describe("ComposeModal — channel reply", () => {
 });
 
 describe("TimelineActions", () => {
+  // The row's seldom-wanted verbs stand behind its menu.
+  async function openRowMenu() {
+    await userEvent.click(
+      await screen.findByRole("button", { name: "More actions" }),
+    );
+  }
   const email: Activity = {
     ...activity202,
     id: "a1",
@@ -196,16 +202,17 @@ describe("TimelineActions", () => {
     kind: "note",
   };
 
-  it("offers Reply on an email row and Relink alongside it", () => {
+  it("offers Reply on an email row and Relink alongside it", async () => {
     stubRoutes();
     render(
       <TimelineActions activity={email} entityType="deal" entityId="d1" />,
     );
     expect(screen.getByRole("button", { name: "Reply" })).toBeTruthy();
+    await openRowMenu();
     expect(screen.getByRole("button", { name: "Relink" })).toBeTruthy();
   });
 
-  it("offers Reply on a non-email row too, as the send path allows", () => {
+  it("offers Reply on a non-email row too, as the send path allows", async () => {
     // A send anchored to a note carries no RFC822 identity and starts a
     // conversation, which the backend handles. Gating this on kind === "email"
     // is what made "log a note → compose → send" unreachable in a workspace
@@ -215,6 +222,7 @@ describe("TimelineActions", () => {
     expect(screen.getByRole("button", { name: "Reply" })).toBeTruthy();
     // Relink is always available. The row is already linked to this timeline's
     // entity, and the Activity list payload carries no `links` to gate on.
+    await openRowMenu();
     expect(screen.getByRole("button", { name: "Relink" })).toBeTruthy();
   });
 
@@ -274,6 +282,7 @@ describe("TimelineActions", () => {
     // Relink renders at once, since it never waits on reachability. That
     // proves the component mounted, and that the missing Reply button is the
     // gate, not an unrendered tree.
+    await openRowMenu();
     expect(await screen.findByRole("button", { name: "Relink" })).toBeTruthy();
     await waitFor(() =>
       expect(screen.queryByRole("button", { name: "Reply" })).toBeNull(),
@@ -340,7 +349,7 @@ describe("TimelineActions", () => {
   // Both shapes are asserted, because that inference would tell them apart.
   // A captured row and a hand-typed one get the same answer: no audience
   // control on the row at all.
-  it("offers no audience control on an email row, whoever captured it", () => {
+  it("offers no audience control on an email row, whoever captured it", async () => {
     stubRoutes();
     const captured: Activity = {
       ...activity202,
@@ -352,6 +361,7 @@ describe("TimelineActions", () => {
       <TimelineActions activity={captured} entityType="deal" entityId="d1" />,
     );
     expect(screen.queryByRole("button", { name: "Share thread" })).toBeNull();
+    await openRowMenu();
     expect(
       screen.queryByRole("button", { name: "Change visibility" }),
     ).toBeNull();
@@ -369,6 +379,7 @@ describe("TimelineActions", () => {
     render(
       <TimelineActions activity={handTyped} entityType="deal" entityId="d1" />,
     );
+    await openRowMenu();
     expect(
       screen.queryByRole("button", { name: "Change visibility" }),
     ).toBeNull();
@@ -380,7 +391,7 @@ describe("TimelineActions", () => {
   // would open, take an answer, and refuse it with `audience_is_derived`. That
   // names a thread-level control the page does not have. A control that cannot
   // work is worse than none: someone keeping a conversation private presses it.
-  it("offers no audience control on a captured message whose audience is derived", () => {
+  it("offers no audience control on a captured message whose audience is derived", async () => {
     stubRoutes();
     render(
       <TimelineActions
@@ -396,6 +407,7 @@ describe("TimelineActions", () => {
         entityId="d1"
       />,
     );
+    await openRowMenu();
     expect(
       screen.queryByRole("button", { name: "Change visibility" }),
     ).toBeNull();
@@ -410,7 +422,7 @@ describe("TimelineActions", () => {
   // import row exists whatever it derived. Gating only on `audience_reason`
   // misses this row: Visibility opens, takes an answer, and the write is
   // refused with no working control on the page (margince#4152).
-  it("offers no audience control on a captured message with no audience_reason at all", () => {
+  it("offers no audience control on a captured message with no audience_reason at all", async () => {
     stubRoutes();
     render(
       <TimelineActions
@@ -427,13 +439,14 @@ describe("TimelineActions", () => {
       />,
     );
     expect(screen.queryByRole("button", { name: "Visibility" })).toBeNull();
+    await openRowMenu();
     expect(screen.getByRole("button", { name: "Relink" })).toBeTruthy();
   });
 
   // `manual` is a HUMAN's own answer, not the system's, so it stays theirs to
   // change. Without this the fix above would read as "any reason at all hides
   // the control", which withholds it from every row somebody has already set.
-  it("keeps the audience control on a row a human set the audience of", () => {
+  it("keeps the audience control on a row a human set the audience of", async () => {
     stubRoutes();
     render(
       <TimelineActions
@@ -447,6 +460,7 @@ describe("TimelineActions", () => {
         entityId="d1"
       />,
     );
+    await openRowMenu();
     expect(
       screen.getByRole("button", { name: "Change visibility" }),
     ).toBeTruthy();
@@ -454,7 +468,7 @@ describe("TimelineActions", () => {
 
   // A note, a call or a meeting derives no audience, so the row keeps the
   // control for every kind but email.
-  it("keeps the audience control on a row that is not an email", () => {
+  it("keeps the audience control on a row that is not an email", async () => {
     stubRoutes();
     render(
       <TimelineActions
@@ -463,6 +477,7 @@ describe("TimelineActions", () => {
         entityId="d1"
       />,
     );
+    await openRowMenu();
     expect(
       screen.getByRole("button", { name: "Change visibility" }),
     ).toBeTruthy();
@@ -517,6 +532,7 @@ describe("TimelineActions", () => {
       />,
     );
 
+    await openRowMenu();
     await userEvent.click(
       screen.getByRole("button", { name: "Change visibility" }),
     );
@@ -590,6 +606,7 @@ describe("TimelineActions", () => {
       />,
     );
 
+    await openRowMenu();
     await userEvent.click(
       screen.getByRole("button", { name: "Change visibility" }),
     );
@@ -606,7 +623,7 @@ describe("TimelineActions", () => {
   // A withheld row offers nothing: somebody outside the audience has no
   // standing to change who else is in it. The kind that still draws the
   // control is the one that has to prove this.
-  it("offers no audience control on a withheld row", () => {
+  it("offers no audience control on a withheld row", async () => {
     stubRoutes();
     render(
       <TimelineActions
@@ -620,6 +637,7 @@ describe("TimelineActions", () => {
         entityId="d1"
       />,
     );
+    await openRowMenu();
     expect(
       screen.queryByRole("button", { name: "Change visibility" }),
     ).toBeNull();

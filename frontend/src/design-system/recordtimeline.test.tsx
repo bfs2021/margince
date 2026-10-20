@@ -23,7 +23,6 @@ import {
   useRecordTimeline,
   useTimelineFilters,
 } from "./recordtimeline";
-import { pickOption } from "./select-testing";
 import { GroupedTimelineList } from "./timeline";
 import { TimelineFilterBar } from "./timelinefilterbar";
 import { groupChronology } from "./timelinegroups";
@@ -109,6 +108,13 @@ function Harness({ firstPage }: Readonly<{ firstPage?: ActivityPage }>) {
   return (
     <>
       <TimelineFilterBar value={filters} onChange={setFilters} />
+      {/* The kind is the History card's cut, which lives with the page. */}
+      <button
+        type="button"
+        onClick={() => setFilters({ ...filters, kind: "task" })}
+      >
+        Tasks only
+      </button>
       <GroupedTimelineList
         groups={groupChronology(entries, timeline.hasNextPage)}
         zone={INSTALLATION_ZONE}
@@ -331,7 +337,7 @@ describe("a record timeline you can work in", () => {
     mount();
     await screen.findByText("Fleet renewal");
 
-    await pickOption(user, screen.getByLabelText("Activity kind"), "Tasks");
+    await user.click(screen.getByRole("button", { name: "Tasks only" }));
     await waitFor(() =>
       expect(feed.last().searchParams.get("kind")).toBe("task"),
     );

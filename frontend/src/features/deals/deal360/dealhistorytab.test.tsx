@@ -108,7 +108,9 @@ describe("DealHistoryTab", () => {
 
     await waitFor(() => expect(screen.getByText(CHANGE_LINE)).toBeTruthy());
     expect(screen.queryByText("Renewal check-in")).toBeNull();
-    expect(screen.queryByLabelText("Activity kind")).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Search this timeline" }),
+    ).toBeNull();
   });
 
   it("says there is nothing yet rather than drawing an empty list silently", async () => {

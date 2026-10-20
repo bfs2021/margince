@@ -3,7 +3,6 @@ import { useState } from "react";
 import type { components } from "../../api/schema";
 import { activityTimeline } from "../../design-system/activitytimeline";
 import { EmptyState, PendingBody } from "../../design-system/atoms";
-import { FilterPills } from "../../design-system/filterpills";
 import { LoadMoreButton } from "../../design-system/querystates";
 import type { RecordTimeline } from "../../design-system/recordtimeline";
 import type { TimelineEntry } from "../../design-system/timelineentry";
@@ -23,13 +22,8 @@ import type { HistoryValueCtx } from "./historyvalues";
 type Activity = components["schemas"]["Activity"];
 type ChangesQuery = ReturnType<typeof useFieldHistory>;
 
-// `conversations` is in the vocabulary but not in the base row. A page offers
-// it through `ChronologyFilter`'s own flag once it renders the cut. A pill
-// whose press changes nothing reads as a broken row.
-export const TIMELINE_FILTERS = ["all", "changes"] as const;
-export type TimelineFilter =
-  | (typeof TIMELINE_FILTERS)[number]
-  | "conversations";
+// The record's two feeds: what was said, and what changed.
+export type TimelineFilter = "all" | "changes";
 
 // Whether the cut reads the exchanges alone, which is every cut but Changes.
 // One predicate answers whether the change feed is read, what draws as loading
@@ -56,51 +50,6 @@ export function useChronologyFilter(
     setFilter("all");
   }
   return [filter, setFilter];
-}
-
-/**
- * ChronologyFilter narrows the record's own history. It sits ABOVE the list
- * rather than in the page's tab strip: it scopes this section, and a control
- * that looks like a tab reads as a different page.
- */
-export function ChronologyFilter({
-  filter,
-  conversations = false,
-  onFilter,
-}: Readonly<{
-  filter: TimelineFilter;
-  // Whether this page offers the Conversations cut — the mail and message
-  // threads alone, drawn as conversations rather than as chronicle rows.
-  // Opt-in per page: the pill only stands where the page renders the cut.
-  conversations?: boolean;
-  onFilter: (next: TimelineFilter) => void;
-}>) {
-  const t = useT();
-  const labels: Record<TimelineFilter, string> = {
-    all: t("chronology.all"),
-    conversations: t("chronology.conversations"),
-    changes: t("chronology.changes"),
-  };
-  // Conversations sits between the whole and the parts: it is a READING of
-  // the exchanges, narrower than All and wider than one kind.
-  const cuts: readonly TimelineFilter[] = conversations
-    ? ["all", "conversations", "changes"]
-    : TIMELINE_FILTERS;
-  return (
-    <FilterPills
-      pills={cuts.map((value) => ({
-        value,
-        label: labels[value],
-        // No counts. Each cut is its own paged read, so this page knows a
-        // floor rather than a total — and a floor printed as a count is a
-        // wrong number where a missing one is merely a missing one.
-        count: undefined,
-      }))}
-      value={filter}
-      onChange={onFilter}
-      label={t("chronology.label")}
-    />
-  );
 }
 
 export type RecordChronology = {
@@ -284,13 +233,12 @@ function activitiesCanGrow(
 /**
  * CHRONOLOGY_EMPTY_KEYS is what "there is none" says under each filter. All
  * takes the caller's own word, because it is about a relationship somebody has
- * to recognise; the other two read the same on every record.
+ * to recognise; Changes reads the same on every record.
  */
 export const CHRONOLOGY_EMPTY_KEYS: Readonly<
   Record<Exclude<TimelineFilter, "all">, MessageKey>
 > = {
   changes: "chronology.changesEmpty",
-  conversations: "chronology.conversationsEmpty",
 };
 
 /**

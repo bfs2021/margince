@@ -52,6 +52,7 @@ export function Panel({
   footer,
   children,
   className,
+  id,
 }: Readonly<{
   title?: ReactNode;
   // Rendered right-aligned in the header, beside the title — a badge, a
@@ -103,6 +104,8 @@ export function Panel({
   footer?: ReactNode;
   children: ReactNode;
   className?: string;
+  // An anchor a link on the page scrolls to.
+  id?: string;
 }>) {
   // A titled panel is a LANDMARK, named by the title a reader already sees. A
   // page of panels is then a list of regions a screen-reader user jumps
@@ -117,6 +120,7 @@ export function Panel({
   const titleId = useId();
   return (
     <section
+      id={id}
       className={["panel", tone ? `panel-${tone}` : "", className ?? ""]
         .filter(Boolean)
         .join(" ")}

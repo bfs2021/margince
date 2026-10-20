@@ -17,7 +17,6 @@ import {
   groupCountLabel,
   MoveFlag,
   noteClass,
-  TIMELINE_ICON,
   TIMELINE_KIND_LABEL,
   type TimelineEntry,
   type TimelineGroup,
@@ -108,19 +107,15 @@ function BulkGroupRow({
   if (newest === undefined) {
     return null;
   }
-  const Icon = TIMELINE_ICON[newest.kind];
   return (
     <li className={directionClass(newest.direction)}>
       {/* A group sits on the same three columns a single row does (date,
           rail, what happened), because it is a row of the chronology. One
           that stepped out of the axis read as a different list wedged into
-          this one. Its mark is the kind's own icon: the whole conversation is
-          one thing that happened, and a dot would say it was one message. */}
+          this one. */}
       <TimelineWhen atIso={newest.atIso} zone={zone} />
       <span className="tl-rail" aria-hidden="true">
-        <span className="tl-icon">
-          <Icon aria-hidden />
-        </span>
+        <span className={dotClass(newest)} />
       </span>
       <div className="tl-body">
         {/* What the send is, while it is closed. No whose-move flag: a bulk

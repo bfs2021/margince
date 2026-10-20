@@ -155,7 +155,7 @@ describe("the record's History", () => {
     expect(feed.changesRead()).toBe(false);
   });
 
-  it("offers All, Threads and Changes, and no Activities cut", () => {
+  it("offers the whole record, each kind of exchange, and Changes", () => {
     withProviders(
       <ContactTimelineTab contactId="p-1" view={viewWith(false)} />,
     );
@@ -165,7 +165,10 @@ describe("the record's History", () => {
       .querySelectorAll("button");
     expect([...cuts].map((cut) => cut.textContent)).toEqual([
       "All",
-      "Threads",
+      "Email",
+      "Meetings",
+      "Calls",
+      "Notes",
       "Changes",
     ]);
   });

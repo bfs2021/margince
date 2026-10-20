@@ -20,7 +20,6 @@ import {
 } from "../../design-system/recordtimeline";
 import { RecordView } from "../../design-system/recordview";
 import { SurfaceState, sectionState } from "../../design-system/surfacestate";
-import { TimelineFilterBar } from "../../design-system/timelinefilterbar";
 import { groupChronology } from "../../design-system/timelinegroups";
 import { useLocale, useT } from "../../i18n";
 import { taskWriteKeys } from "../../lib/activitykeys";
@@ -33,8 +32,8 @@ import { NewDealAction } from "../companies/companyactions";
 import { OpenEmailDrawer } from "../mail/openemaildrawer";
 import { ArchiveAction } from "../records/archive";
 import { CustomFieldsPanel } from "../records/customfields.card";
+import { useHistoryDials } from "../records/historydials";
 import {
-  ChronologyFilter,
   ChronologyFooter,
   chronologyNotice,
   useChronologyFilter,
@@ -421,6 +420,7 @@ function ProjectActions({
 type ChronologySlots = Readonly<{
   timeline?: ReturnType<typeof useRecordChronology>["entries"];
   timelineGroups?: ReturnType<typeof groupChronology>;
+  timelineDials?: ReactNode;
   timelineHeader?: ReactNode;
   timelineFooter?: ReactNode;
   timelineNotice?: ReactNode;
@@ -445,6 +445,12 @@ function useProjectChronology(view: Project360): ChronologySlots {
     activities?.data.length ?? 0,
   );
   const [filters, setFilters] = useTimelineFilters(view.project.id);
+  const dials = useHistoryDials({
+    filter,
+    onFilter: setFilter,
+    filters,
+    onFilters: setFilters,
+  });
   // The 360's own page seeds the list; older pages and every narrowed read
   // come from the activity list itself.
   const timeline = useRecordTimeline("project", view.project.id, {
@@ -477,7 +483,7 @@ function useProjectChronology(view: Project360): ChronologySlots {
   if (activitiesState === "withheld" && filter !== "changes") {
     return {
       timeline: [],
-      timelineHeader: <ChronologyFilter filter={filter} onFilter={setFilter} />,
+      timelineDials: dials.cuts,
       timelineNotice: (
         <SurfaceState
           state="withheld"
@@ -492,14 +498,8 @@ function useProjectChronology(view: Project360): ChronologySlots {
   return {
     timeline: history.entries,
     timelineGroups: groupChronology(history.entries, timeline.hasNextPage),
-    timelineHeader: (
-      <>
-        <ChronologyFilter filter={filter} onFilter={setFilter} />
-        {filter !== "changes" && (
-          <TimelineFilterBar value={filters} onChange={setFilters} />
-        )}
-      </>
-    ),
+    timelineDials: dials.cuts,
+    timelineHeader: dials.narrowing,
     timelineFooter: (
       <>
         <ChronologyFooter filter={filter} chronology={history} />

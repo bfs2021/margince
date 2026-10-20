@@ -16,14 +16,13 @@ import {
   useTimelineFilters,
 } from "../../../design-system/recordtimeline";
 import { GroupedTimelineList } from "../../../design-system/timeline";
-import { TimelineFilterBar } from "../../../design-system/timelinefilterbar";
 import { groupChronology } from "../../../design-system/timelinegroups";
 import { useLocale, useT } from "../../../i18n";
 import { invalidateRecord } from "../../../lib/recordwritekeys";
 import { useRecordZone } from "../../../lib/recordzone";
 import { RecordHistoryTab } from "../../records/history";
+import { useHistoryDials } from "../../records/historydials";
 import {
-  ChronologyFilter,
   ChronologyFooter,
   chronologyNotice,
   hasChronologyFooter,
@@ -70,10 +69,17 @@ export function DealHistoryTab({
       />
     ),
   });
+  const dials = useHistoryDials({
+    filter,
+    onFilter: setFilter,
+    filters,
+    onFilters: setFilters,
+  });
 
   return (
     <Panel
       title={t("tab.history")}
+      titleAction={dials.cuts}
       actions={
         hasChronologyFooter(filter, chronology) ? (
           <ChronologyFooter filter={filter} chronology={chronology} />
@@ -81,15 +87,7 @@ export function DealHistoryTab({
       }
     >
       <PanelBody>
-        {/* Both sets of dials in one block: the cuts through the chronology,
-            then the narrowing of whichever cut is open — the same block the
-            contact, the account and the lead draw them in. */}
-        <div className="timeline-header">
-          <ChronologyFilter filter={filter} onFilter={setFilter} />
-          {filter !== "changes" && (
-            <TimelineFilterBar value={filters} onChange={setFilters} />
-          )}
-        </div>
+        {dials.narrowing}
         {/* The Changes view IS the record's history: one reading of what
             changed on this deal, and the one that can put a change back. */}
         {filter === "changes" ? (

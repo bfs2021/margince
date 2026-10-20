@@ -1290,7 +1290,14 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  margin-block: var(--space-3) var(--space-4);
+  margin-block: 0 var(--space-3);
+}
+/* The History card's head: the search switch, then the cuts. */
+.history-dials {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
 /* The narrowing row already carried a bottom margin from the days it stood
@@ -1300,19 +1307,10 @@
   margin-bottom: 0;
 }
 
-/* The card the chronology sits on. The same white ground, hairline and radius
-   every other body of the record uses — a list this long loose on the page
-   ground stopped reading as one of the record's sections. */
+/* The chronology's own block inside its History card. The card is the
+   panel around it, so the list draws no second edge. */
 .timeline-card {
-  margin-top: var(--space-2);
-  /* Air on all four sides. With none at the top the first row's date and badge
-     sat on the card's own border, which reads as content clipped by the edge
-     rather than as the start of a list. The chronology's pane is the same pane
-     every zone of the record stands on. */
-  padding: var(--space-2) var(--space-5);
-  background: var(--pane);
-  border: 1px solid var(--paneEdge);
-  border-radius: var(--r-lg);
+  margin: 0;
 }
 
 .timeline {
@@ -1404,8 +1402,8 @@
   block-size: 0.5rem;
   border-radius: var(--r-full);
   corner-shape: round;
-  background: var(--borderStrong);
-  border: 1px solid var(--borderStrong);
+  background: var(--textPrimary);
+  border: 1px solid var(--textPrimary);
 }
 
 .timeline .tl-dot-quiet {
@@ -1419,12 +1417,15 @@
   border-color: var(--ai);
 }
 
-/* What kind of thing it was and which way it went, over the headline. */
+/* What kind of thing it was and which way it went, over the headline: a
+   caption line, so the headline under it carries the row. */
 .tl-head {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: var(--space-2);
+  font: var(--fontBodySmall);
+  color: var(--textSecondary);
 }
 /* The verbs share the head line only. Beside the whole body they held a
    column the full height of the entry, and long notes wrapped at a few words. */
@@ -1436,29 +1437,6 @@
   gap: var(--space-2);
 }
 
-/* A conversation's mark on the rail: the kind's icon rather than a dot,
-    because the group stands for several messages and a dot says one. Centred
-    on the rail and drawn on the card's own ground so the line does not run
-    through it. */
-.timeline .tl-icon {
-  position: absolute;
-  inset-block-start: 0.4rem;
-  inset-inline-start: 50%;
-  margin-inline-start: -12px;
-  width: 24px;
-  height: 24px;
-  border-radius: var(--r-full);
-  corner-shape: round;
-  background: var(--bgElevated);
-  border: 1px solid var(--borderStrong);
-  display: grid;
-  place-items: center;
-  flex: none;
-}
-.timeline .tl-icon svg {
-  width: 13px;
-  height: 13px;
-}
 .timeline .tl-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -1497,6 +1475,7 @@
    qualifiers the reader had to read all four to find out what happened. */
 .timeline .tl-title {
   color: var(--textPrimary);
+  font-weight: var(--fontWeightBold);
   text-wrap: pretty;
 }
 /* A withheld row says so where its title would be: the reader's own seat is
@@ -1693,18 +1672,12 @@
   margin-top: var(--space-1);
 }
 
-/* A conversation on the chronology: one card on the body side of the rail,
-   on the record's own pane with a stronger hairline than the row dividers
-   around it, so a thread reads as one event with its messages inside it
-   rather than as three rows that happen to share a subject. */
+/* A conversation on the chronology: one row with its messages listed under
+   its headline, read as one event rather than as rows sharing a subject. */
 .timeline .tl-thread {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  padding: var(--space-3) var(--space-4) var(--space-2);
-  border: 1px solid var(--borderStrong);
-  border-radius: var(--r-lg);
-  background: var(--pane);
 }
 
 /* The thread's verbs sit at the end of its own head line — Reply belongs to
@@ -1721,9 +1694,7 @@
   margin: var(--space-2) 0 0;
   padding: 0;
 }
-.tl-thread-messages > li {
-  border-top: 1px solid var(--borderSubtle);
-}
+
 
 /* One message: the mark, the words, and the moment. */
 .tl-msg {

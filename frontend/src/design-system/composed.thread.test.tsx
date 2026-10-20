@@ -62,7 +62,8 @@ describe("a thread's card", () => {
         ]}
       />,
     );
-    expect(screen.getByText("Thread")).toBeTruthy();
+    // The kind it was, as on every other row: a thread of mail is mail.
+    expect(screen.getByText("Email")).toBeTruthy();
     expect(screen.getByText("3 messages")).toBeTruthy();
     // Each name once, however many messages it was on.
     expect(screen.getByText("Ida Keller, Marc Dubois")).toBeTruthy();

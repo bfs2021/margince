@@ -139,7 +139,11 @@ describe("ProjectScreen", () => {
     // On the hero's spine and in the timeline under the work.
     expect(await screen.findAllByText("Kickoff agenda")).not.toHaveLength(0);
 
-    expect(screen.getByRole("button", { name: "Reply" })).toBeTruthy();
+    const story = screen.getByRole("region", { name: en["record.timeline"] });
+    expect(within(story).getByRole("button", { name: "Reply" })).toBeTruthy();
+    await user.click(
+      within(story).getByRole("button", { name: en["record.moreActions"] }),
+    );
     await user.click(screen.getByRole("button", { name: "Relink" }));
     expect(await screen.findByRole("dialog")).toBeTruthy();
   });

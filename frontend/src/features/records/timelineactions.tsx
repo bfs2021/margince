@@ -17,6 +17,7 @@ import type { components } from "../../api/schema";
 import { Button } from "../../design-system/atoms";
 import { ChoiceList } from "../../design-system/choicelist";
 import { ConfirmModal } from "../../design-system/confirmmodal";
+import { OverflowMenu } from "../../design-system/overflowmenu";
 import { useT } from "../../i18n";
 import { entityTimelineKeys } from "../../lib/activitykeys";
 import { problemMessageOf } from "../../lib/problem";
@@ -102,43 +103,31 @@ export function TimelineActions({
         </Button>
       )}
       {extra?.(activity)}
-      <ActivityFilesAction activity={activity} />
-      <Button onClick={() => setRelink(true)}>{t("compose.relink")}</Button>
-      {/* Every row on a project's timeline is filed under that project, so this
-          is the one surface where taking the filing back is always meaningful. */}
-      {entityType === "project" && (
-        <ProjectFilingAction
-          activityId={activity.id}
-          projectId={entityId}
-          subject={activity.subject ?? undefined}
-        />
-      )}
-      {/* An EMAIL's audience is changed from the message, in the drawer, where
-          the server states which write it would accept as `change_mode` and the
-          editor opens on the set already standing. The row used to decide that
-          here by testing `captured_by` for a `connector:` prefix — a backend
-          ownership rule spelled in display code, in a second language, where
-          the next change to what makes an audience derived would not find it.
-
-          It could not simply be deleted: `change_mode` costs two per-row
-          authorization queries (EnsureActivityWritable and callerIsSenderSeat
-          in activities/emailaccess.go), which is why it rides the presentation
-          and not the summary a twenty-row page ships. What removes the guess is
-          having somewhere better to ask, and the drawer is that.
-
-          Every other kind is offered it, and AudienceAction itself withholds
-          it where the server says the audience was derived, or where
-          `captured_by` says an import wrote the row at all. That claim used to
-          live here as "its audience is never derived", which was false for a
-          connector-captured `message` and is the defect this comment now
-          records rather than repeats. */}
-      {activity.kind !== "email" && (
-        <AudienceAction
-          activity={activity}
-          entityType={entityType}
-          entityId={entityId}
-        />
-      )}
+      {/* The verbs a reader seldom wants on a row, folded behind one control
+          so the row carries its reply and nothing that competes with it. */}
+      <OverflowMenu label={t("record.moreActions")}>
+        <ActivityFilesAction activity={activity} />
+        <Button onClick={() => setRelink(true)}>{t("compose.relink")}</Button>
+        {/* Every row on a project's timeline is filed under that project, so
+            taking the filing back is always meaningful here. */}
+        {entityType === "project" && (
+          <ProjectFilingAction
+            activityId={activity.id}
+            projectId={entityId}
+            subject={activity.subject ?? undefined}
+          />
+        )}
+        {/* An email's audience is changed in the message drawer, where the
+            server says which write it would accept. AudienceAction withholds
+            itself where the audience is derived. */}
+        {activity.kind !== "email" && (
+          <AudienceAction
+            activity={activity}
+            entityType={entityType}
+            entityId={entityId}
+          />
+        )}
+      </OverflowMenu>
       <RelinkModal
         activityId={activity.id}
         activityVersion={activity.version}

@@ -36,13 +36,8 @@ function Live(props: Readonly<{ initial: TimelineFilters }>) {
   return <TimelineFilterBar value={filters} onChange={setFilters} />;
 }
 
-/** Nothing narrowed: every kind, no words, no bounds. */
+/** Nothing narrowed: no words, no bounds. */
 export const Unfiltered: Story = { render: () => <Live initial={{}} /> };
-
-/** One kind. The dials are independent, so a kind and a range compose. */
-export const ByKind: Story = {
-  render: () => <Live initial={{ kind: "email" }} />,
-};
 
 /**
  * A search is running, and the bar SAYS what that costs: a text match answers
@@ -67,7 +62,6 @@ export const FullyNarrowed: Story = {
   render: () => (
     <Live
       initial={{
-        kind: "meeting",
         q: "pricing",
         after: "2026-01-01",
         before: "2026-03-31",

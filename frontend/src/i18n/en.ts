@@ -2127,7 +2127,6 @@ export const en = {
   "timeline.group.mayContinue": "Earlier messages may exist",
   // A thread on the chronology is one card: the kind, the count and who was
   // on it over the subject, then each message with who wrote it and when.
-  "timeline.group.kind": "Thread",
   "timeline.group.earlier_other": "Show {count} earlier messages",
   "timeline.group.earlier_one": "Show {count} earlier message",
   "timeline.group.hideEarlier": "Hide earlier messages",
@@ -2140,14 +2139,10 @@ export const en = {
   "timeline.thread.them": "Them",
   "timeline.thread.sentTo": "sent to {who}",
   "timeline.thread.sent": "sent",
-  "timeline.filters.kind": "Activity kind",
-  "timeline.filters.kind.all": "All kinds",
   "timeline.filters.kind.email": "Email",
-  "timeline.filters.kind.message": "Messages",
   "timeline.filters.kind.call": "Calls",
   "timeline.filters.kind.meeting": "Meetings",
   "timeline.filters.kind.note": "Notes",
-  "timeline.filters.kind.task": "Tasks",
   "timeline.filters.search": "Search this timeline",
   "timeline.filters.from": "From",
   "timeline.filters.to": "To",
@@ -2896,8 +2891,6 @@ export const en = {
   "chronology.changes": "Changes",
   "filter.label": "Filter",
   "chronology.all": "All",
-  "chronology.conversations": "Threads",
-  "chronology.conversationsEmpty": "No threads yet.",
   "convo.yourMove": "Needs reply",
   "convo.waitingOnThem": "Awaiting their reply",
   "chronology.changesEmpty":

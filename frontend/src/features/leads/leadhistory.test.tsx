@@ -72,7 +72,7 @@ const CHANGE_LINE = translate("en", "history.verb.update", {
 // what was changed, in one order, under a filter row that starts on All.
 
 describe("LeadHistoryTab", () => {
-  it("opens on the whole chronology, with the kind filter bar over it", async () => {
+  it("opens on the whole chronology, with the kind cuts in its head", async () => {
     stubWithSession(
       {
         "GET /activities": () =>
@@ -83,7 +83,7 @@ describe("LeadHistoryTab", () => {
     withProviders(<LeadHistoryTab lead={LEAD} onOpenEmail={() => {}} />);
 
     expect(await screen.findByText("Fleet renewal")).toBeTruthy();
-    expect(screen.getByLabelText("Activity kind")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Meetings" })).toBeTruthy();
     expect(
       screen.getByRole("button", { name: "All" }).getAttribute("aria-pressed"),
     ).toBe("true");
@@ -111,7 +111,9 @@ describe("LeadHistoryTab", () => {
     expect(screen.queryByText("Fleet renewal")).toBeNull();
     // The narrowing row stands down with the exchanges it would have
     // narrowed — a reader who picked Changes has no kind left to filter.
-    expect(screen.queryByLabelText("Activity kind")).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Search this timeline" }),
+    ).toBeNull();
     // The panel this swaps in carries its own by-change / by-field switch.
     expect(screen.getByRole("button", { name: "By field" })).toBeTruthy();
   });

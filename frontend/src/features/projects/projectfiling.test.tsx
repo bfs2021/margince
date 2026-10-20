@@ -405,7 +405,8 @@ describe("TimelineActions", () => {
     updated_at: "2026-07-01T00:00:00Z",
   };
 
-  it("offers the undo on a project's timeline and nowhere else", () => {
+  it("offers the undo on a project's timeline and nowhere else", async () => {
+    const user = userEvent.setup();
     stubRoutes({});
     render(
       <TimelineActions
@@ -414,6 +415,8 @@ describe("TimelineActions", () => {
         entityId="p-1"
       />,
     );
+    // The row's seldom-wanted verbs stand behind its menu.
+    await user.click(screen.getByRole("button", { name: "More actions" }));
     // Named by the row it acts on, so a column of them is not a column of one label.
     expect(
       screen.getByRole("button", { name: "Undo filing: Milestone" }),
@@ -422,6 +425,7 @@ describe("TimelineActions", () => {
     render(
       <TimelineActions activity={activity} entityType="deal" entityId="d-1" />,
     );
+    await user.click(screen.getByRole("button", { name: "More actions" }));
     expect(screen.queryByRole("button", { name: /Undo filing/ })).toBeNull();
   });
 });

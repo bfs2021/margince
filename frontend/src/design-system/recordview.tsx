@@ -7,6 +7,7 @@ import { useT } from "../i18n";
 import { Avatar } from "./atoms";
 import { Heading } from "./heading";
 import { PageZones } from "./pagezones";
+import { Panel, PanelBody } from "./panel";
 import { createPortalSlot, SlotFill } from "./portalslot";
 import {
   actionsPlacement,
@@ -197,6 +198,7 @@ export function RecordView({
   timeline,
   timelineGroups,
   onOpenThread,
+  timelineDials,
   timelineHeader,
   timelineFooter,
   timelineNotice,
@@ -289,7 +291,9 @@ export function RecordView({
    */
   timelineGroups?: readonly TimelineGroup[];
   onOpenThread?: (threadKey: string) => void;
-  // Controls above the timeline list (filters), and below it (load more).
+  // The cuts in the History card's head; then controls above the list (the
+  // search row), and below it (load more).
+  timelineDials?: ReactNode;
   timelineHeader?: ReactNode;
   timelineFooter?: ReactNode;
   // When set, replaces the timeline list — e.g. a "not available"
@@ -365,6 +369,7 @@ export function RecordView({
       timeline={timeline}
       timelineGroups={timelineGroups}
       onOpenThread={onOpenThread}
+      timelineDials={timelineDials}
       timelineHeader={timelineHeader}
       timelineFooter={timelineFooter}
       timelineNotice={timelineNotice}
@@ -432,6 +437,7 @@ function RecordStory({
   timeline,
   timelineGroups,
   onOpenThread,
+  timelineDials,
   timelineHeader,
   timelineFooter,
   timelineNotice,
@@ -441,6 +447,7 @@ function RecordStory({
   timeline: TimelineEntry[];
   timelineGroups?: readonly TimelineGroup[];
   onOpenThread?: (threadKey: string) => void;
+  timelineDials?: ReactNode;
   timelineHeader?: ReactNode;
   timelineFooter?: ReactNode;
   timelineNotice?: ReactNode;
@@ -449,41 +456,33 @@ function RecordStory({
 }>) {
   const t = useT();
   return (
-    <section
+    <Panel
       id={timelineAnchorId}
       className="record-timeline"
-      aria-label={t("record.timeline")}
+      title={t("record.timeline")}
+      titleAction={timelineDials}
     >
-      <Heading size="large" className="t-sub">
-        {t("record.timeline")}
-      </Heading>
-      {/* The dials above the list are one block with one rhythm: the cuts
-          through the chronology, then the narrowing of whichever cut is open.
-          Rendered as bare siblings they touched, and two rows of controls
-          with no interval between them read as one control that has
-          wrapped. */}
-      {timelineHeader && (
-        <div className="timeline-header">{timelineHeader}</div>
-      )}
-      {/* The chronology sits on a card of its own, like every other body on
-          the page. Loose on the page ground it read as the page's own text
-          rather than as one of the record's sections, and the rail down its
-          left had nothing to run inside. The notice takes no card: a sentence
-          about why there are no rows is not a list of them. */}
-      {timelineNotice ?? (
-        <div className="timeline-card">
-          {timelineGroups ? (
-            <GroupedTimelineList
-              groups={timelineGroups}
-              zone={zone}
-              onOpenThread={onOpenThread}
-            />
-          ) : (
-            <TimelineList entries={timeline} zone={zone} />
-          )}
-        </div>
-      )}
-      {timelineFooter}
-    </section>
+      <PanelBody>
+        {timelineHeader && (
+          <div className="timeline-header">{timelineHeader}</div>
+        )}
+        {/* The notice replaces the list: a sentence about why there are no
+            rows is not a list of them. */}
+        {timelineNotice ?? (
+          <div className="timeline-card">
+            {timelineGroups ? (
+              <GroupedTimelineList
+                groups={timelineGroups}
+                zone={zone}
+                onOpenThread={onOpenThread}
+              />
+            ) : (
+              <TimelineList entries={timeline} zone={zone} />
+            )}
+          </div>
+        )}
+        {timelineFooter}
+      </PanelBody>
+    </Panel>
   );
 }

@@ -3,37 +3,18 @@
 
 import { useState } from "react";
 import { useT } from "../i18n";
-import type { MessageKey } from "../i18n/en";
 import { isImeCommit } from "../lib/imecommit";
 import { Field, SearchField } from "./atoms";
 import { DateInput, type ISODate, isISODate } from "./dateinput";
-import {
-  ACTIVITY_KINDS,
-  type ActivityKind,
-  type TimelineFilters,
-} from "./recordtimeline";
-import { Select } from "./select";
+import type { TimelineFilters } from "./recordtimeline";
 import "./timelinefilterbar.css";
-
-const KIND_LABEL: Readonly<Record<ActivityKind, MessageKey>> = {
-  email: "timeline.filters.kind.email",
-  message: "timeline.filters.kind.message",
-  call: "timeline.filters.kind.call",
-  meeting: "timeline.filters.kind.meeting",
-  note: "timeline.filters.kind.note",
-  task: "timeline.filters.kind.task",
-};
-
-function isActivityKind(value: string): value is ActivityKind {
-  return ACTIVITY_KINDS.some((kind) => kind === value);
-}
 
 /**
  * TimelineFilterBar is the ONE row of dials every record timeline narrows
- * by: a kind, a search, and a date range. Every dial is a server parameter
- * (`kind`, `q`, `occurred_after` / `occurred_before`); the bar owns no list
- * and filters nothing itself, which is what keeps "tasks on this contact"
- * from meaning "tasks among the twenty newest rows".
+ * by: a search and a date range. The kind is the History card's own cut.
+ * Every dial is a server parameter (`q`, `occurred_after` /
+ * `occurred_before`). The bar owns no list and filters nothing itself, so
+ * "tasks on this contact" never means "tasks among the twenty newest rows".
  *
  * The search commits on Enter or when the field is left, not per keystroke:
  * each commit is a request, and a reader typing a word would otherwise fire
@@ -46,15 +27,9 @@ function isActivityKind(value: string): value is ActivityKind {
  */
 export function TimelineFilterBar({
   value,
-  kinds = ACTIVITY_KINDS,
   onChange,
 }: Readonly<{
   value: TimelineFilters;
-  // Which kinds this surface can actually draw. Every kind, unless the cut
-  // under the bar is narrower than the list is: the Conversations cut keeps
-  // only mail and messages, and a dial that offered Meetings there would name
-  // a value whose only possible answer is an empty list.
-  kinds?: readonly ActivityKind[];
   onChange: (next: TimelineFilters) => void;
 }>) {
   const t = useT();
@@ -72,28 +47,10 @@ export function TimelineFilterBar({
       onChange({ ...value, q: draft.trim() });
     }
   };
-  const kindOptions = [
-    { value: "", label: t("timeline.filters.kind.all") },
-    ...kinds.map((kind) => ({
-      value: kind,
-      label: t(KIND_LABEL[kind]),
-    })),
-  ];
   const day = (raw: string): ISODate | "" => (isISODate(raw) ? raw : "");
   return (
     <div className="timeline-filters">
       <div className="timeline-filters-row">
-        <Select
-          aria-label={t("timeline.filters.kind")}
-          options={kindOptions}
-          value={value.kind ?? ""}
-          onChange={(next) =>
-            onChange({
-              ...value,
-              kind: isActivityKind(next) ? next : undefined,
-            })
-          }
-        />
         <SearchField
           value={draft}
           aria-label={t("timeline.filters.search")}

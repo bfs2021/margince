@@ -4,25 +4,22 @@ import { Panel, PanelBody } from "../../design-system/panel";
 import {
   hasTimelineFilters,
   useRecordTimeline,
+  useTimelineFilters,
 } from "../../design-system/recordtimeline";
 import { SurfaceState } from "../../design-system/surfacestate";
 import { GroupedTimelineList } from "../../design-system/timeline";
-import { TimelineFilterBar } from "../../design-system/timelinefilterbar";
 import { groupChronology } from "../../design-system/timelinegroups";
 import { useLocale, useT } from "../../i18n";
 import { useRecordZone } from "../../lib/recordzone";
 import { RecordHistoryTab } from "../records/history";
+import { useHistoryDials } from "../records/historydials";
 import {
   CHRONOLOGY_EMPTY_KEYS,
-  ChronologyFilter,
   ChronologyFooter,
   hasChronologyFooter,
+  useChronologyFilter,
   useRecordChronology,
 } from "../records/recordchronology";
-import {
-  ConversationList,
-  useChronologyCut,
-} from "../records/recordconversations";
 import { TimelineActions } from "../records/timelineactions";
 import { MeetingBriefAction } from "./contactmeetings";
 import { timelineState } from "./contacttimelinestate";
@@ -41,8 +38,8 @@ type Contact360 = components["schemas"]["Contact360"];
 
 /**
  * ContactTimelineTab is the contact's History, read through the same
- * `useRecordChronology` every record page uses. All and Threads show what was
- * said to them, and Changes what was changed about them.
+ * `useRecordChronology` every record page uses. All and each kind show what
+ * was said to them, and Changes what was changed about them.
  *
  * The exchanges are the 360's own section, already fetched, and one page of
  * it. When the server says there is more, the tab says so, so a cut list does
@@ -68,13 +65,14 @@ export function ContactTimelineTab({
   const { locale } = useLocale();
   const queryClient = useQueryClient();
   const recordZone = useRecordZone();
-  const { filter, filters, setFilters, openCut, kinds } =
-    useChronologyCut(contactId);
-  // Every cut renders through the ONE chronicle, off the same groups: the
-  // Conversations list is the same rows cut to the exchanges somebody can
-  // answer, never a second rendering of what another cut already shows.
-  const List =
-    filter === "conversations" ? ConversationList : GroupedTimelineList;
+  const [filter, setFilter] = useChronologyFilter(contactId);
+  const [filters, setFilters] = useTimelineFilters(contactId);
+  const dials = useHistoryDials({
+    filter,
+    onFilter: setFilter,
+    filters,
+    onFilters: setFilters,
+  });
   // The 360's own page seeds the list; older pages and every narrowed read
   // come from the activity list itself.
   const timeline = useRecordTimeline("contact", contactId, {
@@ -113,6 +111,7 @@ export function ContactTimelineTab({
   return (
     <Panel
       title={t("tab.timeline")}
+      titleAction={dials.cuts}
       actions={
         hasChronologyFooter(filter, chronology) ? (
           <ChronologyFooter filter={filter} chronology={chronology} />
@@ -120,22 +119,7 @@ export function ContactTimelineTab({
       }
     >
       <PanelBody>
-        {/* Both sets of dials under the head, in the one block the account and
-            the project pages already put them in (`timeline-header`): the cuts
-            through the chronology, then the narrowing of whichever cut is open.
-            The pills wrap to as many rows as the column needs, which the head's
-            single band cannot hold — and the two rows of controls read as one
-            block here rather than as a head that grew. */}
-        <div className="timeline-header">
-          <ChronologyFilter filter={filter} conversations onFilter={openCut} />
-          {filter !== "changes" && (
-            <TimelineFilterBar
-              value={filters}
-              kinds={kinds}
-              onChange={setFilters}
-            />
-          )}
-        </div>
+        {dials.narrowing}
         {/* The Changes view IS the record's history: one reading of what
             changed on this record, and the one that can put a change back. A
             second rendering of the same audit rows beside it would be two
@@ -172,7 +156,7 @@ export function ContactTimelineTab({
                 : t(CHRONOLOGY_EMPTY_KEYS[filter])
             }
           >
-            <List
+            <GroupedTimelineList
               groups={groupChronology(chronology.entries, timeline.hasNextPage)}
               zone={recordZone}
             />

@@ -4,27 +4,24 @@ import { useRoster } from "../../components/entityref";
 import {
   hasTimelineFilters,
   useRecordTimeline,
+  useTimelineFilters,
 } from "../../design-system/recordtimeline";
 import type {
   TimelineEntry,
   TimelineGroup,
 } from "../../design-system/timelineentry";
-import { TimelineFilterBar } from "../../design-system/timelinefilterbar";
 import { groupChronology } from "../../design-system/timelinegroups";
 import { useLocale, useT } from "../../i18n";
 import { useOpenEmail } from "../../lib/openemail";
 import { useRecordZone } from "../../lib/recordzone";
+import { useHistoryDials } from "../records/historydials";
 import type { OpenReceipt } from "../records/record360";
 import {
-  ChronologyFilter,
   ChronologyFooter,
   chronologyNotice,
+  useChronologyFilter,
   useRecordChronology,
 } from "../records/recordchronology";
-import {
-  ConversationList,
-  useChronologyCut,
-} from "../records/recordconversations";
 import { TimelineActions } from "../records/timelineactions";
 import type { Company, Company360View } from "./companies";
 import { recordNamesIn } from "./company360";
@@ -37,6 +34,7 @@ import type { CitedRecord } from "./companyevidence";
 type ChronologySlots = {
   timeline?: TimelineEntry[];
   timelineGroups?: readonly TimelineGroup[];
+  timelineDials?: ReactNode;
   timelineHeader?: ReactNode;
   timelineFooter?: ReactNode;
   timelineNotice?: ReactNode;
@@ -89,9 +87,14 @@ export function useChronologySlots({
     records("contact", id) ??
     records("deal", id) ??
     records("company", id);
-  const { filter, filters, setFilters, openCut, kinds } = useChronologyCut(
-    company.id,
-  );
+  const [filter, setFilter] = useChronologyFilter(company.id);
+  const [filters, setFilters] = useTimelineFilters(company.id);
+  const dials = useHistoryDials({
+    filter,
+    onFilter: setFilter,
+    filters,
+    onFilters: setFilters,
+  });
   // The 360's own page seeds the list; older pages and every narrowed read
   // come from the activity list itself.
   const timeline = useRecordTimeline("company", company.id, {
@@ -126,7 +129,7 @@ export function useChronologySlots({
   // An evidence mark asks "where did this value come from", and the answer is
   // the change history. The mark turns the timeline to Changes through the
   // opener a pill press uses, so one set of rules opens a cut.
-  const showChanges = () => openCut("changes");
+  const showChanges = () => setFilter("changes");
 
   if (!active) {
     return {
@@ -145,51 +148,27 @@ export function useChronologySlots({
       // Conversations, not messages. Ungrouped, a product update to three
       // contacts is three rows, and a five-message thread is five.
       timelineGroups: groupChronology(history.entries, timeline.hasNextPage),
-      timelineHeader: (
-        <>
-          <ChronologyFilter filter={filter} conversations onFilter={openCut} />
-          {filter !== "changes" && (
-            <TimelineFilterBar
-              value={filters}
-              kinds={kinds}
-              onChange={setFilters}
-            />
-          )}
-        </>
-      ),
+      timelineDials: dials.cuts,
+      timelineHeader: dials.narrowing,
       timelineFooter: <ChronologyFooter filter={filter} chronology={history} />,
       // Every cut renders through the one chronicle, so no cut is a second
       // rendering of rows another cut shows. The By-field reading and the
       // put-back control live in the record's Full history (the header's
       // overflow menu), the one surface that carries the restore write.
-      timelineNotice:
-        chronologyNotice(
-          filter === "conversations"
-            ? "chronology.conversationsEmpty"
-            : "co.timeline.empty",
-          filter,
-          history,
-          {
-            loading: loading || timeline.isPending,
-            failed: failed || timeline.isError,
-            // A narrowed read is the list's own and is assembled once it
-            // answers. So is an archived account's, whose 360 is refused.
-            assembled:
-              hasTimelineFilters(filters) || company.archived_at
-                ? timeline.isSuccess
-                : Boolean(view?.activities),
-          },
-          t,
-        ) ??
-        // The Conversations cut narrows the chronicle to the exchanges
-        // somebody can answer. It uses the grouped list every other cut uses,
-        // standing where the unfiltered list would.
-        (filter === "conversations" ? (
-          <ConversationList
-            groups={groupChronology(history.entries, timeline.hasNextPage)}
-            zone={recordZone}
-          />
-        ) : undefined),
+      timelineNotice: chronologyNotice(
+        "co.timeline.empty",
+        filter,
+        history,
+        {
+          loading: loading || timeline.isPending,
+          failed: failed || timeline.isError,
+          assembled:
+            hasTimelineFilters(filters) || company.archived_at
+              ? timeline.isSuccess
+              : Boolean(view?.activities),
+        },
+        t,
+      ),
     },
   };
 }

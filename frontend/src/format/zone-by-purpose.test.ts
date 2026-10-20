@@ -270,10 +270,6 @@ const pinnedZones: { file: string; why: string }[] = [
     why: "Same: the stubbed report result carries the installation zone the server sends, and the caption assertion is about that zone reaching the screen unchanged. Reading the runner's zone would make the assertion about the machine.",
   },
   {
-    file: "features/records/recordconversations.test.tsx",
-    why: "The component takes the zone as a required prop and these cases assert which GROUPS render and which badges they carry — no date rendering is asserted. The zone is the shape being satisfied, not a rendering under test.",
-  },
-  {
     file: "design-system/composed.thread.test.tsx",
     why: "The gutter case asserts that a row's time is drawn in the RECORD's zone rather than the instant's — '14:22' for a 12:22Z instant — which needs a zone whose offset is not zero, and the component takes it as a required prop. The other cases pass UTC as the shape being satisfied and assert who wrote what, not a rendering of the clock.",
   },
@@ -284,10 +280,6 @@ const pinnedZones: { file: string; why: string }[] = [
   {
     file: "components/pageaside.stories.tsx",
     why: "The story hand-renders a RecordView around the details pane and passes the view's required zone; nothing in it renders a date, so the zone is the shape being satisfied, not a rendering under review.",
-  },
-  {
-    file: "features/records/recordconversations.stories.tsx",
-    why: "The story passes the component's required zone prop directly — a story has no installation read to take it from, and a zone read off the runner would draw a different date column on every machine the catalog builds on.",
   },
   {
     file: "features/records/historyfielddiff.test.tsx",

@@ -14,6 +14,7 @@ import {
   CommitmentReviewFlag,
   conversationDirection,
   directionClass,
+  dotClass,
   groupCountLabel,
   MoveFlag,
   TIMELINE_ICON,
@@ -290,7 +291,6 @@ export function ThreadRow({
   if (newest === undefined) {
     return null;
   }
-  const Icon = TIMELINE_ICON[newest.kind];
   const threadKey = newest.threadKey;
   const participants = threadParticipants(group.entries, t, locale);
   const folded = group.entries.length - THREAD_OPEN_MEMBERS;
@@ -304,18 +304,15 @@ export function ThreadRow({
   return (
     <li className={directionClass(newest.direction)}>
       {/* The same three columns a single row sits on (date, rail, what
-          happened), because a conversation is a row of the chronology. Its
-          mark is the kind's own icon: a dot would say it was one message. */}
+          happened), because a conversation is a row of the chronology. */}
       <TimelineWhen atIso={newest.atIso} zone={zone} />
       <span className="tl-rail" aria-hidden="true">
-        <span className="tl-icon">
-          <Icon aria-hidden />
-        </span>
+        <span className={dotClass(newest)} />
       </span>
       <div className="tl-body">
         <div className="tl-thread">
           <span className="tl-head">
-            <Eyebrow>{t("timeline.group.kind")}</Eyebrow>
+            <Eyebrow>{t(TIMELINE_KIND_LABEL[newest.kind])}</Eyebrow>
             <span>{groupCountLabel(group, locale)}</span>
             {participants && <span>{participants}</span>}
             {/* Whose move the conversation waits on, read off its newest

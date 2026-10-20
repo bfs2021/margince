@@ -11,7 +11,6 @@ import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { components } from "../../api/schema";
-import { pickOption } from "../../design-system/select-testing";
 import { LocaleProvider } from "../../i18n";
 import { jsonResponse, stubWithSession } from "../../testing/story-utils";
 import { ContactDealsTab } from "./contactdeals";
@@ -166,21 +165,24 @@ describe("the timeline tab", () => {
     expect(pressed("Changes")).toBe("false");
   });
 
-  // The cuts stand in the panel's body, over the row that narrows whichever
-  // cut is open. In the head, a pill row that wraps would raise that card's
-  // head above every other card's.
-  it("keeps the cuts under the head, above the narrowing row", () => {
+  // The cuts stand in the card's head, as on every History card. The search
+  // row is a second dial a reader opens, so it waits under the head.
+  it("puts the cuts in the head and opens the search row under it", async () => {
+    const user = userEvent.setup();
     const { container } = withProviders(
       <ContactTimelineTab contactId="p-1" view={view} />,
     );
     const cuts = screen.getByRole("button", { name: "All" });
-    expect(cuts.closest(".panel-head")).toBeNull();
-    const dials = container.querySelector(".panel-body .timeline-header");
-    expect(dials).not.toBeNull();
-    expect(dials?.contains(cuts)).toBe(true);
-    // The narrowing row follows the cuts inside the same block, so the two
-    // read as one set of dials rather than as a control that wrapped.
-    expect(dials?.querySelector(".timeline-filters")).not.toBeNull();
+    expect(cuts.closest(".panel-head")).not.toBeNull();
+    expect(container.querySelector(".timeline-filters")).toBeNull();
+
+    await user.click(
+      screen.getByRole("button", { name: "Search this timeline" }),
+    );
+
+    expect(
+      container.querySelector(".panel-body .timeline-filters"),
+    ).not.toBeNull();
   });
 
   // Changes is the one cut with no exchanges to narrow, so the filter row
@@ -195,83 +197,14 @@ describe("the timeline tab", () => {
     expect(
       screen.getByRole("button", { name: "All" }).getAttribute("aria-pressed"),
     ).toBe("false");
-    expect(screen.queryByLabelText("Activity kind")).toBeNull();
-  });
-
-  // The record's chronology holds the exchanges and the record's own edits, and
-  // between the whole and one kind sits the reading a reader most often comes
-  // for: the conversations. It is the same chronicle cut, not a second
-  // rendering — the account page has offered it since it shipped, and a contact
-  // is where a conversation actually happens.
-  it("offers the conversations cut and draws only what somebody can answer", async () => {
-    const user = userEvent.setup();
-    withProviders(<ContactTimelineTab contactId="p-1" view={view} />);
-
-    await user.click(screen.getByRole("button", { name: "Threads" }));
-
-    // Waited on the settled cut rather than asserted straight after the press:
-    // the mail is on screen under BOTH cuts, so what says the cut took is the
-    // meeting leaving.
-    await waitFor(() =>
-      // A meeting is an event, not an exchange. It stays on the cuts that are
-      // about the record's whole chronology.
-      expect(screen.queryByText("Depot walkthrough")).toBeNull(),
-    );
-    expect(screen.getByText("Fleet renewal")).toBeTruthy();
-  });
-
-  // The dial narrows the cut it stands under. Offering Meetings inside a cut
-  // that keeps only mail and messages names a value whose only possible answer
-  // is an empty list — on a record whose mail is right there under the pill.
-  it("offers the conversations cut only the kinds it can draw", async () => {
-    const user = userEvent.setup();
-    withProviders(<ContactTimelineTab contactId="p-1" view={view} />);
-
-    await user.click(screen.getByRole("button", { name: "Threads" }));
-    await user.click(screen.getByLabelText("Activity kind"));
-
-    const listbox = await screen.findByRole("listbox");
-    const offered = within(listbox)
-      .getAllByRole("option")
-      .map((option) => option.textContent);
-    expect(offered).toEqual(["All kinds", "Email", "Messages"]);
-  });
-
-  // The kind is a SERVER parameter and the cut is a client-side narrowing, so
-  // the two can contradict each other. Opening the cut narrows what the reader
-  // asked for rather than leaving the server answering about meetings while
-  // every row it returns is thrown away.
-  it("drops a kind the conversations cut cannot draw as it opens", async () => {
-    const user = userEvent.setup();
-    withProviders(<ContactTimelineTab contactId="p-1" view={view} />);
-
-    await pickOption(user, screen.getByLabelText("Activity kind"), "Meetings");
-    await user.click(screen.getByRole("button", { name: "Threads" }));
-
-    await waitFor(() =>
-      expect(screen.getByLabelText("Activity kind").textContent).toContain(
-        "All kinds",
-      ),
-    );
+    expect(
+      screen.queryByRole("button", { name: "Search this timeline" }),
+    ).toBeNull();
   });
 
   it("says the section is withheld rather than drawing it empty", () => {
     withProviders(<ContactTimelineTab contactId="p-1" view={withheld} />);
     expect(screen.queryByText(/Nothing has been logged/)).toBeNull();
-    expect(screen.getByText("Hidden for your role")).toBeTruthy();
-  });
-
-  // The same obligation on the new cut, which reads that same withheld
-  // section: "no conversations with them yet" about a section the reader's
-  // grant does not reach is the page telling them a relationship never
-  // happened.
-  it("says so on the conversations cut too, rather than reporting none", async () => {
-    const user = userEvent.setup();
-    withProviders(<ContactTimelineTab contactId="p-1" view={withheld} />);
-
-    await user.click(screen.getByRole("button", { name: "Threads" }));
-
-    expect(screen.queryByText(/No conversations with them yet/)).toBeNull();
     expect(screen.getByText("Hidden for your role")).toBeTruthy();
   });
 });
