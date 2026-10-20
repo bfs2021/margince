@@ -49552,6 +49552,10 @@ components:
           type: string
           minLength: 1
           maxLength: 160
+        description:
+          type: string
+          maxLength: 2000
+          description: What the report is for, in the author's words. Blank text clears it. Left out of an update, the stored one is kept.
         audience:
           type: string
           enum:
@@ -49587,6 +49591,9 @@ components:
         owner_id: *id002
         name:
           type: string
+        description:
+          type: string
+          description: What the report is for, in the author's words. Absent when none was given.
         audience:
           type: string
           enum:
