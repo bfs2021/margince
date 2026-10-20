@@ -52,24 +52,28 @@ it("renders the server focus even when the queue page contains different rows", 
       state="ready"
     />,
   );
-  // The day's first row is in hand, drawn whole. The list under it names
-  // every other focus row in the server's order, with its rank in the
-  // reader's own numerals.
+  // The day's first row is in hand, drawn whole. The queue beside it names
+  // every focus row in the server's order. Each rank shows in the reader's
+  // own numerals.
   expect(
     [...container.querySelectorAll(".worklist-row-title")].map(
       (row) => row.textContent,
     ),
   ).toEqual([rows[0].title]);
   expect(
+    container.querySelector(".brief-focus-item-inhand .brief-focus-rank")
+      ?.textContent,
+  ).toBe("1");
+  expect(
     [...container.querySelectorAll(".brief-focus-item-title")].map(
       (item) => item.textContent,
     ),
-  ).toEqual(rows.slice(1, 6).map((row) => row.title));
+  ).toEqual(rows.slice(0, 6).map((row) => row.title));
   expect(
     [...container.querySelectorAll(".brief-focus-list > li")].map(
       (item) => item.querySelector(".brief-focus-rank")?.textContent,
     ),
-  ).toEqual(["2", "3", "4", "5", "6"]);
+  ).toEqual(["1", "2", "3", "4", "5", "6"]);
   expect(screen.getByText("1 of 6")).toBeTruthy();
 });
 
@@ -90,22 +94,16 @@ it("puts a queued row in hand when it is pressed, and says where it stands", asy
       (row) => row.textContent,
     ),
   ).toEqual([rows[2].title]);
+  expect(
+    container.querySelector(".brief-focus-item-inhand .brief-focus-rank")
+      ?.textContent,
+  ).toBe("3");
   expect(screen.getByText("3 of 3")).toBeTruthy();
-  // The pressed button is gone, so focus lands on the card it brought in hand.
   expect(
-    document.activeElement?.contains(
-      container.querySelector(".brief-triage-lead"),
-    ),
-  ).toBe(true);
-  // The row in hand leaves the list; the rows still waiting keep their ranks.
-  expect(
-    inQueue(container).queryByRole("button", { name: /Call buyer 2/ }),
-  ).toBeNull();
-  expect(
-    [...container.querySelectorAll(".brief-focus-list > li")].map(
-      (item) => item.querySelector(".brief-focus-rank")?.textContent,
-    ),
-  ).toEqual(["1", "2"]);
+    inQueue(container)
+      .getByRole("button", { name: /Call buyer 2/ })
+      .getAttribute("aria-pressed"),
+  ).toBe("true");
 });
 
 it("neither grows focus nor links the whole queue when more pages exist", () => {
@@ -165,10 +163,10 @@ it("does not claim an empty agenda when a source failed", () => {
   ];
   const { container } = render(<BriefFeed day={day} state="ready" />);
   expect(screen.queryByText(en["brief.feed.clear"])).toBeNull();
-  // The sentence stands in the section, and no empty list stands under it. A
-  // list of nothing is only padding: a blank band under the caption.
+  // The sentence pays the pane's inset, and no empty grid stands under it.
+  // A list of nothing was only its own padding, a blank band under the caption.
   expect(
-    screen.getByText(en["brief.feed.incomplete"]).closest("#brief-today"),
+    screen.getByText(en["brief.feed.incomplete"]).closest(".panel-body"),
   ).not.toBeNull();
   expect(container.querySelector(".brief-feed-list")).toBeNull();
 });
@@ -335,12 +333,10 @@ it("names the account a row in hand is about, and which side wrote last", () => 
   expect(about?.textContent).not.toContain(en["worklist.pane.lastInbound"]);
 });
 
-// THE RANKED COLUMN NAMES ITS ROWS FROM THE CONTACT, not from a message.
+// The ranked column names its rows from the contact, not from a message.
 //
-// Read off `email_summary.counterparty`, the line named the sender of a
-// waiting message and left every other row anonymous — so a task the reader
-// owes somebody stood in the column with its reason and nobody's name, while
-// the same row in hand named them. The contact is the field every row carries.
+// Read off `email_summary.counterparty`, the line left every row but a waiting
+// message anonymous. The contact is the field every row carries.
 it("names a task's contact in the ranked column", () => {
   stubApi({});
   const owed = {
@@ -365,9 +361,8 @@ it("names a task's contact in the ranked column", () => {
     />,
   );
 
-  // THE TASK'S OWN ROW in the column, not the card and not the waiting message
-  // above it: both of those named her before, and either would carry a
-  // page-wide query over a line that still said nothing.
+  // The task's own row in the column, not the card or the waiting message
+  // above it. Both named her already, so a page-wide query would pass anyway.
   const column = container.querySelector(".brief-triage-queue");
   if (!(column instanceof HTMLElement)) throw new Error("no ranked column");
   const row = within(column).getByRole("button", {
@@ -376,13 +371,11 @@ it("names a task's contact in the ranked column", () => {
   expect(within(row).getByText(/Sonya Beck/)).toBeTruthy();
 });
 
-// A WAITING ROW IS STILL NAMED BY ITS SUBJECT, from the row's own `title`.
+// A waiting row is still named by its subject, from the row's own `title`.
 //
 // The server puts a waiting message's subject there (classify.go), so the
-// column reads it like every other row rather than off `email_summary` — which
-// is what kept the ranked list from drawing a part of a message outside the
-// canonical row. The claim used to live in a helper's docblock with nothing
-// holding it; this is what holds it.
+// column reads it like every other row. Reading `email_summary` would draw
+// part of a message outside the canonical row.
 it("names a waiting row by its subject", () => {
   stubApi({});
   const { container } = render(
@@ -425,19 +418,4 @@ it("names the host of a meeting in hand on Home's focus card", () => {
   );
   const card = container.querySelector(".brief-triage-lead");
   expect(card?.textContent).toContain("hosted by Lena Fischer");
-});
-
-it("folds the whole case for the row in hand under Why first", async () => {
-  stubApi({});
-  const user = userEvent.setup();
-  const { container } = render(
-    <BriefFeed day={readingsDay({}, [waitingEmailRow()])} state="ready" />,
-  );
-  await user.click(inHand(container).getByText(en["brief.first.why"]));
-  // The reasons the ranking weighed, and what doing nothing costs, in the
-  // Worklist's own sentences.
-  expect(
-    inHand(container).getByText(en["worklist.consequence.buyer_waits"]),
-  ).toBeTruthy();
-  expect(inHand(container).getByText("waiting 13 days")).toBeTruthy();
 });
