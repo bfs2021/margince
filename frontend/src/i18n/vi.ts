@@ -5395,6 +5395,11 @@ export const vi = {
   "analytics.q.filterN": "Bộ lọc {n}",
   "analytics.q.filters": "Bộ lọc",
   "analytics.q.groupBy": "Nhóm theo",
+  "analytics.q.companyField": "{label} (công ty)",
+  "analytics.q.fieldCoverage_one":
+    "{label} có giá trị ở {held} trên {count} deal có thể xem.",
+  "analytics.q.fieldCoverage_other":
+    "{label} có giá trị ở {held} trên {count} deal có thể xem.",
   "analytics.q.limited_one":
     "Chỉ hiển thị 1 nhóm đầu tiên. Thêm bộ lọc để thu hẹp câu hỏi.",
   "analytics.q.limited_other":
