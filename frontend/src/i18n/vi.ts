@@ -14,6 +14,16 @@ import type { MessageKey } from "./en";
 //     "pháp nhân" (onboarding's legal-block copy). The two senses share no
 //     string in this catalog and must stay that way.
 export const vi = {
+  "approvalPreferences.title": "Ẩn phê duyệt cho riêng bạn",
+  "approvalPreferences.explain":
+    "Loại bị ẩn chỉ rời hàng đợi của bạn. Thành viên khác vẫn thấy đề xuất. Ẩn hoặc khôi phục một loại sẽ tắt thay đổi tự động của bạn cho loại đó. Gửi tin, đặt lịch, hợp nhất và đề xuất có passport vẫn hiển thị.",
+  "approvalPreferences.review": "Xem cả đề xuất đã ẩn",
+  "approvalPreferences.reviewExplain":
+    "Chế độ này gồm đề xuất đã ẩn và hết hạn. Gói trong hàng đợi thường có thể hiển thị ít mục hơn do tùy chọn cá nhân. Xem từng đề xuất trước khi quyết định.",
+  "approvalPreferences.close": "Đóng xem xét",
+  "approvalPreferences.next": "Trang tiếp",
+  "approvalPreferences.first": "Trang đầu",
+
   "approval.preview.nameUnavailable": "Không có tên",
   "approval.preview.structured": "Giá trị có cấu trúc: {value}",
   "approval.preview.resolveConflict":
@@ -8159,6 +8169,33 @@ export const vi = {
   "blockedDomains.source.verdict": "Kết quả mô hình",
   "blockedDomains.source.heuristic": "Quy tắc suy đoán",
   "blockedDomains.source.human": "Thành viên",
+  "blockedDomains.source.reservedDomain":
+    "Tên miền dành riêng: tạm dừng nhận dạng công ty",
+  "blockedDomains.source.forwardedIdentity":
+    "Trang web khác đã phản hồi. Xác nhận công ty phù hợp.",
+  "worklist.domainReview.defer": "Để sau",
+  "worklist.domainReview.restore": "Đưa lại vào mục xem xét",
+  "worklist.domainReview.deferEffect":
+    "Để sau ẩn câu hỏi khỏi hàng đợi của bạn cho đến khi có bằng chứng mới. Bạn vẫn có thể tìm thấy câu hỏi tại đây.",
+  "worklist.domainReview.title": "Xem xét tên miền",
+  "worklist.domainReview.loading": "Đang tải tên miền…",
+  "worklist.domainReview.empty": "Không có tên miền cần xem xét.",
+  "worklist.domainReview.more": "Tải thêm",
+  "worklist.domainReview.forwarded": "Trang phản hồi: {url}",
+  "worklist.domainReview.evidenceAt": "Bằng chứng mới nhất: {date}",
+  "worklist.domainReview.noEvidenceDate": "Không có ngày bằng chứng",
+  "worklist.domainReview.match": "Ghép công ty",
+  "worklist.domainReview.matchEffect":
+    "Ghép sẽ liên kết tên miền và liên hệ đã ghi nhận với công ty đã chọn.",
+  "worklist.domainReview.create": "Tạo công ty",
+  "worklist.domainReview.retry": "Đọc lại trang",
+  "worklist.domainReview.exclude": "Loại tên miền",
+  "worklist.domainReview.forwardedEffects":
+    "Đọc lại giữ danh tính chưa xác định. Loại sẽ ngừng ghi nhận cho hộp thư của bạn.",
+  "worklist.domainReview.effects":
+    "Tạo sẽ thêm công ty. Đọc lại giữ danh tính chưa xác định. Loại sẽ ngừng ghi nhận cho hộp thư của bạn.",
+  "worklist.batch.domain_questions_one": "Xem xét {count} tên miền",
+  "worklist.batch.domain_questions_other": "Xem xét {count} tên miền",
   "blockedDomains.source.unevidenced": "Trang web không nêu tên công ty nào",
   "blockedDomains.source.staleEvidence": "Email làm căn cứ đã quá cũ",
   "blockedDomains.source.nearDuplicate": "Tên công ty đã tồn tại",
@@ -12198,6 +12235,10 @@ export const vi = {
   "webhooks.event.voice.draft_outcome_recorded.when":
     "Kết quả của bản nháp viết theo giọng văn của thành viên được ghi nhận.",
   "webhooks.eventGroup.approvals_audit": "Phê duyệt và nhật ký hoạt động",
+  "webhooks.event.approval.preference_changed.label":
+    "Đã đổi tùy chọn phê duyệt",
+  "webhooks.event.approval.preference_changed.when":
+    "Thành viên đổi việc hiển thị một loại phê duyệt trong Danh sách công việc.",
   "webhooks.event.approval.requested.label": "Đã yêu cầu phê duyệt",
   "webhooks.event.approval.requested.when":
     "Hành động của trợ lý AI được giữ lại để chờ quyết định.",
