@@ -237,9 +237,12 @@ describe("CompanyScreen — profile fields card (B5)", () => {
     );
     expect(receipt).toBeTruthy();
     expect(screen.queryByText(/^High$|^Medium$|^Low$/)).toBeNull();
-    // A field the read never grounded still draws its row, empty. The tab is a
-    // form, not a list of what a crawl found: a reader can only add what they
-    // can see is missing.
+    // A field the read never grounded waits behind one link, as in the
+    // details pane, and opens as an empty row the reader can fill.
+    expect(screen.queryByText("Ideal customer profile")).toBeNull();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Show 10 empty fields" }),
+    );
     expect(
       screen.getAllByText("Ideal customer profile").length,
     ).toBeGreaterThan(0);
@@ -259,11 +262,11 @@ describe("CompanyScreen — profile fields card (B5)", () => {
     await openProfile();
 
     // An account nobody has read is the case this tab exists for. Every field
-    // is present and blank, so the reader can state what they know. A bare
-    // "Nothing read yet" would give no way to change that.
-    await waitFor(() =>
-      expect(screen.getAllByText("Offering").length).toBeGreaterThan(0),
+    // is one press away and blank, so the reader can state what they know.
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Show 11 empty fields" }),
     );
+    expect(screen.getAllByText("Offering").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Sales motion").length).toBeGreaterThan(0);
   });
 });

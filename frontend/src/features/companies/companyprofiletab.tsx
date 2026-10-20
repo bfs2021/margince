@@ -2,12 +2,14 @@
 // SPDX-FileCopyrightText: 2026 Gradion
 
 import type { ReactNode } from "react";
-import { useId } from "react";
+import { useId, useState } from "react";
 import type { components } from "../../api/schema";
+import { Button } from "../../design-system/atoms";
 import { Callout } from "../../design-system/callout";
 import { FieldGrid } from "../../design-system/fieldgrid";
 import { Panel, PanelBody } from "../../design-system/panel";
-import { useT } from "../../i18n";
+import { formatNumber } from "../../format/format";
+import { useLocale, usePlural, useT } from "../../i18n";
 import { useCanWriteRecord } from "../../lib/capability";
 import { useCompanyProfileFields } from "../records/evidenceverdict";
 import type { OpenReceipt } from "../records/record360";
@@ -19,6 +21,7 @@ import { SidecarFieldRow } from "./companyraildetails";
 
 type Company = components["schemas"]["Company"];
 type ProfileFieldKey = components["parameters"]["ProfileFieldKey"];
+type ProfileField = components["schemas"]["CompanyProfileField"];
 
 // The account's own story, in the order a rep reads it: what the company
 // sells, who it sells to, and how the sale actually happens. These eleven
@@ -44,6 +47,7 @@ const NARRATIVE_FIELDS = [
   "sales_motion",
   "history",
 ] as const satisfies readonly ProfileFieldKey[];
+type NarrativeField = (typeof NARRATIVE_FIELDS)[number];
 
 /**
  * CompanyProfileForm is the Profile tab's own body: the account's details as
@@ -108,6 +112,7 @@ export function CompanyProfileForm({
   const canEdit = writable && !specificReason;
   const profileQuery = useCompanyProfileFields(company.id);
   const fields = profileQuery.data ?? [];
+  const narrative = useNarrativeFold(fields, profileQuery.isSuccess);
 
   return (
     <div className="record-stack">
@@ -134,7 +139,7 @@ export function CompanyProfileForm({
       <Panel title={t("co.narrative.title")}>
         <PanelBody>
           <FieldGrid>
-            {NARRATIVE_FIELDS.map((field) => (
+            {narrative.shown.map((field) => (
               <SidecarFieldRow
                 key={field}
                 companyId={company.id}
@@ -156,6 +161,7 @@ export function CompanyProfileForm({
               />
             ))}
           </FieldGrid>
+          {narrative.toggle}
         </PanelBody>
       </Panel>
       {/* Facts are their own panel: many-valued, correctable one row at a
@@ -171,4 +177,39 @@ export function CompanyProfileForm({
       {tools}
     </div>
   );
+}
+
+/**
+ * useNarrativeFold keeps the account's empty description fields behind one
+ * link, as the details pane does, so the card reads as what is known. Until
+ * the fields have loaded every row stands: an empty-looking row is not yet a
+ * fact about the account.
+ */
+function useNarrativeFold(
+  fields: readonly ProfileField[],
+  loaded: boolean,
+): { shown: readonly NarrativeField[]; toggle: ReactNode } {
+  const t = useT();
+  const plural = usePlural();
+  const { locale } = useLocale();
+  const [open, setOpen] = useState(false);
+  const filled = NARRATIVE_FIELDS.filter((key) =>
+    Boolean(fields.find((one) => one.field === key)?.value.trim()),
+  );
+  const empty = NARRATIVE_FIELDS.length - filled.length;
+  if (!loaded || empty === 0) {
+    return { shown: NARRATIVE_FIELDS, toggle: null };
+  }
+  return {
+    shown: open ? NARRATIVE_FIELDS : filled,
+    toggle: (
+      <Button variant="link" onClick={() => setOpen(!open)}>
+        {open
+          ? t("record.hideEmptyFields")
+          : plural("record.showEmptyFields", empty, {
+              count: formatNumber(empty, locale),
+            })}
+      </Button>
+    ),
+  };
 }
