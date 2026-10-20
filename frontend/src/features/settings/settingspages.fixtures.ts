@@ -6,6 +6,7 @@ import { CORE_OBJECTS } from "../../format/rbacobjects";
 import { type GrantSpec, meFixture } from "../../testing/mefixture";
 import { jsonResponse, type RouteMap } from "../../testing/story-utils";
 import { allowance, status } from "../ai/ai-admin.testkit";
+import { agentClientList } from "../automations/agent-clients.fixtures";
 import { defaultAgentAllowances } from "../automations/agentallowances.fixtures";
 import { bookingProfile } from "../booking/book.testkit";
 import { readingsDay } from "../brief/brief.fixtures";
@@ -153,6 +154,7 @@ export const UNUSED_INSTALLATION_ROUTES: RouteMap = {
   "GET /capture/activity": () => jsonResponse(QUIET_CAPTURE),
   "GET /capture/activity/workspace": () => jsonResponse(QUIET_CAPTURE),
   "GET /capture/settings": () => jsonResponse(CAPTURE_SETTINGS),
+  "GET /installation/agent-clients": () => jsonResponse(agentClientList([])),
   "GET /knowledge/corpora": () =>
     jsonResponse({ items: [] } satisfies Schemas["KnowledgeCorpusList"]),
   "GET /imports/format": () => jsonResponse(formatFixture),
