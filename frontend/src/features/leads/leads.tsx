@@ -200,25 +200,6 @@ function LeadRecord({ lead, id }: Readonly<{ lead: Lead; id: string }>) {
       // default for a prospect. A lead carries no workspace location of its
       // own to prefer over where the reader is.
       zone={viewerZone()}
-      // Where the lead stands, at the foot of its head. A deal's own ladder
-      // stands in the same place, for the question both records are asked
-      // first.
-      standing={
-        <LeadStepper
-          lead={lead}
-          pending={writer.patch.isPending}
-          readOnlyReason={writer.readOnlyReason}
-          onStep={(status) => {
-            // Same one-write-at-a-time rule as the inline rows: a status
-            // sent while another save is in flight races it for If-Match.
-            if (!writer.patch.isPending && !writer.readOnly) {
-              writer.save({ status });
-            }
-          }}
-          onQualify={() => setDialog("qualify")}
-          onDisqualify={() => setDialog("disqualify")}
-        />
-      }
       band={leadBand({ lead, writer, reasonId: terminalReasonId, id, t })}
       // The same strip every record in the product carries. A place a reader
       // navigates, drawn as a rule with the open body underlined, not a pill
@@ -249,6 +230,24 @@ function LeadRecord({ lead, id }: Readonly<{ lead: Lead; id: string }>) {
           promotion={promotion}
           terminalReasonId={terminalReasonId}
           thread={threadQuery}
+          // Where the lead stands, under its call, as a deal's ladder stands
+          // under its own.
+          path={
+            <LeadStepper
+              lead={lead}
+              pending={writer.patch.isPending}
+              reasonId={writer.readOnly ? terminalReasonId : undefined}
+              onStep={(status) => {
+                // Same one-write-at-a-time rule as the inline rows: a status
+                // sent while another save is in flight races it for If-Match.
+                if (!writer.patch.isPending && !writer.readOnly) {
+                  writer.save({ status });
+                }
+              }}
+              onQualify={() => setDialog("qualify")}
+              onDisqualify={() => setDialog("disqualify")}
+            />
+          }
           onOpenEmail={setOpenEmail}
         />
       )}

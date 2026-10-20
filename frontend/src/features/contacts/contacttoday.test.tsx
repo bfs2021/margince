@@ -160,8 +160,10 @@ describe("the move the panel leads with", () => {
     // The subject is in the ask and nowhere else: no row of its own under the
     // move that already asks for it.
     expect(screen.queryByText(OPEN_TASK.subject)).toBeNull();
-    // Every other commitment the record carries still stands.
-    expect(screen.getByText(OTHER_TASK.subject)).toBeTruthy();
+    // Every other commitment the record carries still stands, counted.
+    expect(
+      screen.getByText(en["today.more_one"].replace("{count}", "1")),
+    ).toBeTruthy();
   });
 
   it("shows what it rests on only where that is a record the ask does not name", () => {
@@ -228,7 +230,7 @@ describe("the day's work on a contact", () => {
 
   // A truncated list with no count reads as "that is everything", which is
   // the one thing a list of commitments may not say.
-  it("says how many open tasks the cut left out", () => {
+  it("draws the first open task and counts the rest", () => {
     const many = [1, 2, 3, 4, 5].map((n) => ({
       ...OPEN_TASK,
       id: `a-${n}`,
@@ -241,9 +243,9 @@ describe("the day's work on a contact", () => {
 
     expect(
       screen.getAllByRole("button", { name: en["deal360.openTask"] }),
-    ).toHaveLength(3);
+    ).toHaveLength(1);
     expect(
-      screen.getByText(en["co.suggest.more"].replace("{count}", "2")),
+      screen.getByText(en["today.more_other"].replace("{count}", "4")),
     ).toBeTruthy();
   });
 

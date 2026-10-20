@@ -14,7 +14,7 @@ export function ContactSubtitle({
   const bought = boughtFields(contact);
   const employment = currentEmployer(view.employments?.data);
   return (
-    <div className="record-sub record-sub-inline">
+    <span className="record-sub-inline">
       {contact.title && (
         <BoughtText value={contact.title} bought={bought.get("title")} />
       )}
@@ -39,6 +39,6 @@ export function ContactSubtitle({
           />
         </>
       )}
-    </div>
+    </span>
   );
 }

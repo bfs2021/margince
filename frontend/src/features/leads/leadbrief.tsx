@@ -20,7 +20,7 @@
 // card owes but they do not is this card's own to draw.
 
 import type { ReactNode } from "react";
-import { Panel } from "../../design-system/panel";
+import { Panel, PanelBody } from "../../design-system/panel";
 import { useT } from "../../i18n";
 import {
   type Grounding,
@@ -42,6 +42,8 @@ export function LeadBrief({
   standing,
   because,
   restsOn,
+  rings,
+  path,
   children,
 }: Readonly<{
   standing?: { label: string; tone: StandingTone };
@@ -49,20 +51,29 @@ export function LeadBrief({
   because?: ReactNode;
   // The readings behind the call, one disclosure away.
   restsOn?: readonly Grounding[];
+  // The shares the call is read from, beside it.
+  rings?: ReactNode;
+  // Where the lead stands on its ladder, under the call.
+  path?: ReactNode;
   children?: ReactNode;
 }>) {
   const t = useT();
   return (
-    <Panel tone="ai" title={t("lead.brief.title")}>
+    <Panel
+      tone="ai"
+      className="record-hero"
+      title={t("record.howItStandsTitle")}
+    >
       {standing ? (
         <VerdictHead
           label={standing.label}
           tone={standing.tone}
           because={because}
           restsOn={restsOn}
-          scale="compact"
         />
       ) : null}
+      {rings ? <PanelBody className="r360-rings">{rings}</PanelBody> : null}
+      {path ? <PanelBody>{path}</PanelBody> : null}
       {children}
     </Panel>
   );

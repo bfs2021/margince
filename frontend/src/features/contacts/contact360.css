@@ -25,25 +25,6 @@
 
 /* The standing chip is a button that looks like the badge it holds: no
    chrome of its own, the focus ring on the pill. */
-.pe-standing-chip {
-  display: inline-flex;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  border-radius: var(--r-full);
-  corner-shape: round;
-}
-.pe-standing-chip:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
-}
-/* One sentence behind a reading, at a reading measure. */
-.pe-brief-gloss {
-  margin: 0;
-  max-width: 32ch;
-}
-
 .pe-meta-link {
   display: inline-flex;
   align-items: center;
@@ -145,112 +126,6 @@
    dates they were the loudest thing in the card; the sentences are the
    reading, and the sources are the footnote a reader follows when they doubt
    one. */
-/* The brief's readings: four cells in a row, caption over value, on the same
-   grid step the rest of the card keeps. They fold to two columns before the
-   values start breaking mid-word. */
-.pe-brief-readings {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: var(--space-3) var(--space-4);
-  margin: var(--space-4) 0 0;
-}
-.pe-brief-reading {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-width: 0;
-}
-.pe-brief-reading dd {
-  margin: 0;
-  font-weight: var(--fontWeightMedium);
-  color: var(--textPrimary);
-}
-/* A reading that opens on hover says so: the dotted rule under the value is
-   the one mark for "there is more behind this word", the same one the
-   glossary terms in the product wear. The panel is prose, so the trigger
-   keeps the value's own ink. */
-.pe-brief-reading .popover-trigger {
-  text-decoration: underline dotted;
-  text-decoration-color: var(--borderStrong);
-  text-underline-offset: 0.2em;
-  font: inherit;
-  color: inherit;
-}
-.pe-brief-reading .popover-panel .emailentry {
-  min-width: 22rem;
-}
-/* The trend's glyph sits before its word, in the trend's tone. */
-.pe-brief-reading dd:has(> .pe-brief-trend) {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-.pe-brief-trend-warming {
-  color: var(--successText);
-}
-.pe-brief-trend-cooling {
-  color: var(--warningText);
-}
-.pe-brief-trend-none {
-  color: var(--textSecondary);
-}
-/* The verdict leads the row and wears its tone at the heading rung: it is
-   the one word a reader glances for, and the four readings after it are
-   what it was read from. The selectors carry the `dd` so they outweigh the
-   value rule above, which names the element too. */
-.pe-brief-reading dd.pe-brief-reading-verdict {
-  font: var(--fontHeadingSmall);
-}
-/* As the sheet's lead the verdict takes the row to itself at the verdict rung,
-   and the readings it was read from line up under it. */
-.record-sheet .pe-brief .pe-brief-reading:has(> .pe-brief-reading-verdict) {
-  grid-column: 1 / -1;
-}
-.record-sheet .pe-brief .pe-brief-reading dd.pe-brief-reading-verdict {
-  font: var(--fontVerdict);
-}
-@media (min-width: 721px) {
-  .record-sheet .pe-brief .pe-brief-readings {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-/* On the sheet the four readings are one ruled strip, each cell parted from
-   the one before it, so they read as one row of facts and not four tiles. */
-.record-sheet .pe-brief > .panel-body > .pe-brief-readings {
-  gap: 0;
-  margin-block-start: var(--space-5);
-  border-block: 1px solid var(--borderSubtle);
-}
-.record-sheet .pe-brief > .panel-body > .pe-brief-readings > .pe-brief-reading {
-  padding: var(--space-3);
-}
-.record-sheet
-  .pe-brief
-  > .panel-body
-  > .pe-brief-readings
-  > .pe-brief-reading
-  + .pe-brief-reading {
-  border-inline-start: 1px solid var(--borderSubtle);
-}
-.record-sheet
-  .pe-brief
-  > .panel-body
-  > .pe-brief-readings
-  > .pe-brief-reading:first-child {
-  padding-inline-start: 0;
-}
-.pe-brief-reading dd.pe-brief-reading-success {
-  color: var(--successText);
-}
-.pe-brief-reading dd.pe-brief-reading-danger {
-  color: var(--dangerText);
-}
-@media (max-width: 720px) {
-  .pe-brief-readings {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 .pe-chiprow {
   display: flex;
   flex-wrap: wrap;
@@ -479,31 +354,6 @@
 }
 .pe-rail .company-card:hover {
   background: none;
-}
-
-/* The pulse card's overall reading sits under a rule: it summarizes the rows
-   above it rather than joining them. */
-
-/* Who knows them: a contact, their strength, and the proof under it. */
-.pe-colleagues {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-}
-.pe-colleague {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) 0;
-}
-
-/* Name over proof, not name beside proof: they are two spans in one column,
-   so the name needs to be a block or the two run together. */
-.pe-colleague-name {
-  display: block;
-  color: var(--textPrimary);
 }
 
 .pe-colleague-proof {
@@ -1074,128 +924,11 @@
   gap: var(--space-2);
   min-width: 0;
 }
-.pe-brief-call .pe-brief-readings {
-  margin: 0;
-}
-
-/* On the sheet the call, its lead sentence and the rings share one grid, and
-   what the lead leaves unsaid runs under both as a quiet callout. */
-.record-sheet .pe-brief .pe-brief-lead {
-  grid-template-areas:
-    "verdict rings"
-    "lead rings"
-    "lines lines";
-  row-gap: var(--space-2);
-}
-.record-sheet .pe-brief .pe-brief-call,
-.record-sheet .pe-brief .pe-brief-call > .co-brief-read {
-  display: contents;
-}
-.record-sheet .pe-brief .pe-brief-call > .pe-brief-readings {
-  grid-area: verdict;
-}
-.record-sheet .pe-brief .co-brief-lead {
-  grid-area: lead;
+/* As the record's lead the sentence under the verdict reads at the display
+   face's reading size, and the lines after it at the body's. */
+.record-hero .pe-brief-call .co-brief-lead {
+  max-width: 32ch;
   padding-bottom: 0;
   border-bottom: 0;
-  max-width: 56ch;
-  color: var(--textSecondary);
-}
-.record-sheet .pe-brief .pe-brief-lead > .rings-with-legend {
-  grid-area: rings;
-}
-.record-sheet .pe-brief .co-brief-lines {
-  grid-area: lines;
-  padding: 0;
-  margin-block-start: var(--space-4);
-}
-.record-sheet .pe-brief .co-brief-lines > li {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--r-md);
-  background: var(--bgInset);
-  color: var(--textSecondary);
-}
-.record-sheet .pe-brief .co-brief-lines > li::before {
-  content: "";
-  flex: none;
-  align-self: center;
-  inline-size: 6px;
-  block-size: 6px;
-  border-radius: var(--r-full);
-  corner-shape: round;
-  background: var(--warning);
-}
-@container work (max-width: 48rem) {
-  .record-sheet .pe-brief .pe-brief-lead {
-    grid-template-areas: "verdict" "lead" "rings" "lines";
-  }
-}
-/* The axis and the sources are the reading's evidence and its byline, so no
-   seam parts them from it. */
-.record-sheet .pe-brief > .panel-body.co-spine::before {
-  content: none;
-}
-.record-sheet .pe-brief > .panel-foot {
-  border-top: 0;
-  padding-block-start: 0;
-}
-.pe-brief-reading dd:has(> .pe-brief-trend-warming) {
-  color: var(--successText);
-}
-.pe-brief-reading dd:has(> .pe-brief-trend-cooling) {
-  color: var(--warningText);
-}
-/* The figure stands beside the call at a glance's size, not as a second lead. */
-.record-sheet .pe-brief .rings {
-  inline-size: 5.25rem;
-  block-size: 5.25rem;
-}
-/* The axis as one line under its dates: today named on the dates' own row,
-   and each stop's kind and subject on one caption line under its title. */
-.record-sheet .pe-brief .co-spine-now > .co-spine-when {
-  display: none;
-}
-.record-sheet .pe-brief .co-spine-now > .co-spine-title {
-  display: block;
-  grid-row: 1;
-  align-self: end;
-  padding-block-end: var(--space-1);
-  white-space: nowrap;
-  font-weight: var(--fontWeightBold);
-}
-.record-sheet .pe-brief .co-spine-now-word::after {
-  content: " · ";
-}
-.record-sheet .pe-brief .co-spine-title {
-  font-weight: var(--fontWeightMedium);
-}
-.record-sheet .pe-brief .co-spine-detail {
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: var(--space-1);
-}
-.record-sheet .pe-brief .co-spine-detail > .co-spine-relation {
-  order: -1;
-}
-.record-sheet .pe-brief .co-spine-detail > .co-spine-relation::after {
-  content: " ·";
-}
-/* Its sources read as a footnote: who wrote it, then the way to what it rests
-   on, in the machine's ink. */
-.pe-brief-foot .popover-trigger {
-  min-block-size: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--aiText);
-  font: inherit;
-}
-.pe-brief-foot {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
+  font: var(--fontVerdictBecause);
 }

@@ -81,7 +81,8 @@ describe("the header's core record verbs — edit, merge, archive", () => {
         ),
     });
 
-    const subtitle = () => document.querySelector(".record-sub");
+    const subtitle = () =>
+      document.querySelector(".record-sub .record-sub-inline");
     await waitFor(() => expect(subtitle()?.textContent).toBe("Old title"));
     await userEvent.click(
       await screen.findByRole("button", { name: "Change Title" }),

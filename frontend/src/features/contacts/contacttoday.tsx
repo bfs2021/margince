@@ -4,7 +4,7 @@ import type { components } from "../../api/schema";
 import { Button, EmptyState } from "../../design-system/atoms";
 import { ErrorLine } from "../../design-system/errorline";
 import { PanelBody } from "../../design-system/panel";
-import { formatDate, formatNumber } from "../../format/format";
+import { formatDate } from "../../format/format";
 import { daysPast } from "../../format/lateness";
 import { type Locale, useLocale, useT } from "../../i18n";
 import { useMemberNames } from "../../lib/membernames";
@@ -63,7 +63,6 @@ export function ContactToday({
   // The one move the panel leads with, where the ladder found one. A quiet or
   // thin rung is an answer rather than an ask, so it draws no row and the
   // panel's own sentence speaks for the day.
-  const { locale } = useLocale();
   const move = moment && actionableMoment(moment) ? moment : undefined;
   const tasks = useOpenTaskRows(view, move);
   const standing = standingSentence(moment, t);
@@ -72,7 +71,7 @@ export function ContactToday({
     <TodayPanel
       onOpenTasks={onOpenTasks}
       tasksLabel={t("today.workQueue")}
-      footer={panelFoot({ moment, more: tasks.more, t, locale })}
+      footer={panelFoot({ moment, t })}
       notice={
         <WithheldNotice
           sections={[
@@ -211,26 +210,17 @@ function standingSentence(
   return moment.rule === "thin_relationship" ? moment.headline : undefined;
 }
 
-// The band under the rows: what the list did not show, and how far the reading
-// reached. Both are facts about the READING rather than work, so they sit in
-// the foot; as rows they would read as two more things to do. A truncated list
-// with no count reads as "that is everything", which is the one thing a list
-// of commitments may not say.
+// The band under the rows: how far the reading reached. It is a fact about the
+// reading rather than work, so it sits in the foot. As a row it would read as
+// one more thing to do.
 function panelFoot({
   moment,
-  more,
   t,
-  locale,
 }: Readonly<{
   moment: ContactMoment | undefined;
-  more: number;
   t: ReturnType<typeof useT>;
-  locale: Locale;
 }>): ReactNode | undefined {
   const lines = [
-    ...(more > 0
-      ? [t("co.suggest.more", { count: formatNumber(more, locale) })]
-      : []),
     // "Nothing needs you" about a relationship with almost nothing recorded is
     // honest only with the reach of the records behind it named beside it.
     ...(moment?.rule === "thin_relationship"
@@ -257,11 +247,12 @@ function panelFoot({
 // Rows rather than a component, because the panel counts what it is handed to
 // decide whether the day is quiet — and a component that renders nothing is
 // still one child. A withheld section yields no rows; the rail says what was
-// withheld. `more` is what the cut left out, which the foot reports.
+// withheld. Every open task is handed in: the strip draws the first and
+// counts the rest.
 function useOpenTaskRows(
   view: Contact360,
   move: ContactMoment | undefined,
-): { rows: ReactNode[]; more: number } {
+): { rows: ReactNode[] } {
   const t = useT();
   const { locale } = useLocale();
   const zone = useRecordZone();
@@ -283,7 +274,7 @@ function useOpenTaskRows(
   };
   const asOf = Date.parse(view.as_of);
   return {
-    rows: tasks.slice(0, OPEN_TASKS_SHOWN).map((task) => (
+    rows: tasks.map((task) => (
       <TodoRow
         key={task.id}
         who={assigneeOf(task.assignee_id)}
@@ -300,7 +291,6 @@ function useOpenTaskRows(
         }
       />
     )),
-    more: Math.max(tasks.length - OPEN_TASKS_SHOWN, 0),
   };
 }
 
@@ -316,10 +306,6 @@ function recordsTheMoveNames(move: ContactMoment | undefined): Set<string> {
     (move?.evidence ?? []).flatMap((item) => (item.id ? [item.id] : [])),
   );
 }
-
-// How many open tasks the day's work lists before the reader is sent to the
-// full list. Three is what reads as a glance beside the move above them.
-const OPEN_TASKS_SHOWN = 3;
 
 // When a task is owed, coloured only once it is late. A task with no date says
 // so rather than leaving the slot empty, which reads as a date that failed to

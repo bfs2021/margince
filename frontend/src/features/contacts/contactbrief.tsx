@@ -1,17 +1,11 @@
-import { Handshake, Minus, TrendingDown, TrendingUp } from "lucide-react";
+import { Handshake } from "lucide-react";
 import type { ReactNode } from "react";
 import type { components } from "../../api/schema";
-import { Avatar, Button } from "../../design-system/atoms";
-import { EmailEntry } from "../../design-system/emailentry";
+import { Button } from "../../design-system/atoms";
 import { EmailReference } from "../../design-system/emailreference";
 import { Panel, PanelBody } from "../../design-system/panel";
-import { Popover } from "../../design-system/popover";
-import {
-  formatDayMonth,
-  formatNumber,
-  relativeDays,
-} from "../../format/format";
-import { type Locale, useLocale, useT } from "../../i18n";
+import { formatDayMonth } from "../../format/format";
+import { useLocale, useT } from "../../i18n";
 import { useRecordZone } from "../../lib/recordzone";
 import {
   interactionIcon,
@@ -23,16 +17,9 @@ import {
   SourcesPill,
   type SpineSource,
   spineTask,
+  WrittenBy,
 } from "../records/record360";
-import {
-  colleagueWords,
-  directionSentence,
-  directionWord,
-  overallVerdict,
-  trendKind,
-  trendSentence,
-  trendWord,
-} from "./contactrail";
+import { overallVerdict } from "./contactrail";
 import { ContactRings } from "./contactrings";
 
 type Contact360 = components["schemas"]["Contact360"];
@@ -104,21 +91,21 @@ export function ContactBriefCard({
   }
   return (
     <Panel
-      // A section like the others under it. Its name and date stand in the
-      // title column; who wrote it and its sources stand in its foot.
-      className="pe-brief"
-      title={written ? t("record.howItStandsTitle") : t("contact.brief.title")}
+      // The record's lead, as on every record. A dateline sits over the call
+      // once it is written; who wrote it and what it rests on sit at the end.
+      tone="ai"
+      className="record-hero"
+      title={
+        written
+          ? t("record.howItStands", {
+              when: formatDayMonth(brief.generated_at, locale, recordZone),
+            })
+          : t("contact.brief.title")
+      }
       titleAction={
         written ? (
-          <span className="t-sub">
-            {formatDayMonth(brief.generated_at, locale, recordZone)}
-          </span>
-        ) : undefined
-      }
-      footer={
-        written ? (
-          <span className="pe-brief-foot t-caption">
-            <span>{t(`co.brief.by.${brief.generated_by}`)}</span>
+          <>
+            <WrittenBy by={brief.generated_by} />
             {/* The messages the reading rests on, behind one pill: a busy
                 contact cites dozens, and a list of them buried the call. */}
             <SourcesPill count={sources.length}>
@@ -132,7 +119,7 @@ export function ContactBriefCard({
                 </li>
               ))}
             </SourcesPill>
-          </span>
+          </>
         ) : undefined
       }
     >
@@ -148,40 +135,23 @@ export function ContactBriefCard({
             </Button>
           </p>
         )}
+        {/* The call first with the judgement under it, and beside both the
+            shares the relationship is read from. */}
         {written && (
-          <>
-            {/* The call first, then the judgement under it, and beside both
-                the shares the relationship is read from. */}
-            <div className="pe-brief-lead">
-              <div className="pe-brief-call">
-                <BriefReadings
-                  view={view}
-                  onOpenEmail={onOpenEmail}
-                  part="verdict"
-                />
-                <SentenceList
-                  sentences={brief.sentences}
-                  leadWithJudgement
-                  citations="none"
-                />
-              </div>
-              <ContactRings
-                view={view}
-                firstName={view.contact.full_name.split(" ")[0] ?? ""}
+          <div className="pe-brief-lead">
+            <div className="pe-brief-call">
+              <BriefVerdict view={view} />
+              <SentenceList
+                sentences={brief.sentences}
+                leadWithJudgement
+                citations="none"
               />
             </div>
-            {/* The relationship's four readings under the sentence they
-                qualify: which way it runs, who on our side carries it, what
-                is on the table and what is owed. Inside the brief rather
-                than as a row of tiles under it, because each is one fact the
-                sentence above already rests on, and four cards for four
-                words gave each the weight of a section. */}
-            <BriefReadings
+            <ContactRings
               view={view}
-              onOpenEmail={onOpenEmail}
-              part="readings"
+              firstName={view.contact.full_name.split(" ")[0] ?? ""}
             />
-          </>
+          </div>
         )}
       </PanelBody>
       {/* The thread the reading was made from: the last word, the silence
@@ -204,195 +174,28 @@ function spineSource(view: Contact360): SpineSource {
   };
 }
 
-// The message the "last reply" reading was read from: the newest inbound
-// mail on the page's own timeline, handed to the cell that draws it as the
-// row the timeline draws so a reader can open it from here.
-function newestInbound(view: Contact360): Activity | undefined {
-  return (view.activities?.data ?? [])
-    .filter(
-      (row) =>
-        row.kind === "email" &&
-        row.direction === "inbound" &&
-        row.email_summary,
-    )
-    .sort((a, b) => Date.parse(b.occurred_at) - Date.parse(a.occurred_at))[0];
-}
-
-// The five cells of the brief's pulse row, built apart from the component
-// that draws them so the reading rules and the rendering are two short
-// pieces rather than one long one.
-function briefCells(
-  view: Contact360,
-  t: ReturnType<typeof useT>,
-  locale: Locale,
-  omitted: ReadonlySet<string>,
-  lastInbound: Activity | undefined,
-  onOpenEmail: ((activityId: string) => void) | undefined,
-) {
-  const touch = (value: () => string) =>
-    omitted.has("last_touch") ? t("record.notShown") : value();
-  const overall = omitted.has("last_touch") ? null : overallVerdict(view);
-  return [
-    {
-      key: "overall",
-      term: t("contact.rail.overall"),
-      value: overall ? overall.word(t) : t("record.notShown"),
-      tone: overall?.tone,
-    },
-    {
-      key: "direction",
-      term: t("contact.rail.direction"),
-      value: touch(() => directionWord(view, t)),
-      detail: omitted.has("last_touch") ? null : (
-        <p className="t-body pe-brief-gloss">{directionSentence(view, t)}</p>
-      ),
-    },
-    {
-      key: "lastReply",
-      term: t("contact.rail.lastReply"),
-      value: touch(() =>
-        relativeDays(view.last_inbound_at, t, locale, new Date(view.as_of)),
-      ),
-      detail:
-        !omitted.has("last_touch") && lastInbound?.email_summary ? (
-          <EmailEntry
-            summary={lastInbound.email_summary}
-            onOpen={
-              onOpenEmail &&
-              lastInbound.email_summary.display_status !== "withheld"
-                ? () => onOpenEmail(lastInbound.id)
-                : undefined
-            }
-            whyNotOpenable="noDetail"
-          />
-        ) : null,
-    },
-    {
-      key: "coverage",
-      term: t("contact.rail.coverage"),
-      value: omitted.has("network")
-        ? t("record.notShown")
-        : colleagueWords(view.network?.colleagues?.length ?? 0, locale),
-      // WHO the colleagues are, behind the count: a reader who sees "1
-      // colleague" wants the name, and the proof beside it (exchanges in the
-      // last ninety days, never a ranking nobody can check).
-      detail: omitted.has("network") ? null : <Colleagues view={view} />,
-    },
-    {
-      key: "trend",
-      term: t("contact.rail.trend"),
-      value: touch(() => trendWord(view, t)),
-      // The direction as a glyph before the word, so the row reads at a
-      // glance: up for warming, down for cooling, a dash when nothing has
-      // come in to read a direction from.
-      glyph: omitted.has("last_touch") ? null : <TrendGlyph view={view} />,
-      detail:
-        omitted.has("last_touch") || trendKind(view) === "none" ? null : (
-          <p className="t-body pe-brief-gloss">{trendSentence(view, t)}</p>
-        ),
-    },
-  ];
-}
-
-// The relationship's pulse, as a row of caption-over-value cells under the
-// sentence it qualifies: which way it runs, when they last wrote, who on our
-// side carries it, where it is heading, and the verdict those four add up to.
-// Four of the five are read from the two touch dates, which one grant
-// governs, so one withheld section blanks them together; coverage is the
-// network's, on its own grant.
-function BriefReadings({
-  view,
-  onOpenEmail,
-  part,
-}: Readonly<{
-  view: Contact360;
-  onOpenEmail?: (activityId: string) => void;
-  // The verdict alone, which leads the brief, or the four readings it adds up
-  // from, which stand under the judgement.
-  part: "verdict" | "readings";
-}>) {
+// The verdict the brief leads with, in the standing's tone. It is read from
+// the touch dates, so a reader they are withheld from gets none.
+function BriefVerdict({ view }: Readonly<{ view: Contact360 }>): ReactNode {
   const t = useT();
-  const { locale } = useLocale();
-  const omitted = new Set(view.sections_omitted ?? []);
-  const cells = briefCells(
-    view,
-    t,
-    locale,
-    omitted,
-    newestInbound(view),
-    onOpenEmail,
-  ).filter((cell) => (cell.key === "overall") === (part === "verdict"));
+  const withheld = (view.sections_omitted ?? []).includes("last_touch");
+  const overall = withheld ? null : overallVerdict(view);
+  const tone = overall ? VERDICT_TONE[overall.tone ?? "none"] : "unknown";
   return (
-    <dl className="pe-brief-readings">
-      {cells.map((cell) => (
-        <div key={cell.key} className="pe-brief-reading">
-          <dt className="t-caption">{cell.term}</dt>
-          <dd
-            className={
-              [
-                cell.key === "overall" ? "pe-brief-reading-verdict" : "",
-                cell.tone ? `pe-brief-reading-${cell.tone}` : "",
-              ]
-                .filter(Boolean)
-                .join(" ") || undefined
-            }
-          >
-            {"glyph" in cell && cell.glyph}
-            {"detail" in cell && cell.detail ? (
-              <Popover onHover label={cell.value}>
-                {cell.detail}
-              </Popover>
-            ) : (
-              cell.value
-            )}
-          </dd>
-        </div>
-      ))}
-    </dl>
+    <div className="r360-verdict">
+      <span className={`r360-standing r360-standing-${tone}`}>
+        {overall ? overall.word(t) : t("record.notShown")}
+      </span>
+    </div>
   );
 }
 
-// The trend's glyph in the trend's tone.
-function TrendGlyph({ view }: Readonly<{ view: Contact360 }>): ReactNode {
-  const kind = trendKind(view);
-  const Glyph =
-    kind === "warming" ? TrendingUp : kind === "cooling" ? TrendingDown : Minus;
-  return (
-    <Glyph
-      size={15}
-      aria-hidden="true"
-      className={`pe-brief-trend pe-brief-trend-${kind}`}
-    />
-  );
-}
-
-// The colleagues who also know this contact, with the proof beside each:
-// exchanges in the last ninety days, never a ranking nobody can check.
-function Colleagues({ view }: Readonly<{ view: Contact360 }>): ReactNode {
-  const t = useT();
-  const { locale } = useLocale();
-  const colleagues = view.network?.colleagues ?? [];
-  if (colleagues.length === 0) {
-    return null;
-  }
-  return (
-    <ul className="pe-colleagues">
-      {colleagues.map((colleague) => (
-        <li key={colleague.user_id} className="pe-colleague">
-          <Avatar name={colleague.display_name} identity={colleague.user_id} />
-          <span>
-            <span className="pe-colleague-name">{colleague.display_name}</span>
-            <span className="pe-colleague-proof t-caption">
-              {t("contact.rail.exchanges", {
-                count: formatNumber(colleague.interactions_90d, locale),
-              })}
-            </span>
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
-}
+// The record 360's standing tones, keyed by the contact's own verdict tone.
+const VERDICT_TONE = {
+  success: "calm",
+  danger: "danger",
+  none: "accent",
+} as const;
 
 // One cited source, named for what it is.
 //

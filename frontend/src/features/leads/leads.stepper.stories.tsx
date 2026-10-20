@@ -42,10 +42,13 @@ function ladder(props: {
     installFetchStub({});
     return (
       <StoryProviders>
+        {props.readOnlyReason && (
+          <p id="lead-ladder-reason">{props.readOnlyReason}</p>
+        )}
         <LeadStepper
           lead={lead(props.lead)}
           pending={props.pending ?? false}
-          readOnlyReason={props.readOnlyReason}
+          reasonId={props.readOnlyReason ? "lead-ladder-reason" : undefined}
           onStep={() => undefined}
           onQualify={() => undefined}
           onDisqualify={() => undefined}
@@ -86,7 +89,7 @@ export const MovedByTheSystem: Story = {
 };
 
 /** Qualified: the ladder is finished, every step is a fact, and the reason
- *  the moves are refused is stated on each one rather than once elsewhere. */
+ *  the moves are refused is stated once, and every step points at it. */
 export const Qualified: Story = {
   render: ladder({
     lead: { status: "promoted", archived_at: "2026-08-25T10:00:00Z" },

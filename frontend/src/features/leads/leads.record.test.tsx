@@ -86,18 +86,18 @@ describe("LeadScreen — edit with If-Match (P-1)", () => {
     );
     // The score reads in the band and on the folded score section's summary.
     expect(screen.getAllByText("Score: 72").length).toBeGreaterThan(0);
-    // Status and company are readings in the band's strip, not pills among
-    // pills. The word is the same everywhere. Otherwise a German reader sees
+    // Status is a pill under the name and company is on the name's own line.
+    // The word is the same everywhere. Otherwise a German reader sees
     // "In Bearbeitung" on the chip and the raw enum "contacted" in the cell.
     expect(
       screen
         .getAllByText("Contacted")
-        .some((el) => el.classList.contains("stat-card-value")),
+        .some((el) => el.closest(".record-pulse") !== null),
     ).toBe(true);
     expect(
       screen
         .getAllByText("Nordwind Logistik")
-        .some((el) => el.classList.contains("stat-card-value")),
+        .some((el) => el.closest(".record-name-row") !== null),
     ).toBe(true);
   });
 });

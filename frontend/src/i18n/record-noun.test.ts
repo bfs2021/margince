@@ -558,7 +558,6 @@ const HUMAN_SENSE_KEYS: Record<string, readonly string[]> = {
     "webhooks.event.deal.updated.when",
     "webhooks.event.deal.owner_changed.when",
     "webhooks.event.list.updated.when",
-    "contact.page.owner",
     "lists.fact.steward",
     "lists.invalid.body",
     "lists.ownerless.body",

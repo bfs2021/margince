@@ -48,19 +48,13 @@ import { TimelineActions } from "../records/timelineactions";
 import { useTaskUpdate } from "../worklist/taskactions";
 import { TaskDetailModal } from "../worklist/taskdetailmodal";
 import { useProjectVerbRefusal } from "./project360.refusal";
+import { ProjectCall } from "./projectcall";
 import { ProjectCompanies } from "./projectcompanies";
 import { ProjectIdentityFacts } from "./projectheaderfacts";
-import { ProjectHealth } from "./projecthealth";
 import type { ProjectHealthAssessment } from "./projecthealth.queries";
 import { ProjectHealthModal } from "./projecthealthmodal";
 import { AssignProjectOwnerAction } from "./projectowner";
 import { AdvanceProjectModal, PhaseStepper } from "./projectphase";
-import {
-  PROJECT_ACTIVITY_ANCHOR,
-  PROJECT_COMMITMENTS_ANCHOR,
-  PROJECT_DEALS_ANCHOR,
-  RollupsStrip,
-} from "./projectreadings";
 import { PhaseBadge, ProjectKeyChip } from "./projects";
 import {
   mapProjectUpdate,
@@ -80,6 +74,12 @@ import {
 } from "./projectsections";
 import { ProjectTabs } from "./projecttabs";
 import "./projects.css";
+
+// Where the page's own links land: the cards a reading is computed from, and
+// the record's story that `RecordView` draws under the work column.
+const PROJECT_DEALS_ANCHOR = "project-deals";
+const PROJECT_COMMITMENTS_ANCHOR = "project-commitments";
+const PROJECT_ACTIVITY_ANCHOR = "project-activity";
 
 // The project page: one composite read (GET /projects/{id}/360) drawn in the
 // company page's three zones — what the project IS on the left (its phase
@@ -181,9 +181,7 @@ function ProjectPage({ view }: Readonly<{ view: Project360 }>) {
             projectId={project.id}
             readOnly={readOnly}
           />
-          <ProjectContractsCard view={view} />
           <ProjectDocumentsCard view={view} />
-          <PhaseHistoryCard view={view} />
           <CustomFieldsPanel object="project" record={project} />
         </>
       }
@@ -214,18 +212,6 @@ function ProjectPage({ view }: Readonly<{ view: Project360 }>) {
       // company, contact and lead pages put them. Without it the verbs fall to
       // the full-width strip under the header.
       actionsInline
-      // Where the project stands, at the foot of its head, the same row a
-      // deal's stage ladder and a lead's stepper stand in. It is the question a
-      // reader arrives with, so it is answered before the body rather than as
-      // the first card inside it.
-      standing={
-        <PhaseStepper
-          phase={project.phase}
-          refusedReasonId={readOnly ? readOnlyReasonId : undefined}
-          pending={false}
-          onMove={setMoveTo}
-        />
-      }
       tabs={<ProjectTabs />}
       band={
         // One sentence and nothing else: why this record takes no changes, so
@@ -238,19 +224,23 @@ function ProjectPage({ view }: Readonly<{ view: Project360 }>) {
       {...chronology}
       timelineAnchorId={PROJECT_ACTIVITY_ANCHOR}
     >
-      {/* The record's work column, at the record's own step. The readings open
-            it: they are read as cards and so stand BESIDE the details pane, as on
-            every other record, rather than in a band across both columns that the
-            pane would reflow. The phase is not one of them — it says where the
-            whole project stands, so it rides the head (`standing` above), which
-            is full width already and above the pane. */}
-      <div className="record-stack">
-        <RollupsStrip view={view} />
-        <ProjectHealth
-          projectId={project.id}
-          readOnly={readOnly}
+      {/* The record's lead, with its phases under the call, then its cards:
+          the deals and the paper, what is owed and how the phases ran. */}
+      <div className="record-stack record-sections">
+        <ProjectCall
+          view={view}
+          current={view.health?.current}
+          canRecord={!readOnly}
           onRecord={() => setHealthEdit("new")}
           onCorrect={setHealthEdit}
+          phase={
+            <PhaseStepper
+              phase={project.phase}
+              refusedReasonId={readOnly ? readOnlyReasonId : undefined}
+              pending={false}
+              onMove={setMoveTo}
+            />
+          }
         />
         <div id={PROJECT_DEALS_ANCHOR}>
           <ProjectDealsCard
@@ -273,9 +263,11 @@ function ProjectPage({ view }: Readonly<{ view: Project360 }>) {
             }
           />
         </div>
+        <ProjectContractsCard view={view} />
         <div id={PROJECT_COMMITMENTS_ANCHOR}>
           <CommitmentsCard view={view} onOpenTask={setOpenTask} />
         </div>
+        <PhaseHistoryCard view={view} />
       </div>
       <AdvanceProjectModal
         projectId={project.id}

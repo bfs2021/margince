@@ -253,7 +253,6 @@ const KEPT_IN_ENGLISH = new Set<string>([
   "timeline.filters.kind.email",
   "auth.email",
   "contact.action.email",
-  "contact.memory.email",
   "contact.memory.channelEmail",
   "contact.rail.email",
   "history.field.email",

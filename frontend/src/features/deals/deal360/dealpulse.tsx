@@ -69,22 +69,10 @@ export function DealPulse({
       </p>
     );
   }
+  // Nothing inbound is flagged for this reader, which says nothing about
+  // whether we are waiting on them, so the line is left out.
   if (!waiting) {
-    // Nothing inbound is flagged for this reader, and that is ALL this says.
-    //
-    // It used to say "Their move. Nobody here is owed an answer." — a claim
-    // about the buyer that the data behind it cannot support. `reply_to` names
-    // the most recent INBOUND message nobody has answered, so its absence means
-    // the buyer is not waiting on us. It says nothing about whether we are
-    // waiting on them, and the read behind it also drops requests this reader
-    // snoozed or marked not-mine. A deal where the buyer genuinely owes us a
-    // reply rendered identically to one where nothing at all is outstanding.
-    return (
-      <p className="d360-pulse">
-        <span>{t("deal.pulse.nothingFlagged")}</span>{" "}
-        <span>{t("deal.pulse.nothingFlaggedWhy")}</span>
-      </p>
-    );
+    return null;
   }
   const days = calendarDaysBetween(new Date(waiting.at), new Date());
   return (

@@ -600,14 +600,12 @@
   color: var(--textPrimary);
 }
 
-/* THE LEAD of the sheet is the one section that keeps a surface: the record's
- * 360, the reading the page exists to give. A hairline and a wash of the
- * call's own tone, lit from the corner the eye starts at, and no shadow: it
- * sits in the sheet's plane and is told apart by its ground alone. The tone
- * is read off the standing it holds, so a page sets no tone on it by hand. */
+/* THE LEAD of the sheet is the card a wash sets apart: the record's 360, the
+ * reading the page exists to give. A wash of the call's own tone, lit from the
+ * corner the eye starts at. The tone is read off the standing it holds, so a
+ * page sets no tone on it by hand. */
 .record-sheet .panel.record-hero {
   --heroWash: var(--aiLight);
-  margin-inline: calc(-1 * var(--space-3));
   border: 1px solid var(--borderSubtle);
   border-radius: var(--r-lg);
   background:
@@ -641,9 +639,13 @@
 .record-sheet .record-hero > .panel-head .panel-title {
   color: var(--textSecondary);
 }
-/* The rings stand beside the verdict, not under it, so no rule parts them. */
-.record-sheet .record-hero > .panel-body + .panel-body.r360-rings::before {
+/* The lead's parts read as one reading: no rule parts the rings, the path or
+ * the thread from the call, and a part with nothing to say takes no room. */
+.record-sheet .record-hero > .panel-body + .panel-body::before {
   content: none;
+}
+.record-sheet .record-hero > .panel-body:empty {
+  display: none;
 }
 
 /* THE OVERVIEW'S SECTIONS are cards in two columns under the record's lead:
@@ -655,19 +657,21 @@
   align-items: start;
   gap: var(--space-4);
 }
-.record-sheet
-  .record-sections
-  > :is(.co-lead, .record-hero, .pe-brief-anchor, .co-reading) {
+.record-sheet .record-sections :is(.co-lead, .record-hero),
+.record-sheet .record-sections > .pe-brief-anchor {
   grid-column: 1 / -1;
+}
+/* A record that groups its reading's cards hands them to the grid one by one. */
+.record-sheet .record-sections :is(.co-reading, .co-reading-pair) {
+  display: contents;
 }
 /* The next step leads and the 360 follows it, whatever order the cards a
    record hands in were written in. */
-.record-sheet .record-sections > .co-lead {
+.record-sheet .record-sections .co-lead {
   order: -2;
 }
-.record-sheet
-  .record-sections
-  > :is(.record-hero, .pe-brief-anchor, .co-reading) {
+.record-sheet .record-sections > .pe-brief-anchor,
+.record-sheet .record-sections .record-hero {
   order: -1;
 }
 

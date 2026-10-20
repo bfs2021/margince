@@ -13,7 +13,7 @@ import type { components } from "../../api/schema";
 import { LocaleProvider, type Translator, translate } from "../../i18n";
 import { en } from "../../i18n/en";
 import { meFixture } from "../../testing/mefixture";
-import { ContactRail, contactStanding } from "./contactrail";
+import { ContactRail, overallVerdict } from "./contactrail";
 
 // The rail's words are short verdicts — "One-sided", "Never", "No inbound",
 // "Thin", "Nothing stands out on this relationship." — which is exactly why the
@@ -313,23 +313,20 @@ function section(heading: string): HTMLElement {
 
 const WITHHELD_SENTENCE = "Hidden for your role";
 
-// contactStanding is the one line of relationship standing the record's head
-// carries: a pure derivation from the two touch timestamps, tested directly
-// rather than through a mount: the words and the tone are what the head
-// renders, and nothing about drawing them belongs to this rail any more.
-describe("contactStanding", () => {
+// overallVerdict is the word the 360 leads with: a pure derivation from the
+// two touch timestamps, tested directly rather than through a mount.
+describe("overallVerdict", () => {
   const t: Translator = (key, params) => translate("en", key, params);
 
-  it("reads a two-way relationship as strong, with the trend of its last touch", () => {
+  it("reads a recent reply as strong", () => {
     const view: Contact360 = {
       ...emptyButGranted,
       last_inbound_at: daysAgo(3),
       last_outbound_at: daysAgo(8),
     };
-    expect(contactStanding(view, t)).toEqual({
-      words: "Strong · warming",
-      tone: "success",
-    });
+    const verdict = overallVerdict(view);
+    expect(verdict.word(t)).toBe("Strong");
+    expect(verdict.tone).toBe("success");
   });
 
   it("reads a silence past the quiet threshold as at risk", () => {
@@ -339,25 +336,20 @@ describe("contactStanding", () => {
       ...emptyButGranted,
       last_inbound_at: daysAgo(40),
     };
-    const standing = contactStanding(view, t);
-    expect(standing?.tone).toBe("danger");
-    expect(standing?.words.startsWith("At risk")).toBe(true);
+    const verdict = overallVerdict(view);
+    expect(verdict.word(t)).toBe("At risk");
+    expect(verdict.tone).toBe("danger");
   });
 
-  it("calls a contact nobody has ever heard from thin, with no trend to state", () => {
+  it("calls a contact nobody has ever heard from thin, in no tone", () => {
     const view: Contact360 = {
       ...emptyButGranted,
       last_inbound_at: null,
       last_outbound_at: null,
     };
-    expect(contactStanding(view, t)).toEqual({
-      words: "Thin",
-      tone: undefined,
-    });
-  });
-
-  it("gives no standing at all when the touch dates are withheld", () => {
-    expect(contactStanding(withheld, t)).toBeNull();
+    const verdict = overallVerdict(view);
+    expect(verdict.word(t)).toBe("Thin");
+    expect(verdict.tone).toBeUndefined();
   });
 });
 

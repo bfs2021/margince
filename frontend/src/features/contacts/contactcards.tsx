@@ -16,6 +16,7 @@ import { useRecordZone } from "../../lib/recordzone";
 import { navigate } from "../../lib/router";
 import { useViewerId } from "../../lib/session";
 import { DismissClaimButton } from "../records/claimdismiss";
+import { openContactTab } from "../worklist/worklist.return";
 
 // The overview's four cards (concept §5.6–5.9). Each one is a read of what the
 // 360 already assembled — none of them fetches, so a card can never show a
@@ -113,7 +114,17 @@ export function ContactCommercialCard({
   }
   const deal = commercial.deal;
   return (
-    <Panel title={t("contact.commercial.title")}>
+    <Panel
+      title={t("contact.commercial.title")}
+      titleAction={
+        <Button
+          variant="link"
+          onClick={() => openContactTab(view.contact.id, "deals")}
+        >
+          {t("tab.deals")}
+        </Button>
+      }
+    >
       <PanelBody>
         {/* "No open deal" is a fact about the deal, not about the role or the
             committee — a contact can carry a buying role and sit on a
@@ -330,11 +341,27 @@ export function ContactCommitmentsCard({
   view,
   firstName,
   includeTasks = true,
-}: Readonly<{ view: Contact360; firstName: string; includeTasks?: boolean }>) {
+  onOpenTasks,
+}: Readonly<{
+  view: Contact360;
+  firstName: string;
+  includeTasks?: boolean;
+  // Where the whole list is kept. Absent, the card names no way to it.
+  onOpenTasks?: () => void;
+}>) {
   const t = useT();
   const rows = openLoops(view, useViewerId(), includeTasks);
   return (
-    <Panel title={t("contact.loops.title")}>
+    <Panel
+      title={t("contact.loops.title")}
+      titleAction={
+        onOpenTasks ? (
+          <Button variant="link" onClick={onOpenTasks}>
+            {t("co.suggest.viewTasks")}
+          </Button>
+        ) : undefined
+      }
+    >
       {rows.length === 0 && (
         // An empty commitments card on a record whose mail contains no
         // promises is CORRECT behaviour, not a gap (ADR-0097 consequences).

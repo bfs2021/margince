@@ -1,12 +1,5 @@
-import { ChevronRight } from "lucide-react";
-import { useState } from "react";
 import type { components } from "../../api/schema";
-import {
-  Avatar,
-  Badge,
-  Button,
-  SegmentedControl,
-} from "../../design-system/atoms";
+import { Avatar, Badge, Button } from "../../design-system/atoms";
 import { EmailEntry } from "../../design-system/emailentry";
 import { Panel, PanelBody, PanelRow } from "../../design-system/panel";
 import { formatNumber } from "../../format/format";
@@ -36,12 +29,7 @@ import { openContactTab } from "../worklist/worklist.return";
 // the human it was built for.
 //
 // Only the reply, though. Relink is a raw-ledger act and stays on the ledger.
-import {
-  foldActivities,
-  fromEntry,
-  matches,
-  openerFor,
-} from "./contactmemory.rows";
+import { foldActivities, fromEntry, openerFor } from "./contactmemory.rows";
 
 export type Contact360 = components["schemas"]["Contact360"];
 
@@ -49,11 +37,7 @@ export type Activity = components["schemas"]["Activity"];
 
 export type EmailSummary = components["schemas"]["EmailSummary"];
 
-const FILTERS = ["all", "email", "meetings", "calls", "notes"] as const;
-
-export type Filter = (typeof FILTERS)[number];
-
-// How many conversations the card draws before the footer takes over.
+// How many conversations the card draws before the title's link takes over.
 //
 // The card is a GLANCE — what was said lately, read beside the card that says
 // what is owed — and the two are a pair because they are read together. An
@@ -83,7 +67,6 @@ export function ContactMemory({
   // record's zone. Two colleagues discussing one thread must name the same day.
   // The time rides beside it: a reader deciding whether to follow up wants the hour.
   const recordZone = useRecordZone();
-  const [filter, setFilter] = useState<Filter>("all");
   const interactionLabel = useInteractionLabel();
   const entries = view.conversation_memory ?? [];
   // Until the thread projection is filled, the timeline the page already read
@@ -103,52 +86,24 @@ export function ContactMemory({
           ),
         )
       : foldActivities(view, t, interactionLabel, locale, recordZone);
-  // Filter first, then cut: three of what the reader asked for, not whichever
-  // of the newest three survive the cut they chose. A filter that narrowed to
-  // nothing already drawn would read as a channel with no history on it.
-  const matching = rows.filter((row) => matches(row, filter));
-  const shown = matching.slice(0, GLANCE);
+  const shown = rows.slice(0, GLANCE);
   if (hideEmpty && rows.length === 0) return null;
 
   return (
     <Panel
       title={t("contact.memory.title")}
-      // The way out of the glance, in the band that belongs to the whole card
-      // rather than to any row. It lands on the Timeline tab — this record's
-      // chronology whole, every exchange with the changes to the record beside
-      // them — so it stands even when the glance happens to be drawing
-      // everything the card folded, and a cut that came up empty needs it
-      // most. The rail's own glance leads to the same tab: one record, one
-      // ledger a reader is sent to.
-      footer={
+      // The way out of the glance: this record's chronology whole, the same
+      // tab the rail's own glance leads to.
+      titleAction={
         <Button
           variant="link"
           onClick={() => openContactTab(view.contact.id, "timeline")}
         >
-          {t("contact.memory.showAll")} <ChevronRight aria-hidden="true" />
+          {t("contact.memory.showAll")}
         </Button>
       }
     >
-      {/* The cut sits under the head, not in it: five options beside the title
-          gave this card a taller head than every other card in the stack. One
-          compact switch, because the glance shows a handful of rows and the
-          cut is a quick narrowing of them, not a lane through a ledger. */}
-      <PanelBody>
-        <SegmentedControl
-          options={FILTERS}
-          labels={{
-            all: t("contact.memory.all"),
-            email: t("contact.memory.email"),
-            meetings: t("contact.memory.meetings"),
-            calls: t("contact.memory.calls"),
-            notes: t("contact.memory.notes"),
-          }}
-          value={filter}
-          onChange={setFilter}
-          label={t("contact.memory.title")}
-        />
-      </PanelBody>
-      {matching.length === 0 && (
+      {rows.length === 0 && (
         <PanelBody>
           <p className="pe-prose t-body">{t("contact.memory.empty")}</p>
         </PanelBody>

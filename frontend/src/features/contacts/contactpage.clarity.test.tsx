@@ -258,7 +258,7 @@ it("names restricted overview sections even when an open commitment leads", asyn
   ).toBeTruthy();
   expect(
     screen.getByText(
-      /Not shown: Latest, Contact status, Margince findings, open tasks/,
+      /Not shown: What was said, How it stands, Margince findings, open tasks/,
     ),
   ).toBeTruthy();
   expect(screen.queryByText("No interactions recorded")).toBeNull();

@@ -82,12 +82,9 @@ describe("ProjectScreen", () => {
     expect(within(stepper).getByText("Initiative").tagName).toBe("SPAN");
     expect(screen.getByTestId("project-step-closed").tagName).toBe("BUTTON");
 
-    // The readings plate and the filing line.
-    const rollups = screen.getByTestId("project-rollups");
-    expect(within(rollups).getByText("€12,000.00")).toBeTruthy();
-    expect(within(rollups).getByText("€4,500.00")).toBeTruthy();
-    expect(within(rollups).getByText("4")).toBeTruthy();
-    expect(within(rollups).getByText("142 filed")).toBeTruthy();
+    // The hero's rings: the money won of the deals, read against what is open.
+    const rings = screen.getByRole("img", { name: /Budget/ });
+    expect(rings).toBeTruthy();
     // No coverage line: three numbers about how well the FILING SYSTEM has
     // done its job are the machine's bookkeeping, not a reading of the work,
     // and they were the first thing a reader met under the title.
@@ -116,32 +113,6 @@ describe("ProjectScreen", () => {
     ).toBeTruthy();
   });
 
-  // The activity readings' way out. Both are counted from the record's own
-  // chronology, which is already on the page one screen down, so the door is a
-  // scroll rather than a route — and the id it aims at is the timeline
-  // SECTION's own, handed to `RecordView`, so the two cannot drift apart.
-  it("reveals the chronology from the activity readings", async () => {
-    projectsBackend({ view: project360() });
-    render(<ProjectScreen id="pr-1" />);
-    const story = await screen.findByRole("region", {
-      name: en["record.timeline"],
-    });
-    expect(story.id).toBe("project-activity");
-    // jsdom implements no scrolling at all, so the page's own element is what
-    // records the call.
-    const scrolled = vi.fn();
-    story.scrollIntoView = scrolled;
-
-    await userEvent.setup().click(
-      screen.getByRole("button", {
-        name: en["stat.open"],
-        description: en["project.rollups.activityCount"],
-      }),
-    );
-
-    expect(scrolled).toHaveBeenCalledTimes(1);
-  });
-
   it("offers Relink and Reply on a timeline row", async () => {
     const user = userEvent.setup();
     projectsBackend({
@@ -165,7 +136,8 @@ describe("ProjectScreen", () => {
       }),
     });
     render(<ProjectScreen id="pr-1" />);
-    await screen.findByText("Kickoff agenda");
+    // On the hero's spine and in the timeline under the work.
+    expect(await screen.findAllByText("Kickoff agenda")).not.toHaveLength(0);
 
     expect(screen.getByRole("button", { name: "Reply" })).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Relink" }));
@@ -192,10 +164,9 @@ describe("ProjectScreen", () => {
     render(<ProjectScreen id="pr-1" />);
     await screen.findByRole("heading", { name: "CRM rollout" });
     const withheld = screen.getAllByText("Hidden for your role");
-    // The contracts card, the rollups plate, the company in the subtitle and
-    // the timeline: four withheld sections, four sentences, no empty state
-    // standing in for any of them. The coverage line is gone from the page, so
-    // it withholds nothing.
+    // Four withheld sections, four sentences: the contracts card, the hero's
+    // money ring, the company in the subtitle and the timeline. No empty state
+    // stands in for any of them, and the page draws no coverage line.
     expect(withheld).toHaveLength(4);
     expect(
       screen.queryByText(/No contract is filed under this project/),

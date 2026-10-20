@@ -111,13 +111,14 @@ describe("the sentence says whose move it is", () => {
     expect(screen.getByText(/no one has replied/)).toBeInTheDocument();
   });
 
-  it("says nothing is flagged, and never that the buyer owes us", () => {
+  it("draws no line, and never that the buyer owes us, when nothing is owed", () => {
     // An empty reply_to means no INBOUND message is waiting for an answer. It
-    // does not mean the buyer is the one who owes something, and the sentence
-    // must not say so — that claim told a rep to sit and wait on a deal where
-    // nobody was going to write.
-    show(<DealPulse card={card({ reply_to: null })} timeline={[]} />);
-    expect(screen.getByText(/No reply due/)).toBeInTheDocument();
+    // does not mean the buyer is the one who owes something, so the pulse says
+    // nothing rather than a claim the data cannot support.
+    const { container } = show(
+      <DealPulse card={card({ reply_to: null })} timeline={[]} />,
+    );
+    expect(container.querySelector(".d360-pulse")).toBeNull();
     expect(screen.queryByText(/Their move/)).not.toBeInTheDocument();
   });
 

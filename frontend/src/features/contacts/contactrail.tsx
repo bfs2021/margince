@@ -2,8 +2,7 @@ import type { components } from "../../api/schema";
 import { Panel, PanelBody } from "../../design-system/panel";
 import { RecordOriginFacts } from "../../design-system/recordfacts";
 import { omitted, type SectionState } from "../../design-system/surfacestate";
-import { formatNumber } from "../../format/format";
-import { type Locale, translatePlural, useT } from "../../i18n";
+import { useT } from "../../i18n";
 import { useCanWriteRecord } from "../../lib/capability";
 import { TagsPanel } from "../lists/tagspanel";
 import { CounterpartyHoldRow } from "../privacy/counterparty-hold";
@@ -12,7 +11,7 @@ import { ContactConfirmCallout } from "./contactconfirm";
 import { ConsentAndChannels } from "./contactconsentpanel";
 import { ContactDetails } from "./contactdetails";
 import { Employers } from "./contactemployers";
-import { daysSinceInbound, isQuiet, QUIET_AFTER_DAYS } from "./contactquiet";
+import { daysSinceInbound, isQuiet } from "./contactquiet";
 
 // The right rail (concept §5.11): SEPARATE panels, each answering one question
 // about the contact (their fields, their companies, what they allow) in the
@@ -113,10 +112,6 @@ export function ContactRail({
           whose invoices they handle are different facts, and an external
           bookkeeper holds the second without the first. */}
       <ContactBillingRoles companies={view.billing_roles} />
-      {/* The relationship's standing is one badge under the name (the page's
-          head reads `contactStanding`), not a card of readings: the brief in
-          the work column carries direction, coverage and what is owed, and
-          the same four facts in a rail card beside it were the brief twice. */}
       {/* Last, and still here: the head's Write verb is refused on what this
           panel states, and a refusal whose reason sits a tab away is a button
           that says no for no reason a reader can see. The hold and the tags
@@ -200,35 +195,6 @@ export function useContactReadOnlyReason(contact: Contact): string | undefined {
 
 // --- Relationship standing --------------------------------------------
 
-export function trendWord(
-  view: Contact360,
-  t: ReturnType<typeof useT>,
-): string {
-  switch (trendKind(view)) {
-    case "none":
-      return t("contact.rail.noInbound");
-    case "cooling":
-      return t("contact.rail.cooling");
-    case "warming":
-      return t("contact.rail.warming");
-  }
-}
-
-// Which way the relationship is heading, as a key the word and the glyph are
-// both read from: nothing without an inbound message, cooling when ours is
-// the newer one, warming otherwise.
-export function trendKind(view: Contact360): "warming" | "cooling" | "none" {
-  const inbound = view.last_inbound_at;
-  const outbound = view.last_outbound_at;
-  if (!inbound) {
-    return "none";
-  }
-  if (outbound && new Date(outbound) > new Date(inbound)) {
-    return "cooling";
-  }
-  return "warming";
-}
-
 // The overall reading: its word, and the tone the word is drawn in. The tone
 // follows the verdict key, never the rendered word, so a translation cannot
 // recolour it; a thin relationship is no verdict either way and stays neutral.
@@ -244,109 +210,4 @@ export function overallVerdict(view: Contact360): {
     return { word: (t) => t("contact.rail.atRisk"), tone: "danger" };
   }
   return { word: (t) => t("contact.rail.strong"), tone: "success" };
-}
-
-// Which way the relationship runs, from the two directional timestamps: they
-// arrive together or not at all, one grant governs both.
-export function directionWord(
-  view: Contact360,
-  t: ReturnType<typeof useT>,
-): string {
-  const inbound = view.last_inbound_at;
-  const outbound = view.last_outbound_at;
-  if (inbound && outbound) {
-    return t("contact.rail.twoWay");
-  }
-  if (inbound) {
-    return t("contact.rail.inboundOnly");
-  }
-  if (outbound) {
-    return t("contact.rail.outboundOnly");
-  }
-  return t("contact.rail.noDirection");
-}
-
-// How many colleagues also know them, as a counted phrase.
-export function colleagueWords(count: number, locale: Locale): string {
-  return translatePlural(locale, "contact.rail.colleagues", count, {
-    count: formatNumber(count, locale),
-  });
-}
-
-// The one line of standing the head carries: the verdict word and, when the
-// relationship has a direction, the trend it is on ("Strong · warming"). One
-// Badge, because a label in a pill is one badge; the tone is the verdict's
-// alone, the trend is a word after it. Nothing when the reader may not see
-// the touch dates: a verdict drawn over withheld facts is a guess in a pill.
-export function contactStanding(
-  view: Contact360,
-  t: ReturnType<typeof useT>,
-): { words: string; tone: "success" | "danger" | undefined } | null {
-  if (withheldSections(view).lastTouch) {
-    return null;
-  }
-  const overall = overallVerdict(view);
-  const trend = view.last_inbound_at ? trendWord(view, t) : null;
-  return {
-    words: trend
-      ? `${overall.word(t)} · ${trend.toLowerCase()}`
-      : overall.word(t),
-    tone: overall.tone,
-  };
-}
-
-// Why the head says what it says, as one short text for a tooltip: the
-// verdict's sentence and the trend's. Words, not a panel: the chip's press
-// leads to the brief, where the readings behind the verdict are laid out.
-export function standingSentences(
-  view: Contact360,
-  t: ReturnType<typeof useT>,
-  locale: Locale,
-): string {
-  const days = daysSinceInbound(view);
-  const quietDays = formatNumber(QUIET_AFTER_DAYS, locale);
-  const why =
-    days == null
-      ? t("contact.standing.why.thin")
-      : isQuiet(days)
-        ? t("contact.standing.why.atRisk", { days: quietDays })
-        : t("contact.standing.why.strong", { days: quietDays });
-  const trend = trendSentence(view, t);
-  return trend ? `${why} ${trend}` : why;
-}
-
-// Which way the relationship runs, as a sentence: what the direction word
-// stands for, for a reader who hovers it.
-export function directionSentence(
-  view: Contact360,
-  t: ReturnType<typeof useT>,
-): string {
-  const inbound = view.last_inbound_at;
-  const outbound = view.last_outbound_at;
-  if (inbound && outbound) {
-    return t("contact.standing.direction.twoWay");
-  }
-  if (inbound) {
-    return t("contact.standing.direction.inboundOnly");
-  }
-  if (outbound) {
-    return t("contact.standing.direction.outboundOnly");
-  }
-  return t("contact.standing.direction.none");
-}
-
-// The trend as a sentence, on the same rule `trendWord` draws the word from:
-// nothing without an inbound message, cooling when ours is the newer one.
-export function trendSentence(
-  view: Contact360,
-  t: ReturnType<typeof useT>,
-): string | null {
-  switch (trendKind(view)) {
-    case "none":
-      return null;
-    case "cooling":
-      return t("contact.standing.trend.cooling");
-    case "warming":
-      return t("contact.standing.trend.warming");
-  }
 }

@@ -33,9 +33,9 @@ import "../../companies/company360.css";
 import "./record360.css";
 
 /**
- * TodayPanel is the record's next step: a strip holding the first row a caller
- * hands in, the count of the rest, and the one honest sentence for a day with
- * no rows. The rest stand in a card of their own when the caller names one.
+ * TodayPanel is the record's next step: a strip with the first row a caller
+ * hands in and the count of the rest. A day with no rows gets one sentence.
+ * The rest stand in a card of their own when the caller names one.
  *
  * `state` is the read the rows come from. Neither the pending read nor the
  * failed one draws rows — and neither may draw the quiet sentence, which is a

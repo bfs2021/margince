@@ -71,6 +71,7 @@ export function ContactOverview({
           view={view}
           firstName={view.contact.full_name.split(" ")[0] ?? ""}
           includeTasks={false}
+          onOpenTasks={openQueue}
         />
       )}
       <ContactOverviewCoverage view={view} />
@@ -92,7 +93,7 @@ function ContactOverviewCoverage({ view }: Readonly<{ view: Contact360 }>) {
     hidden.has("commercial") ||
     hidden.has("claims") ||
     hidden.has("next_meeting")
-      ? [t("contact.readings.title")]
+      ? [t("record.howItStandsTitle")]
       : []),
     ...(hidden.has("moments") ? [t("today.source.moments")] : []),
     ...(hidden.has("next_steps") ? [t("today.source.nextSteps")] : []),

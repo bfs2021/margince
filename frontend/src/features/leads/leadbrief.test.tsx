@@ -27,7 +27,7 @@ describe("LeadBrief", () => {
         />
       </LocaleProvider>,
     );
-    expect(screen.getByRole("heading", { name: "Lead brief" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "How it stands" })).toBeTruthy();
     expect(screen.getByText("Your move")).toBeTruthy();
     expect(screen.getByText("No response to this lead yet.")).toBeTruthy();
     expect(screen.queryByText(/Last update/)).toBeNull();
@@ -50,7 +50,7 @@ describe("LeadBrief", () => {
         <LeadBrief />
       </LocaleProvider>,
     );
-    expect(screen.getByRole("heading", { name: "Lead brief" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "How it stands" })).toBeTruthy();
     expect(screen.queryByText("Your move")).toBeNull();
   });
 });

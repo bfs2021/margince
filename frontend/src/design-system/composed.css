@@ -419,7 +419,7 @@
   -webkit-line-clamp: 2;
   line-clamp: 2;
   overflow: hidden;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .deal-card .deal-figure {
   display: flex;
@@ -615,45 +615,91 @@
   color: var(--textPrimary);
   min-width: 0;
   text-wrap: balance;
+  /* One word wider than the column, a compound name on a phone, breaks
+     inside itself rather than running past the sheet's edge. */
+  overflow-wrap: break-word;
 }
-/* The compact head's second register: a caption line on the name's own row
-   (the role and the company), the pills under it, and the facts strip as a
-   full row across the head under a rule. The strip is the `badges` slot,
-   drawn after the verbs so the verbs keep the name's line; `order` here is
-   the one place the head's reading order and its drawn order differ, and it
-   is the facts that step back, not the verbs. */
+/* The compact head is a grid. Row one holds the mark, the name and the verbs.
+   The caption, the pills and the facts strip take the full width under the
+   name. The name's column is as wide as the name, up to a cap; the verbs take
+   what is left and fold onto a second row before a short name would wrap. */
+.record-head-compact {
+  display: grid;
+  grid-template-columns: auto fit-content(60%) minmax(0, 1fr);
+  column-gap: var(--space-4);
+  row-gap: 0;
+  align-items: start;
+}
+.record-head-compact > .record-id {
+  display: contents;
+}
+.record-head-compact > .avatar {
+  grid-row: 1 / 4;
+  align-self: center;
+}
 .record-head-compact .record-name-row {
+  grid-column: 2;
+  grid-row: 1;
   align-items: baseline;
   gap: var(--space-3);
+}
+.record-head-compact > .record-actions-inline {
+  grid-column: 3;
+  grid-row: 1;
+  /* Half the gap between the name's line box and a button's height, so the
+     verbs sit level with a one-line name. */
+  margin-block-start: var(--space-1);
+}
+.record-head-compact .record-sub {
+  grid-column: 2 / -1;
+  grid-row: 2;
+}
+.record-head-compact .record-pulse {
+  grid-column: 2 / -1;
+  grid-row: 3;
+  margin-top: var(--space-2);
+}
+.record-head-compact .record-badges {
+  grid-column: 1 / -1;
+  grid-row: 5;
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--borderSubtle);
+}
+.record-head-compact > .record-standing {
+  grid-column: 1 / -1;
+  grid-row: 6;
+}
+/* A narrow head has no room for the verbs beside the name: they take a row of
+   their own under the pills, from the name's left edge, and the name takes the
+   row they left. */
+@container (max-width: 44rem) {
+  .record-head-compact .record-name-row {
+    grid-column: 2 / -1;
+  }
+  .record-head-compact > .record-actions-inline {
+    grid-column: 2 / -1;
+    grid-row: 4;
+    margin-block-start: var(--space-4);
+    justify-content: flex-start;
+  }
+}
+/* A phone-width head gives the mark's column to the name: under 30rem a 64px
+   mark leaves a display name a handful of letters per line. */
+@container (max-width: 30rem) {
+  .record-head-compact > .avatar {
+    display: none;
+  }
+  .record-head-compact
+    :is(.record-name-row, .record-sub, .record-pulse, .record-actions-inline) {
+    grid-column: 1 / -1;
+  }
 }
 .record-sub-inline {
   min-width: 0;
 }
-.record-head-compact .record-pulse {
-  margin-top: var(--space-2);
-}
-.record-head-compact .record-badges {
-  flex-basis: 100%;
-  order: 1;
-  margin-top: var(--space-1);
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--borderSubtle);
-}
-/* The compact head: the mark and the identity on one row at their natural
-   width, so the name keeps its line, and the verbs on the row under them. */
-.record-head-compact {
-  row-gap: var(--space-4);
-}
-.record-head-compact .record-id {
-  flex: 0 1 auto;
-}
-/* The verbs stand on a row of their own under the identity, from its left. */
-.record-head-compact > .record-actions-inline {
-  flex-basis: 100%;
-  margin-inline-start: 0;
-  justify-content: flex-start;
-}
 .record-head-compact .record-sub {
+  max-width: none;
   margin-top: var(--space-2);
 }
 
@@ -717,6 +763,18 @@
    the open track. */
 .record-zones > .record-aside > .record-aside-head {
   width: max-content;
+}
+/* A first caption with a control of its own keeps that line, and the switch
+   takes one above it at the far end. */
+.record-zones
+  > .record-aside:has(
+    > .record-aside-head + .panel > .panel-head .btn,
+    > .record-aside-head + * > .panel:first-child > .panel-head .btn
+  )
+  > .record-aside-head {
+  position: static;
+  align-self: flex-end;
+  margin-block-end: calc(-1 * var(--space-4));
 }
 /* The column is narrow, so its labels take a narrower rung than a form's,
    and every group in it shares that rung so their values line up. */
@@ -1578,7 +1636,7 @@
 .tl-text-link {
   color: var(--accentText);
   text-decoration: underline;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 /* A thread's members are a card on the body side of the rail: the

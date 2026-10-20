@@ -43,10 +43,10 @@ export function DealBrief({
   if (!text) {
     return (
       <Panel
-        title={t("deal.brief")}
-        actions={
+        title={t("deal.brief.title")}
+        titleAction={
           canWrite ? (
-            <Button variant="ghost" onClick={showDetails}>
+            <Button variant="link" onClick={showDetails}>
               {t("deal.briefAdd")}
             </Button>
           ) : undefined
@@ -57,7 +57,7 @@ export function DealBrief({
             state="empty"
             emptyLabel={t("deal.briefEmpty")}
             emptyDetail={t("deal.briefEmptyDetail")}
-            loadingLabel={t("deal.brief")}
+            loadingLabel={t("deal.brief.title")}
           >
             {null}
           </SurfaceState>
@@ -73,10 +73,10 @@ export function DealBrief({
   const clamped = clampable && !expanded;
   return (
     <Panel
-      title={t("deal.brief")}
-      actions={
+      title={t("deal.brief.title")}
+      titleAction={
         canWrite ? (
-          <Button variant="ghost" onClick={showDetails}>
+          <Button variant="link" onClick={showDetails}>
             {t("deal.briefEdit")}
           </Button>
         ) : undefined

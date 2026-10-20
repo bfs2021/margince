@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Panel, PanelBody } from "../../design-system/panel";
 import type { RecordTimeline } from "../../design-system/recordtimeline";
 import { viewerZone } from "../../format/timezone";
@@ -12,7 +13,7 @@ import {
 import { RecordListsPanel } from "../records/recordlists";
 import { LeadBrief } from "./leadbrief";
 import { MergedLeadPanel } from "./leadmerged";
-import { LeadReadings } from "./leadreadings";
+import { LeadRings } from "./leadrings";
 import type { Lead, LeadWriter } from "./leads";
 import { PromotedLeadPanel, type PromotionRecord } from "./leads.promotion";
 import { LeadScoreCard } from "./leads.score";
@@ -28,10 +29,12 @@ import { leadTodoRows } from "./leadtoday";
 function LeadCall({
   lead,
   thread,
+  path,
   onOpenEmail,
 }: Readonly<{
   lead: Lead;
   thread: RecordTimeline;
+  path?: ReactNode;
   // The page's one drawer, handed down to the thread. A conversation the
   // thread names and cannot open is the one place in the product that does
   // that.
@@ -45,6 +48,8 @@ function LeadCall({
       standing={{ label: standing.label, tone: standing.tone }}
       because={standing.because}
       restsOn={standing.restsOn}
+      rings={<LeadRings lead={lead} />}
+      path={path}
     >
       <TimelineThread thread={thread} onOpenEmail={onOpenEmail} />
     </LeadBrief>
@@ -58,10 +63,13 @@ export function LeadOverviewPane({
   promotion,
   terminalReasonId,
   thread,
+  path,
   onOpenEmail,
 }: Readonly<{
   lead: Lead;
   id: string;
+  // Where the lead stands on its ladder, drawn under the call.
+  path?: ReactNode;
   writer: LeadWriter;
   promotion: PromotionRecord;
   terminalReasonId: string;
@@ -78,9 +86,7 @@ export function LeadOverviewPane({
   // the "Next task" row's own verb both open the same queue.
   const onOpenTasks = () => navigate({ screen: "worklist" });
   return (
-    <div className="record-stack">
-      {/* The readings open the overview, as they do on every record page. */}
-      <LeadReadings lead={lead} />
+    <div className="record-stack record-sections">
       {/* A merged-away lead's page leads with where it went, for the same
           reason: the reader arrived asking what happened to this prospect. */}
       {lead.merged_into_id && (
@@ -96,7 +102,12 @@ export function LeadOverviewPane({
           contact. Under them sit two sections a reader consults rather than
           reads: why it scores what it scores, and what the rep knows. */}
       <RecordReading>
-        <LeadCall lead={lead} thread={thread} onOpenEmail={onOpenEmail} />
+        <LeadCall
+          lead={lead}
+          thread={thread}
+          path={path}
+          onOpenEmail={onOpenEmail}
+        />
         <TodayPanel onOpenTasks={onOpenTasks} tasksLabel={t("today.workQueue")}>
           {leadTodoRows(lead, t, locale, recordZone, onOpenTasks)}
         </TodayPanel>

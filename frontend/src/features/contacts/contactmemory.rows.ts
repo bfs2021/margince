@@ -4,12 +4,7 @@ import { groupChronology } from "../../design-system/timelinegroups";
 import { formatDayMonth, formatTimeOfDay } from "../../format/format";
 import type { Locale, useT } from "../../i18n";
 import type { useInteractionLabel } from "../records/interactionchrome";
-import type {
-  Activity,
-  Contact360,
-  EmailSummary,
-  Filter,
-} from "./contactmemory";
+import type { Activity, Contact360, EmailSummary } from "./contactmemory";
 
 type Row = {
   messageCount?: number;
@@ -253,22 +248,5 @@ function toneFor(
       return "accent";
     default:
       return undefined;
-  }
-}
-
-export function matches(row: Row, filter: Filter): boolean {
-  switch (filter) {
-    case "all":
-      return true;
-    case "email":
-      return row.channel === "email";
-    case "meetings":
-      return row.channel === "meeting";
-    case "calls":
-      return row.channel === "call";
-    case "notes":
-      return row.channel === "note";
-    default:
-      return true;
   }
 }

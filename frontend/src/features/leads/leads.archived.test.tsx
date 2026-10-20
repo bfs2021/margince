@@ -1,6 +1,6 @@
 /** @vitest-environment happy-dom */
 import "@testing-library/jest-dom/vitest";
-import { cleanup, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { en } from "../../i18n/en";
@@ -326,26 +326,11 @@ describe("LeadScreen — archived/terminal is read-only (P-3)", () => {
     });
     render(<LeadScreen id="l-1" />);
 
-    // Said wherever the score is. The score card states it in the open; the
-    // reading beside it keeps its receipt behind its "Evidence" door. So the
-    // sentence counts once before that door opens and twice after, and
-    // neither surface can drop it unnoticed.
+    // The score card is where the score is read, and it states the gap in the
+    // open.
     const notStored =
       "The breakdown for this score is not stored yet. The next update shows it.";
     await waitFor(() => expect(screen.getAllByText(notStored)).toHaveLength(1));
-    const grid = document.querySelector(".readings-grid");
-    if (!(grid instanceof HTMLElement)) {
-      throw new Error("the lead's readings row is not on the page");
-    }
-    const scoreCard = within(grid).getByText("Score").closest(".stat-card");
-    if (!(scoreCard instanceof HTMLElement)) {
-      throw new Error("the score reading is not a card in the readings row");
-    }
-    const user = userEvent.setup();
-    await user.click(
-      within(scoreCard).getByRole("button", { name: "Evidence" }),
-    );
-    await waitFor(() => expect(screen.getAllByText(notStored)).toHaveLength(2));
     expect(screen.queryByText("Score inputs:")).toBeNull();
     expect(
       screen.queryByText("No factors counted toward this score yet."),

@@ -311,30 +311,21 @@ describe("the contact page's memory card", () => {
     expect(mail).toBe(note);
   });
 
-  // Five cuts do not fit beside the title on the one band a panel head is, so
-  // the strip stands in the card's body above the rows. Both halves matter: a
-  // strip put back in the head gives this card a taller head than every other
-  // card in the stack, and a strip moved without its wiring narrows nothing.
-  it("narrows the list from a strip under the head rather than inside it", async () => {
-    const user = userEvent.setup();
+  // The card is a glance and draws no filter of its own. Narrowing by channel
+  // is the History tab's work, which its head's one link leads to.
+  it("offers its head's link, not a filter, as the way to more", () => {
     const { container } = renderCard(viewWith([emailRow(), noteRow]));
 
-    const strip = container.querySelector(".segmented");
-    expect(strip).not.toBeNull();
-    expect(strip?.closest(".panel-head")).toBeNull();
-    expect(strip?.closest(".panel-body")).not.toBeNull();
-
-    await user.click(screen.getByRole("button", { name: "Notes" }));
-
-    expect(screen.getByText("Call prep")).toBeTruthy();
-    expect(screen.queryByText("Re: the renewal quote")).toBeNull();
+    expect(container.querySelector(".segmented")).toBeNull();
+    const more = screen.getByRole("button", { name: "Full history" });
+    expect(more.closest(".panel-head")).not.toBeNull();
   });
 
   // The card is one half of the record's reading and the commitments card is
   // the other, and they are a pair because they are read together. Uncut, a
   // contact with fifty captured exchanges pushes the other half off the
   // screen.
-  it("draws three conversations and holds the rest behind the footer", () => {
+  it("draws three conversations and holds the rest behind the head's link", () => {
     renderCard(viewWith(notes(5)));
 
     expect(screen.getByText("Note 1")).toBeTruthy();
@@ -348,7 +339,7 @@ describe("the contact page's memory card", () => {
     const navigate = vi.spyOn(router, "navigate").mockImplementation(() => {});
     renderCard(viewWith(notes(5)));
 
-    await user.click(screen.getByRole("button", { name: /Show all activity/ }));
+    await user.click(screen.getByRole("button", { name: "Full history" }));
 
     // The tab that holds the exchanges whole, which is also where the rail's
     // own glance leads: one record, one ledger to be sent to.
@@ -356,20 +347,6 @@ describe("the contact page's memory card", () => {
       { screen: "contacts", id: "p-1", id2: "timeline" },
       undefined,
     );
-  });
-
-  // The cut is taken AFTER the filter. Taken before it, a reader who asked for
-  // email would be shown whichever of the newest three happened to be email —
-  // which on a contact with four notes and one message is nothing at all, and
-  // reads as a channel this contact has never been reached on.
-  it("draws three of what the reader asked for, not three of everything", async () => {
-    const user = userEvent.setup();
-    renderCard(viewWith([...notes(4), emailRow()]), vi.fn());
-
-    await user.click(screen.getByRole("button", { name: "Email" }));
-
-    expect(screen.getByText("Re: the renewal quote")).toBeTruthy();
-    expect(screen.queryByText("Note 1")).toBeNull();
   });
 
   it("leaves every other kind reading as it did", () => {
@@ -433,7 +410,7 @@ describe("leaving the card for the Timeline tab", () => {
     window.location.hash = "#/contacts/p-1?filter=tasks&from=worklist";
     renderCard(viewWith(notes(1)));
 
-    await user.click(screen.getByRole("button", { name: /Show all activity/ }));
+    await user.click(screen.getByRole("button", { name: "Full history" }));
 
     expect(window.location.hash).toBe(
       "#/contacts/p-1/timeline?filter=tasks&from=worklist",
@@ -445,7 +422,7 @@ describe("leaving the card for the Timeline tab", () => {
     window.location.hash = "#/contacts/p-1";
     renderCard(viewWith(notes(1)));
 
-    await user.click(screen.getByRole("button", { name: /Show all activity/ }));
+    await user.click(screen.getByRole("button", { name: "Full history" }));
 
     expect(window.location.hash).toBe("#/contacts/p-1/timeline");
   });

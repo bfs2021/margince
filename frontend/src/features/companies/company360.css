@@ -88,11 +88,6 @@
   gap: var(--space-4);
   align-items: start;
 }
-/* Among an overview's cards the reading's own cards keep the grid's interval. */
-.record-sections .co-reading,
-.record-sections .co-reading-pair {
-  gap: var(--space-4);
-}
 /* What this account is worth to us. The panel is one reading in five parts —
    the verdict, the dimensions under it, the two sides of the argument, the
    labelled answers, the attribution — and a hairline between consecutive
