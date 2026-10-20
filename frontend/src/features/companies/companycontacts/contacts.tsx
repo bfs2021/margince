@@ -158,6 +158,9 @@ export function CompanyContactsList({
         unit="unit.contacts"
         searchable
         showArchivedToggle={false}
+        // An account's people are a handful: the dials stand down while every
+        // one of them fits on the page.
+        hideShortChrome
         // The colleague-by-contact comparison, kept as the diagnostic it is
         // rather than a headline: it answers "where are we thin across the
         // team", which a reader asks after choosing somebody, not before.

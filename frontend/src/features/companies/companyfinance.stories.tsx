@@ -35,6 +35,26 @@ const connected: FinanceSummary = {
   open_balance: { amount_minor: 240_000, currency: "EUR" },
   overdue: { amount_minor: 89_000, currency: "EUR" },
   median_days_after_due: 4,
+  payment_behaviour: [0, 2, 0, 0, 1, 0, 0, 3, 0],
+  invoiced_by_month: [
+    ["2025-09", 450_000],
+    ["2025-10", 900_000],
+    ["2025-11", 450_000],
+    ["2025-12", 0],
+    ["2026-01", 900_000],
+    ["2026-02", 450_000],
+    ["2026-03", 0],
+    ["2026-04", 1_350_000],
+    ["2026-05", 450_000],
+    ["2026-06", 450_000],
+    ["2026-07", 520_000],
+    ["2026-08", 450_000],
+  ].map(([month, amount]) => ({
+    month: String(month),
+    amount_minor: Number(amount),
+    currency: "EUR",
+    count: Number(amount) > 0 ? 1 : 0,
+  })),
   recent_invoices: [
     {
       id: "inv-1",
@@ -81,7 +101,7 @@ function Finance({
   });
   return (
     <StoryProviders>
-      <div style={{ maxWidth: 420 }}>
+      <div style={{ maxWidth: 960 }}>
         <CompanyFinanceCard companyId="o-1" lifecycle={lifecycle} />
       </div>
     </StoryProviders>

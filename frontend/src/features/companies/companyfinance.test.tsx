@@ -116,7 +116,7 @@ describe("the finance card is absent only where FIN-AC-3 says so", () => {
     stub();
     render(<CompanyFinanceCard companyId="o-1" lifecycle="customer" />);
     expect(await screen.findByText("€186,420.00")).toBeTruthy();
-    expect(screen.getByText("Finance")).toBeTruthy();
+    expect(screen.getByRole("region", { name: "Finance" })).toBeTruthy();
     expect(screen.queryByText("Finance · historical")).toBeNull();
   });
 });
@@ -164,17 +164,17 @@ describe("the two readings the card draws as shapes", () => {
 
   it("draws the payment habit's shape, and states the median beside the money", async () => {
     withSummary({ median_days_after_due: 4, payment_behaviour: [1, 3, 9] });
-    expect(await screen.findByText("Typically 4 days after due.")).toBeTruthy();
+    expect(await screen.findByText("Typically 4 days after due")).toBeTruthy();
     expect(
-      screen.getByLabelText("Days late per settled invoice, oldest first"),
+      screen.getByText("Days late per settled invoice, oldest first"),
     ).toBeTruthy();
   });
 
   it("draws no line from a single settled invoice, and still states the median", async () => {
     withSummary({ median_days_after_due: 4, payment_behaviour: [1] });
-    expect(await screen.findByText("Typically 4 days after due.")).toBeTruthy();
+    expect(await screen.findByText("Typically 4 days after due")).toBeTruthy();
     expect(
-      screen.queryByLabelText("Days late per settled invoice, oldest first"),
+      screen.queryByText("Days late per settled invoice, oldest first"),
     ).toBeNull();
   });
 
@@ -183,25 +183,12 @@ describe("the two readings the card draws as shapes", () => {
       open_balance: { amount_minor: 400_000, currency: "EUR" },
       overdue: { amount_minor: 100_000, currency: "EUR" },
     });
-    expect(await screen.findByText("25% of open balance.")).toBeTruthy();
+    expect(await screen.findByText("25% of open balance")).toBeTruthy();
     expect(screen.getByText("Overdue €1,000.00")).toBeTruthy();
     expect(screen.getByText("Open €4,000.00")).toBeTruthy();
     const meter = screen.getByLabelText("Overdue share of the open balance");
     expect(meter.getAttribute("aria-valuenow")).toBe("100000");
     expect(meter.getAttribute("aria-valuemax")).toBe("400000");
-  });
-
-  it("states both clauses as one lede when the panel has both", async () => {
-    withSummary({
-      median_days_after_due: 26,
-      open_balance: { amount_minor: 400_000, currency: "EUR" },
-      overdue: { amount_minor: 100_000, currency: "EUR" },
-    });
-    expect(
-      await screen.findByText(
-        "25% of open balance. Typically 26 days after due.",
-      ),
-    ).toBeTruthy();
   });
 
   it("draws no bar when the two halves are in different currencies", async () => {

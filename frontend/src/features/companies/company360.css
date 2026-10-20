@@ -950,57 +950,27 @@
    of context beside it, and the invoice table under both. The two columns are
    separated by a rule rather than by space alone — at this width space reads
    as one wide column with a gap in it. */
-.fin-split {
+/* The two charts of the Finance tab side by side, one under the other on a
+   column too narrow for two. */
+.fin-pair {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-6);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: var(--space-4);
 }
-.fin-split > * + * {
-  border-left: 1px solid var(--borderSubtle);
-  padding-left: var(--space-6);
+.fin-pair:empty {
+  display: none;
 }
-/* One column at 390px, where two would set the hero figure at a size that
-   wraps mid-number. The rule goes with the split: a border between stacked
-   blocks reads as a divider the design did not ask for. */
-@media (max-width: 640px) {
-  .fin-split {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
-  }
-  .fin-split > * + * {
-    border-left: none;
-    padding-left: 0;
-  }
+/* A year of months leaves each column too narrow for its figure: the bars
+   carry the shape, and the table under the chart carries the figures. */
+.fin-pair
+  .report-chart-columns:has(> :nth-child(9))
+  .report-chart-column-amount {
+  display: none;
 }
-.fin-lead,
-.fin-aside {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-width: 0;
+.fin-pair .report-chart-column-label {
+  white-space: nowrap;
 }
-.fin-figure {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-.fin-amount {
-  font-variant-numeric: tabular-nums;
-}
-/* The one figure on the panel that asks for a decision. Overdue money is drawn
-   in the danger tone whatever its value: unlike a badge, the figure is the
-   reading itself, and a reader who has to check whether it is coloured has
-   already read it. */
-.fin-amount-hero {
-  color: var(--dangerText);
-}
-.fin-lede {
-  margin: 0;
-}
-/* What period the figures describe, under them. It qualifies the whole panel
-   rather than any one reading, which is why it sits below the split instead of
-   beside a figure. The type is `.t-caption` on the element — the line under the
-   thing it qualifies — so only the margin is left to say here. */
+/* What period the figures describe, under the readings it qualifies. */
 .fin-coverage {
   margin: 0;
 }
@@ -1012,11 +982,6 @@
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-4);
   margin: 0;
-}
-.fin-behaviour {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
 }
 /* The invoice table. Its first and last cells align with the panel body's own
    padding, so the table reads as part of the panel rather than as a block

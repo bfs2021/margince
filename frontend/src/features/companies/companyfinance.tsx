@@ -1,9 +1,6 @@
 import { Landmark } from "lucide-react";
-import type { ReactNode } from "react";
 import type { components } from "../../api/schema";
-import { Eyebrow } from "../../design-system/eyebrow";
 import { Panel, PanelBody } from "../../design-system/panel";
-import { Sparkline } from "../../design-system/readings";
 import {
   type SectionState,
   SurfaceState,
@@ -14,13 +11,12 @@ import type { MessageKey } from "../../i18n/en";
 import { problemCodeOf } from "../../lib/problem";
 import { useRecordZone } from "../../lib/recordzone";
 import { BillingContactsPanel } from "../projects/billingcontacts";
-import { RecentInvoices } from "../projects/financeinvoices";
-import { OverdueLead } from "../projects/financeoverdue";
 import { useFinanceSummary } from "../projects/financesummary";
 // The row and card shapes this file draws — co-rowlink, co-row-meta, co-card —
 // are defined in company360.css. Imported HERE rather than left to the caller:
 // it works today only because the company record page pulls that stylesheet in
 // for its own sake, so this file renders unstyled anywhere else.
+import { FinanceTab } from "./companyfinancetab";
 import "./company360.css";
 
 // The finance card: does this customer actually pay us, and on time?
@@ -159,33 +155,42 @@ export function CompanyFinanceCard({
   }
   const summary = query.data;
   const cardState = CARD_STATE[summary.state];
-  // `stale` and `partial` still carry real rows, so the figures and the
-  // provenance footer belong with them — a stale figure from this morning is
-  // still a figure, with its `as of` beside it.
-  const present =
-    cardState === "ready" ||
-    cardState === "empty" ||
-    cardState === "stale" ||
-    cardState === "partial";
+  // `stale` and `partial` still carry real rows, so the figures belong with
+  // them: a stale figure from this morning is still a figure, with its as-of.
+  const figures =
+    cardState === "ready" || cardState === "stale" || cardState === "partial";
+  const states = {
+    loadingLabel: title,
+    state: cardState,
+    emptyLabel: t(EMPTY_LABEL[summary.state] ?? "finance.none"),
+    detail: {
+      onRetry: () => void query.refetch(),
+      staleAsOf: summary.last_synced_at
+        ? formatDate(summary.last_synced_at, locale, recordZone)
+        : undefined,
+    },
+  };
   return (
     <div className="co-overview-stack">
-      <Panel title={title} {...chromeOf(summary, present, t)}>
-        <PanelBody>
-          <SurfaceState
-            loadingLabel={title}
-            state={cardState}
-            emptyLabel={t(EMPTY_LABEL[summary.state] ?? "finance.none")}
-            detail={{
-              onRetry: () => void query.refetch(),
-              staleAsOf: summary.last_synced_at
-                ? formatDate(summary.last_synced_at, locale, recordZone)
-                : undefined,
-            }}
-          >
-            <FinanceBody summary={summary} />
-          </SurfaceState>
-        </PanelBody>
-      </Panel>
+      {figures ? (
+        <SurfaceState {...states}>
+          <FinanceTab
+            summary={summary}
+            source={<FinanceProvenance summary={summary} />}
+            foot={
+              summary.truncated ? (
+                <span className="t-caption">{t("finance.moreInvoices")}</span>
+              ) : undefined
+            }
+          />
+        </SurfaceState>
+      ) : (
+        <Panel title={title}>
+          <PanelBody>
+            <SurfaceState {...states}>{null}</SurfaceState>
+          </PanelBody>
+        </Panel>
+      )}
       {/* OUTSIDE the SurfaceState above, deliberately. Who to send the invoice
           to is the installation's own record and has nothing to do with whether
           an accounting source is connected, mapped or still syncing — and an
@@ -200,31 +205,6 @@ export function CompanyFinanceCard({
   );
 }
 
-// The three slots the panel's chrome fills, decided together because all three
-// hang on the same question: does this panel have real figures to qualify?
-//
-// Where the figures came from and how fresh they are belongs beside the
-// panel's NAME rather than under its last row — it qualifies every number in
-// the panel, and a reader who has scrolled past the invoice table has stopped
-// looking for it. The footer carries what the table could not fit. No slot
-// offers to connect a source: nothing in the product writes a finance
-// connection, so such a button would be a door with nothing behind it.
-function chromeOf(
-  summary: FinanceSummary,
-  present: boolean,
-  t: ReturnType<typeof useT>,
-): { titleAction?: ReactNode; footer?: ReactNode } {
-  if (!present) {
-    return {};
-  }
-  return {
-    titleAction: <FinanceProvenance summary={summary} />,
-    footer: summary.truncated ? (
-      <span className="t-caption">{t("finance.moreInvoices")}</span>
-    ) : undefined,
-  };
-}
-
 // What the card says when it has no figures. Two different sentences, because
 // "nobody has connected an accounting system" and "this customer is not mapped
 // to one of its customers" have different fixes.
@@ -233,31 +213,6 @@ const EMPTY_LABEL: Partial<Record<FinanceState, MessageKey>> = {
   unmapped: "finance.unmapped",
   syncing: "finance.syncing",
 };
-
-// The panel leads with the one figure that asks for a decision, and states
-// the rest around it. Overdue money is what a rep acts on; net invoiced is
-// context for the size of the relationship, and the payment habit is context
-// for whether the overdue figure is a blip or the pattern.
-function FinanceBody({ summary }: Readonly<{ summary: FinanceSummary }>) {
-  const t = useT();
-  const { locale } = useLocale();
-  return (
-    <>
-      <div className="fin-split">
-        <OverdueLead summary={summary} />
-        <div className="fin-aside">
-          <FinanceFigure
-            label={t("finance.netInvoiced")}
-            value={amountOf(summary.net_invoiced, locale)}
-          />
-          <PaymentBehaviour summary={summary} />
-        </div>
-      </div>
-      <CoveragePeriod summary={summary} />
-      <RecentInvoices summary={summary} />
-    </>
-  );
-}
 
 // WHAT PERIOD these figures are drawn from, which is a different question from
 // when we last looked.
@@ -275,7 +230,9 @@ function FinanceBody({ summary }: Readonly<{ summary: FinanceSummary }>) {
 //
 // Absent when the mirror holds no invoice: a period minted from nothing would
 // name a window nothing is in.
-function CoveragePeriod({ summary }: Readonly<{ summary: FinanceSummary }>) {
+export function CoveragePeriod({
+  summary,
+}: Readonly<{ summary: FinanceSummary }>) {
   const t = useT();
   const { locale } = useLocale();
   const recordZone = useRecordZone();
@@ -308,55 +265,6 @@ export function amountOf(
     return undefined;
   }
   return formatMoney(money.amount_minor, money.currency, locale);
-}
-
-// One reading. An absent value renders as a dash with its label intact, so the
-// reader sees WHICH figure is missing rather than a shorter row.
-export function FinanceFigure({
-  label,
-  value,
-  hero,
-  absentNote,
-}: Readonly<{
-  label: string;
-  value?: string;
-  hero?: boolean;
-  absentNote?: string;
-}>) {
-  return (
-    <div className="fin-figure">
-      <Eyebrow>{label}</Eyebrow>
-      {/* ds:ignore a money figure drawn in the ink, not a failure line */}
-      <span className={hero ? "fin-amount fin-amount-hero" : "fin-amount"}>
-        {value ?? "—"}
-      </span>
-      {/* Only beside an absent figure, and only when the caller knows WHY.
-          A dash with no note still reads as "could not compute", which is the
-          honest default; a note beside a figure that is present would be
-          explaining something the reader can see. */}
-      {value === undefined && absentNote && (
-        <span className="t-caption">{absentNote}</span>
-      )}
-    </div>
-  );
-}
-
-// How they pay, as the shape of it: days late per settled invoice, oldest
-// first. A line climbing to the right is a customer slipping, which is the one
-// thing the median beside the overdue figure cannot say, because averaging is
-// what hides it.
-function PaymentBehaviour({ summary }: Readonly<{ summary: FinanceSummary }>) {
-  const t = useT();
-  const series = summary.payment_behaviour ?? [];
-  if (series.length < 2) {
-    return null;
-  }
-  return (
-    <div className="fin-behaviour">
-      <Eyebrow>{t("finance.behaviour")}</Eyebrow>
-      <Sparkline points={series} label={t("finance.behaviourShape")} />
-    </div>
-  );
 }
 
 function FinanceProvenance({ summary }: Readonly<{ summary: FinanceSummary }>) {
