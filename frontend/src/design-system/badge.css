@@ -52,6 +52,16 @@
 .badge-wrap {
   border-radius: var(--r-sm);
 }
+/* In a record's fields column every mark wraps the same way: a source named in
+   full can be wider than the column it stands in. */
+.record-aside .fieldgrid-value .badge,
+.record-aside .fieldgrid-value .badge .badge-label {
+  white-space: normal;
+}
+.record-aside .fieldgrid-value .badge {
+  max-width: 100%;
+  border-radius: var(--r-sm);
+}
 /* The status tints are TRANSLUCENT by canon, so a badge painted with one
    takes its contrast from whatever it lands on: --success on --successBg read
    4.54:1 over --bgElevated and failed AA at 4.05:1 over a PanelPlate's

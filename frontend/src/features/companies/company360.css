@@ -178,10 +178,9 @@
 .co-deal-won {
   margin: var(--space-2) 0 0;
 }
-/* A section's count stands on a quiet line under its title. */
+/* A section's count stands beside its title, quieter than it. */
 .co-section-count {
-  display: block;
-  margin-block-start: var(--space-1);
+  margin-inline-start: var(--space-2);
   font: var(--fontBody);
   color: var(--textSecondary);
 }
@@ -1825,6 +1824,10 @@
 .co-recent {
   padding-top: 0;
 }
+/* Set inside its card's own body, so the body's inset is paid once. */
+.panel-body > .panel-body.co-recent {
+  padding-inline: 0;
+}
 
 .co-recent-list {
   list-style: none;
@@ -1832,17 +1835,21 @@
   padding: 0;
 }
 
+/* The date first, down a column of its own; then what was said, on a rule
+   that runs down the list; then who it was with. */
 .co-recent-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) 0;
+  padding: var(--space-2) 0;
 }
-
-/* Between rows only. The last row's rule would double the section's own
-   boundary, and the first row's would sit against the label above it. */
-.co-recent-row + .co-recent-row {
-  border-top: 1px solid var(--borderSubtle);
+.co-recent-row > .co-recent-when {
+  order: -1;
+  inline-size: 4.5rem;
+  text-align: end;
+}
+.co-recent-row > .avatar {
+  order: 1;
 }
 
 .co-recent-body {
@@ -1851,6 +1858,12 @@
   gap: 0.1rem;
   min-width: 0;
   flex: 1 1 auto;
+  padding-inline-start: var(--space-3);
+  border-inline-start: 2px solid var(--borderSubtle);
+}
+/* The subject leads; its kind and direction qualify it underneath. */
+.co-recent-body > .co-recent-title {
+  order: -1;
 }
 
 .co-recent-head {
@@ -1950,10 +1963,26 @@
   align-self: center;
 }
 
-/* In the lead, the company's readings stand as one column beside the rings. */
+/* In the lead, the company's readings stand as one column beside the rings:
+   a row each, its name at the start and its rating at the end, ruled apart. */
 .record-sheet .record-hero .co-360-readings {
   grid-template-columns: minmax(0, 1fr);
-  min-inline-size: 11rem;
+  gap: 0;
+  min-inline-size: 16rem;
+}
+.record-sheet .record-hero .co-360-reading {
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-block: var(--space-2);
+  border-bottom: 1px solid var(--borderSubtle);
+}
+.record-sheet .record-hero .co-360-reading:last-child {
+  border-bottom: 0;
+}
+.record-sheet .record-hero .co-360-reading dd {
+  text-align: end;
 }
 .co-360-reading-why {
   display: block;

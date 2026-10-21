@@ -214,7 +214,7 @@ function hostOf(website: string | null | undefined): string | undefined {
 }
 
 /**
- * ContactsSection is who is on the account: the top of the roster as pills, each
+ * ContactsSection is who is on the account: the top of the roster as rows, each
  * opening the contact. The set-role and route-in verbs stay on the Contacts
  * tab's own roster rather than being rebuilt here a second time.
  */
@@ -255,7 +255,7 @@ export function ContactsSection({
     >
       <PanelBody>
         {state === "ready" ? (
-          <ul className="record-card-list record-card-pills">
+          <ul className="record-card-list record-card-rows">
             {contacts.slice(0, RAIL_ROW_LIMIT).map((contact) => (
               <li key={contact.contact_id}>
                 <ContactCard contact={contact} />

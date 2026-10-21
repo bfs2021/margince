@@ -668,41 +668,108 @@
 /* The next step leads and the 360 follows it, whatever order the cards a
    record hands in were written in. */
 .record-sheet .record-sections .co-lead {
-  order: -2;
+  order: -3;
 }
 .record-sheet .record-sections > .pe-brief-anchor,
 .record-sheet .record-sections .record-hero {
+  order: -2;
+}
+/* The lead card's name stands on a band of its own, ruled off from the
+   reading under it. */
+.record-sheet .record-hero > .panel-head {
+  padding-block: var(--space-4);
+  border-bottom: 1px solid var(--borderSubtle);
+}
+.record-sheet .record-hero > .panel-head + .panel-body {
+  padding-top: var(--space-5);
+}
+/* The account's readings close its How it stands card: a row of figures
+   joined to the card's foot, as the card's last band. */
+.record-sheet
+  .record-sections
+  > .stat-strip-wrap:has([data-testid="company-strip"]) {
+  grid-column: 1 / -1;
   order: -1;
+  margin-top: calc(-1 * var(--space-4));
+}
+/* One band of cells under the card, divided by hairlines, on the well's
+   ground: the card's foot rather than a row of cards of its own. */
+.record-sheet .stat-strip-wrap:has([data-testid="company-strip"]) .stat-strip {
+  gap: 0;
+  border: 1px solid var(--borderSubtle);
+  border-top: 0;
+  border-end-start-radius: var(--r-lg);
+  border-end-end-radius: var(--r-lg);
+  background: var(--bgWell);
+  overflow: hidden;
+}
+.record-sheet
+  .stat-strip-wrap:has([data-testid="company-strip"])
+  .stat-strip
+  > *
+  + * {
+  border-inline-start: 1px solid var(--borderSubtle);
+}
+.record-sheet .stat-strip-wrap:has([data-testid="company-strip"]) .stat-card {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+/* One row of cells has room for every name on one line. */
+.record-sheet
+  .stat-strip-wrap:has([data-testid="company-strip"])
+  .stat-card-label {
+  min-block-size: 0;
+}
+.record-sheet
+  .record-sections:has(> .stat-strip-wrap [data-testid="company-strip"])
+  .record-hero {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
 }
 
-/* THE NEXT STEP is one strip across the sheet: its name and a rule, the first
- * thing to do, and how much more waits behind it at the far end. */
+/* THE NEXT STEP is one card across the sheet. Its first line names it and
+ * where its reading came from; then what to do, with the verbs at the far
+ * end; then what it rests on; and the way to the rest at the row's end. */
 .record-sheet .record-next {
-  --fontPanelTitle: var(--fontHeadingXSmall);
+  --fontPanelTitle: var(--fontBodySmall);
   display: grid;
-  grid-template-columns: max-content minmax(0, 1fr) max-content;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: start;
   column-gap: var(--space-4);
-  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5);
-  border-radius: var(--r-md);
+  padding: var(--space-5);
 }
 .record-sheet .record-next > .panel-head {
   grid-column: 1;
   grid-row: 1;
-  align-self: stretch;
-  align-items: center;
-  padding: 0 var(--space-4) 0 0;
-  border-inline-end: 1px solid var(--borderSubtle);
+  align-self: center;
+  min-height: 0;
+  padding: 0;
+  border: 0;
 }
 .record-sheet .record-next > .panel-head .panel-title {
   color: var(--textSecondary);
 }
-.record-sheet .record-next > * {
-  grid-column: 2;
+/* A move's byline names the card, so the title stands down: it still names
+   the region, through the section's aria-labelledby. */
+.record-sheet .record-next:has(.co-move-by) > .panel-head {
+  display: none;
 }
-.record-sheet .record-next > .record-next-more {
-  grid-column: 3;
+/* Across the whole first line, ending at the card's edge, so a long source
+   line never widens the verbs' columns and narrows the ask. */
+.record-sheet .record-next > .panel-foot {
+  grid-column: 1 / -1;
   grid-row: 1;
+  justify-self: end;
+  align-self: center;
+}
+@container work (max-width: 40rem) {
+  .record-sheet .record-next > .panel-foot {
+    grid-row: 6;
+    justify-self: start;
+    margin-top: var(--space-3);
+  }
 }
 .record-sheet .record-next > :is(.panel-row, .panel-body, .panel-foot) {
   padding: 0;
@@ -710,6 +777,17 @@
 }
 .record-sheet .record-next > .panel-row::before {
   content: none;
+}
+.record-sheet .record-next > :is(.panel-row, .panel-body) {
+  grid-column: 1 / 3;
+  grid-row: 2;
+  margin-top: var(--space-3);
+}
+.record-sheet .record-next > .record-next-more {
+  grid-column: 3;
+  grid-row: 2 / 4;
+  align-self: center;
+  margin-top: var(--space-3);
 }
 @container work (max-width: 48rem) {
   .record-sheet .record-sections {

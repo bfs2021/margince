@@ -101,7 +101,11 @@ function RecordHead({
               one line and truncated rather than allowed to grow the header;
               the tooltip is what carries the whole of it, and appears only
               when there was more name than row. */}
-          <Heading size="xxlarge" ref={nameTip.ref} {...nameTip.trigger}>
+          <Heading
+            size={compact ? "xlarge" : "xxlarge"}
+            ref={nameTip.ref}
+            {...nameTip.trigger}
+          >
             {name}
             {nameTip.tip}
           </Heading>

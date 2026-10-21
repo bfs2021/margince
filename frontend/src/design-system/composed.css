@@ -635,7 +635,7 @@
 }
 .record-head-compact > .avatar {
   grid-row: 1 / 4;
-  align-self: center;
+  align-self: start;
 }
 .record-head-compact .record-name-row {
   grid-column: 2;
@@ -717,7 +717,7 @@
 /* The fields column stands beside the sheet on the page's own ground, wide
    enough for a label and a value that does not break. */
 .page-zones.record-zones {
-  --asideOpenW: 280px;
+  --asideOpenW: 300px;
   --asideFoldW: var(--space-12);
   column-gap: var(--space-6);
 }
@@ -747,21 +747,40 @@
 }
 /* Open, it is no card: groups of rows on the page's ground, each named by a
    caption, a wide interval between one group and the next. */
+/* The fields column is a card of its own beside the sheet, in the sheet's
+   ground and edge, so the two read as one record in two parts. */
 .record-zones > .record-aside {
+  --asideInset: var(--space-5);
   position: relative;
   gap: var(--space-6);
-  padding-block-start: var(--space-2);
+  padding: var(--asideInset);
+  background: var(--bgElevated);
+  border: 1px solid var(--borderSubtle);
+  border-radius: var(--r-lg);
 }
 /* The pane's own switch sits on its first caption's line, at the far end. */
 .record-aside-head {
   position: absolute;
-  inset-block-start: 0;
-  inset-inline-end: 0;
+  inset-block-start: var(--asideInset, 0);
+  inset-inline-end: var(--asideInset, 0);
   z-index: 1;
+}
+/* A long value wraps inside the column rather than running past the card's
+   edge. */
+.record-aside .fieldgrid-value {
+  min-width: 0;
+}
+
+/* The pane sizes every child to the open track (pagezones.css). On this
+   card that is the track less its inset and edge. */
+@media (min-width: 1201px) {
+  .page-zones.record-zones > .record-aside > * {
+    width: calc(var(--asideOpenW) - 2 * var(--asideInset) - 2px);
+  }
 }
 /* As wide as its switch, against the pane's rule that sizes every child to
    the open track. */
-.record-zones > .record-aside > .record-aside-head {
+.page-zones.record-zones > .record-aside > .record-aside-head {
   width: max-content;
 }
 /* A first caption with a control of its own keeps that line, and the switch
@@ -1694,7 +1713,6 @@
   margin: var(--space-2) 0 0;
   padding: 0;
 }
-
 
 /* One message: the mark, the words, and the moment. */
 .tl-msg {

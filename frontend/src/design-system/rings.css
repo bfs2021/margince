@@ -63,3 +63,24 @@
   padding-inline-start: calc(0.5rem + var(--space-2));
   color: var(--textSecondary);
 }
+/* In a record's lead card the legend reads as rows: each ring's name at the
+   start, what it measures at the end, ruled apart. */
+.record-sheet .record-hero .rings-legend {
+  gap: 0;
+  min-inline-size: 16rem;
+}
+.record-sheet .record-hero .rings-legend > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-block: var(--space-2);
+  border-bottom: 1px solid var(--borderSubtle);
+}
+.record-sheet .record-hero .rings-legend > div:last-child {
+  border-bottom: 0;
+}
+.record-sheet .record-hero .rings-legend dd {
+  padding-inline-start: 0;
+  text-align: end;
+}

@@ -141,3 +141,20 @@ a.record-card-open:focus-visible {
 .record-card-pills .record-card-position {
   color: var(--textSecondary);
 }
+/* As rows: a short list inside a card, each record on a line of its own with
+   no box of its own, divided by hairlines. */
+.record-card-list.record-card-rows {
+  gap: 0;
+}
+.record-card-rows > li + li {
+  border-top: 1px solid var(--borderSubtle);
+}
+.record-card-rows .record-card {
+  padding: var(--space-3) 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.record-card-rows .record-card-position {
+  color: var(--textSecondary);
+}
