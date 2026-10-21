@@ -37754,12 +37754,15 @@ components:
       x-extension-note: |
         additionalProperties:true admits client custom fields (data-model §9 — custom fields
         are real columns added by migration, surfaced additively through this same contract).
-        Because these extra keys carry no per-key schema, writes are drop-on-mismatch: a key
-        that names no ACTIVE custom column (unknown or retired), or whose value shape does
-        not match the column's declared type, is silently excluded from the write — the
-        request still succeeds. A picklist value outside the declared options is the one
-        typed refusal (422, the column's CHECK constraint). Reads surface only ACTIVE
-        columns; a retired field's stored values are preserved but leave the payload.
+        Because these extra keys carry no per-key schema, a write admits only the standard
+        fields of its route and `cf_` keys. Anything else is a 422 `unknown_field`: a
+        misspelt or non-writable standard field, and a `cf_` key that names no ACTIVE custom
+        column (unknown or retired). A value the column cannot hold is a 422
+        `invalid_value`: a wrong shape, or a picklist or multiselect choice outside its
+        options. The refusal names every such key and nothing is written. A null for a key
+        no field names is accepted, so a form that cached a field retired since can still
+        save. Reads surface only ACTIVE columns; a retired field's stored values are
+        preserved but leave the payload.
 
     BoughtField:
       type: object
@@ -38248,12 +38251,15 @@ components:
       x-extension-note: |
         additionalProperties:true admits client custom fields (data-model §9 — custom fields
         are real columns added by migration, surfaced additively through this same contract).
-        Because these extra keys carry no per-key schema, writes are drop-on-mismatch: a key
-        that names no ACTIVE custom column (unknown or retired), or whose value shape does
-        not match the column's declared type, is silently excluded from the write — the
-        request still succeeds. A picklist value outside the declared options is the one
-        typed refusal (422, the column's CHECK constraint). Reads surface only ACTIVE
-        columns; a retired field's stored values are preserved but leave the payload.
+        Because these extra keys carry no per-key schema, a write admits only the standard
+        fields of its route and `cf_` keys. Anything else is a 422 `unknown_field`: a
+        misspelt or non-writable standard field, and a `cf_` key that names no ACTIVE custom
+        column (unknown or retired). A value the column cannot hold is a 422
+        `invalid_value`: a wrong shape, or a picklist or multiselect choice outside its
+        options. The refusal names every such key and nothing is written. A null for a key
+        no field names is accepted, so a form that cached a field retired since can still
+        save. Reads surface only ACTIVE columns; a retired field's stored values are
+        preserved but leave the payload.
 
     CompanyDomainInput:
       type: object
@@ -44017,12 +44023,15 @@ components:
       x-extension-note: |
         additionalProperties:true admits client custom fields (data-model §9 — custom fields
         are real columns added by migration, surfaced additively through this same contract).
-        Because these extra keys carry no per-key schema, writes are drop-on-mismatch: a key
-        that names no ACTIVE custom column (unknown or retired), or whose value shape does
-        not match the column's declared type, is silently excluded from the write — the
-        request still succeeds. A picklist value outside the declared options is the one
-        typed refusal (422, the column's CHECK constraint). Reads surface only ACTIVE
-        columns; a retired field's stored values are preserved but leave the payload.
+        Because these extra keys carry no per-key schema, a write admits only the standard
+        fields of its route and `cf_` keys. Anything else is a 422 `unknown_field`: a
+        misspelt or non-writable standard field, and a `cf_` key that names no ACTIVE custom
+        column (unknown or retired). A value the column cannot hold is a 422
+        `invalid_value`: a wrong shape, or a picklist or multiselect choice outside its
+        options. The refusal names every such key and nothing is written. A null for a key
+        no field names is accepted, so a form that cached a field retired since can still
+        save. Reads surface only ACTIVE columns; a retired field's stored values are
+        preserved but leave the payload.
 
     CreateDealRequest:
       type: object
@@ -48142,12 +48151,15 @@ components:
       x-extension-note: |
         additionalProperties:true admits client custom fields (data-model §9 — custom fields
         are real columns added by migration, surfaced additively through this same contract).
-        Because these extra keys carry no per-key schema, writes are drop-on-mismatch: a key
-        that names no ACTIVE custom column (unknown or retired), or whose value shape does
-        not match the column's declared type, is silently excluded from the write — the
-        request still succeeds. A picklist value outside the declared options is the one
-        typed refusal (422, the column's CHECK constraint). Reads surface only ACTIVE
-        columns; a retired field's stored values are preserved but leave the payload.
+        Because these extra keys carry no per-key schema, a write admits only the standard
+        fields of its route and `cf_` keys. Anything else is a 422 `unknown_field`: a
+        misspelt or non-writable standard field, and a `cf_` key that names no ACTIVE custom
+        column (unknown or retired). A value the column cannot hold is a 422
+        `invalid_value`: a wrong shape, or a picklist or multiselect choice outside its
+        options. The refusal names every such key and nothing is written. A null for a key
+        no field names is accepted, so a form that cached a field retired since can still
+        save. Reads surface only ACTIVE columns; a retired field's stored values are
+        preserved but leave the payload.
 
     CreateLeadRequest:
       type: object
@@ -58702,8 +58714,7 @@ components:
         default_tax_rate: { type: [number, 'null'], format: double, minimum: 0, description: Percent; defaults to 0. }
         active: { type: [boolean, 'null'], description: Defaults to true. }
         source: { type: string }
-      additionalProperties: true
-      x-extension: true
+      additionalProperties: false
 
     UpdateProductRequest:
       type: object
@@ -58719,8 +58730,7 @@ components:
         currency: { type: string, pattern: '^[A-Z]{3}$' }
         default_tax_rate: { type: number, format: double, minimum: 0 }
         active: { type: boolean }
-      additionalProperties: true
-      x-extension: true
+      additionalProperties: false
 
     # ---- Deal Room (the buyer-facing projection of a deal) ----
     DealRoomState:
@@ -59486,8 +59496,7 @@ components:
           type: [array, 'null']
           items: { $ref: '#/components/schemas/OfferLineItemInput' }
         source: { type: string }
-      additionalProperties: true
-      x-extension: true
+      additionalProperties: false
 
     UpdateOfferRequest:
       type: object
@@ -59508,8 +59517,7 @@ components:
         template_id: { type: [string, 'null'], format: uuid }
         intro_text: { type: [string, 'null'] }
         terms_text: { type: [string, 'null'] }
-      additionalProperties: true
-      x-extension: true
+      additionalProperties: false
 
     RejectOfferRequest:
       type: object

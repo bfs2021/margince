@@ -40,9 +40,8 @@ type CreateLeadInput struct {
 	Source              string
 	// Author is who wrote it in the system it came from; zero when unknown.
 	Author storekit.SourceAuthorInput
-	// CustomFields carries the request body's extra top-level keys
-	// (additionalProperties); only active cf_* catalog columns land,
-	// drop-on-mismatch (customfields.go).
+	// CustomFields carries the request body's cf_* keys. A key no active catalog
+	// column takes is refused (storekit.CheckCustomValues).
 	CustomFields map[string]any
 	// FromContactID names a contact whose identity fills the fields left
 	// out (leadfromcontact.go).
@@ -198,7 +197,10 @@ func insertLeadRow(ctx context.Context, tx pgx.Tx, in CreateLeadInput, active []
 		in.LinkedInURL, in.Status, fit.Score, in.OwnerID, in.ProjectID, in.SourceSystem, in.SourceID, in.Source, by,
 		in.FromContactID, in.Phone,
 	})
-	cfCols, cfHolders, args := storekit.InsertFragments(active, in.CustomFields, base)
+	cfCols, cfHolders, args, err := storekit.InsertFragments(active, in.CustomFields, base)
+	if err != nil {
+		return ids.LeadID{}, err
+	}
 	_, err = tx.Exec(ctx,
 		`INSERT INTO lead (id, full_name, email, title, company_name, candidate_company_key,
 		                   linkedin_url, status, score, owner_id, project_id, source_system, source_id, source, captured_by,
