@@ -4619,6 +4619,9 @@ export const vi = {
     "Tạo công ty mới nếu không chọn công ty có sẵn trong danh sách.",
   "create.dealName": "Tên deal",
   "create.amount": "Giá trị",
+  "create.amountNegative": "Nhập số tiền từ 0 trở lên.",
+  "create.referenceNotFound":
+    "Bản ghi này không còn tồn tại hoặc bạn không thể xem.",
   "create.currency": "Loại tiền",
   "create.stage": "Giai đoạn",
   "create.relatedCompany": "Công ty",
@@ -6507,6 +6510,8 @@ export const vi = {
   "import.reason.run_in_flight":
     "Lần nhập này đang chạy. Nó tự hoàn tất và trang này tự cập nhật.",
   "import.reason.undo_failed": "Không thể hoàn tác bản ghi này.",
+  "import.reason.amount_negative":
+    "“{value}” nhỏ hơn 0, mà số tiền của deal thì không được âm.",
   "import.reason.author_too_long": "Tác giả dài hơn {max} ký tự.",
   "import.reason.cannot_create":
     "Bạn không có quyền tạo {plural} nên tệp {plural} bị bỏ qua.",

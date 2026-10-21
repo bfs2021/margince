@@ -4719,6 +4719,9 @@ export const de = {
     "Erstellt ein neues Unternehmen, sofern keines aus der Liste ausgewählt wird.",
   "create.dealName": "Deal-Name",
   "create.amount": "Wert",
+  "create.amountNegative": "Gib einen Betrag von null oder mehr ein.",
+  "create.referenceNotFound":
+    "Dieser Datensatz existiert nicht mehr, oder du kannst ihn nicht sehen.",
   "create.currency": "Währung",
   "create.stage": "Phase",
   "create.relatedCompany": "Unternehmen",
@@ -6683,6 +6686,8 @@ export const de = {
     "Dieser Import läuft bereits. Er endet von selbst und diese Seite aktualisiert sich.",
   "import.reason.undo_failed":
     "Der Datensatz konnte nicht zurückgenommen werden.",
+  "import.reason.amount_negative":
+    "„{value}“ liegt unter null, und der Betrag eines Deals darf das nicht sein.",
   "import.reason.author_too_long":
     "Die Angabe, wer den Eintrag erstellt hat, ist länger als {max} Zeichen.",
   "import.reason.cannot_create":

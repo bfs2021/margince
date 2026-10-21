@@ -4788,6 +4788,9 @@ export const en = {
     "Creates a new company unless one is picked from the list.",
   "create.dealName": "Deal name",
   "create.amount": "Value",
+  "create.amountNegative": "Enter an amount of zero or more.",
+  "create.referenceNotFound":
+    "This record no longer exists, or you cannot see it.",
   "create.currency": "Currency",
   "create.stage": "Stage",
   "create.relatedCompany": "Company",
@@ -6764,6 +6767,8 @@ export const en = {
   "import.reason.run_in_flight":
     "This import is already running. It finishes on its own and this page updates.",
   "import.reason.undo_failed": "The record could not be undone.",
+  "import.reason.amount_negative":
+    "“{value}” is below zero, and a deal’s amount cannot be.",
   "import.reason.author_too_long": "Author is longer than {max} characters.",
   "import.reason.cannot_create":
     "You cannot create {plural}, so the {plural} file is skipped.",
