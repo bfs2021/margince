@@ -9093,6 +9093,9 @@ export interface paths {
          *     gets `withheld: true` and no assignments — distinguishable from a record that simply
          *     carries none, because "no tags" is a claim about the record and this caller cannot
          *     make it.
+         *
+         *     An archived record answers 404, as its lists do: it is closed to reads of what hangs off
+         *     it, and its tags come back when it is restored.
          */
         get: operations["getRecordTags"];
         put?: never;

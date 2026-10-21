@@ -7165,7 +7165,9 @@ export const de = {
   "import.draft.continue": "Fortsetzen",
   "import.draft.cancel": "Abbrechen",
   "import.sourceBusy":
-    "Ein anderer Import mit diesem Quellnamen schreibt noch. Warte, bis dieser Import fertig ist, und teste dann erneut.",
+    "Ein anderer Import mit diesem Quellnamen schreibt noch. Warte, bis er fertig ist, und versuche es dann erneut.",
+  "import.sourceBusyDraft":
+    "Deine Datei wartet als Entwurf unter „Letzte Importe“. Setze sie fort, sobald der andere Import fertig ist.",
   "import.sourceBusyOpen": "Diesen Import öffnen",
   "import.upload.tooManyRowsTitle": "Die Datei ist zu lang für einen Testlauf",
   "import.upload.tooManyRows":

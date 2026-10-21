@@ -6981,7 +6981,9 @@ export const vi = {
   "import.draft.continue": "Tiếp tục",
   "import.draft.cancel": "Hủy",
   "import.sourceBusy":
-    "Một lần nhập khác cùng tên nguồn vẫn đang ghi. Hãy đợi nó xong, rồi chạy thử lại.",
+    "Một lần nhập khác cùng tên nguồn vẫn đang ghi. Hãy đợi nó xong, rồi thử lại.",
+  "import.sourceBusyDraft":
+    "Tệp của bạn chờ ở dạng bản nháp trong Lần nhập gần đây. Hãy tiếp tục nó khi lần nhập kia xong.",
   "import.sourceBusyOpen": "Mở lần nhập đó",
   "import.upload.tooManyRowsTitle": "Tệp quá dài cho một lần chạy thử",
   "import.upload.tooManyRows":
