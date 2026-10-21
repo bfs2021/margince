@@ -15241,6 +15241,48 @@ func (e ReportingCardWidth) Valid() bool {
 	}
 }
 
+// Defines values for ReportingCardKind.
+const (
+	ReportingCardKindBookingsTrend     ReportingCardKind = "bookings_trend"
+	ReportingCardKindForecastSupport   ReportingCardKind = "forecast_support"
+	ReportingCardKindMetricReading     ReportingCardKind = "metric_reading"
+	ReportingCardKindOwnerAttainment   ReportingCardKind = "owner_attainment"
+	ReportingCardKindPipelineMovement  ReportingCardKind = "pipeline_movement"
+	ReportingCardKindQuestion          ReportingCardKind = "question"
+	ReportingCardKindSdrOutcomes       ReportingCardKind = "sdr_outcomes"
+	ReportingCardKindStageAge          ReportingCardKind = "stage_age"
+	ReportingCardKindStageDistribution ReportingCardKind = "stage_distribution"
+	ReportingCardKindTargetProgress    ReportingCardKind = "target_progress"
+)
+
+// Valid indicates whether the value is a known member of the ReportingCardKind enum.
+func (e ReportingCardKind) Valid() bool {
+	switch e {
+	case ReportingCardKindBookingsTrend:
+		return true
+	case ReportingCardKindForecastSupport:
+		return true
+	case ReportingCardKindMetricReading:
+		return true
+	case ReportingCardKindOwnerAttainment:
+		return true
+	case ReportingCardKindPipelineMovement:
+		return true
+	case ReportingCardKindQuestion:
+		return true
+	case ReportingCardKindSdrOutcomes:
+		return true
+	case ReportingCardKindStageAge:
+		return true
+	case ReportingCardKindStageDistribution:
+		return true
+	case ReportingCardKindTargetProgress:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ReportingExecutionStatus.
 const (
 	ReportingExecutionStatusFailed    ReportingExecutionStatus = "failed"
@@ -46049,9 +46091,18 @@ type ReportingCaptureStatus struct {
 // ReportingCard defines model for ReportingCard.
 type ReportingCard struct {
 	// Id A short id the client mints. Unique within the report, so one chart kind can be placed twice.
-	Id     string             `json:"id"`
-	Kind   ReportingBlockKind `json:"kind"`
+	Id string `json:"id"`
+
+	// Kind A chart kind, or `question`, a custom analytics question the card asks for each reader.
+	Kind   ReportingCardKind  `json:"kind"`
 	Metric *ReportingMetricID `json:"metric,omitempty"`
+
+	// Question A custom analytics question a card asks. Present exactly when the card's `kind` is
+	// `question`. The page asks it through `/analytics/query` for each reader, under their
+	// own grants and over the report's scope. Every reader of the report receives it, so it
+	// carries no filters (a filter value can name a record a reader may not open), no scope
+	// and no save. A sent edition does not keep its answer.
+	Question *ReportingCardQuestion `json:"question,omitempty"`
 
 	// Width `half` shares a row with the next half card. A chart that needs the whole width draws full regardless.
 	Width ReportingCardWidth `json:"width"`
@@ -46059,6 +46110,24 @@ type ReportingCard struct {
 
 // ReportingCardWidth `half` shares a row with the next half card. A chart that needs the whole width draws full regardless.
 type ReportingCardWidth string
+
+// ReportingCardKind A chart kind, or `question`, a custom analytics question the card asks for each reader.
+type ReportingCardKind string
+
+// ReportingCardQuestion A custom analytics question a card asks. Present exactly when the card's `kind` is
+// `question`. The page asks it through `/analytics/query` for each reader, under their
+// own grants and over the report's scope. Every reader of the report receives it, so it
+// carries no filters (a filter value can name a record a reader may not open), no scope
+// and no save. A sent edition does not keep its answer.
+type ReportingCardQuestion struct {
+	// Entity The population, by name.
+	Entity  string    `json:"entity"`
+	GroupBy *[]string `json:"group_by,omitempty"`
+
+	// Limit The rows the card shows; 100 when absent.
+	Limit    *int               `json:"limit,omitempty"`
+	Measures []AnalyticsMeasure `json:"measures"`
+}
 
 // ReportingCatalog defines model for ReportingCatalog.
 type ReportingCatalog struct {

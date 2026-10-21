@@ -323,6 +323,18 @@ export const de = {
   "reporting.cardSection": "Abschnitt für {chart}",
   "reporting.removeCard": "{chart} entfernen",
   "reporting.addChart": "Diagramm hinzufügen",
+  "reporting.questionCard": "Frage: {population}",
+  "reporting.questionLoading": "Frage wird gestellt…",
+  "reporting.questionNotKept":
+    "In gesendeten Berichten nicht enthalten. Der Live-Bericht zeigt die Antwort auf diese Frage.",
+  "reporting.questionLink": "Link zu einem gespeicherten eigenen Bericht",
+  "reporting.questionLinkInvalid":
+    "Den Link einfügen, den Link kopieren bei einem gespeicherten eigenen Bericht liefert.",
+  "reporting.addQuestion": "Frage hinzufügen",
+  "reporting.questionNotPreviewed":
+    "In der Rollenvorschau nicht angezeigt. Diese Frage beantwortet beim Öffnen des Berichts der Zugriff des jeweiligen Kontos.",
+  "reporting.questionFiltered":
+    "Dieser eigene Bericht hat Filter, die eine Berichtskarte nicht behalten kann. Eine Kopie ohne Filter speichern; der Umfang des Berichts grenzt die Karte ein.",
   "reporting.previewChart": "Vorschau",
   "reporting.previewLoading": "Vorschau wird geladen…",
   "reporting.previewEmpty":
