@@ -55,6 +55,27 @@ export const en = {
   "dataTasks.blocked.earlier_step": "An earlier step must finish first.",
   "dataTasks.blocked.missing_prerequisite":
     "Required updates must finish first.",
+  "dealSuggestion.linkedUnlinked":
+    "Evidence linked. Some evidence remains in place because permissions do not allow it to be moved.",
+  "dealSuggestion.searchExisting": "Search deals",
+  "dealSuggestion.existingDeal": "Existing deal",
+  "dealSuggestion.moreDeals": "Load more deals",
+  "dealSuggestion.noMatchingDeals": "No matching deals at this company.",
+  "dealSuggestion.changed":
+    "This suggestion is no longer available. Refresh the findings to see its current state.",
+  "dealSuggestion.linkExisting": "Link to existing deal",
+  "dealSuggestion.linked": "Evidence linked to the deal.",
+  "dealSuggestion.dismissTitle": "Dismiss deal suggestion",
+  "dealSuggestion.linkEffect":
+    "Attach the cited evidence to a deal at {company}; no new deal is created.",
+  "dealSuggestion.dismissEffect":
+    "Close this suggestion for {company} and record the reason.",
+  "dealSuggestion.dismissReason": "Reason",
+  "dealSuggestion.dismissReason.not_a_deal": "No buying interest",
+  "dealSuggestion.dismissReason.already_tracked": "Already tracked",
+  "dealSuggestion.dismissReason.wrong_company": "Wrong company",
+  "dealSuggestion.dismissReason.historical": "Historical activity",
+  "dealSuggestion.dismissReason.other": "Other reason",
   "approval.preview.nameUnavailable": "Name unavailable",
   "approval.preview.structured": "Structured value: {value}",
   "approval.preview.resolveConflict":
@@ -884,6 +905,8 @@ export const en = {
   "dealSuggestion.field.amount": "Amount",
   "dealSuggestion.field.currency": "Currency",
   "dealSuggestion.field.stage": "Stage",
+  "dealSuggestion.accountOwner": "Account owner",
+  "dealSuggestion.unassignedOwner": "Unassigned",
   "dealSuggestion.field.owner": "Owner",
   "dealSuggestion.ownerMe": "Me",
   "dealSuggestion.field.closeDate": "Expected close",
@@ -5682,6 +5705,13 @@ export const en = {
   "analytics.share.closeBody":
     "The link stops opening at once, for anyone who has it. A closed link cannot be reopened.",
   "analytics.frame": "As of {asOf} · {zone}",
+  "review.unlinkedSignal": "Buying interest without a deal",
+  "review.signalNotRelevant": "Not relevant",
+  "review.signalOccurred": "Source date: {date}",
+  "review.uncertainBuyer":
+    "Confirm who is buying and which company they represent before creating a deal.",
+  "review.historicalSignal":
+    "This source is old. Check whether the buyer still wants this before linking it.",
   "review.title": "Checks before the call",
   "review.ready": "Ready",
   "review.readyWithExceptions": "Ready, with notes",
