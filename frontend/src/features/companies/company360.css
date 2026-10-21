@@ -137,8 +137,9 @@
   outline: var(--focus-ring);
   outline-offset: 2px;
 }
-/* The overview's deal rows: the name over its close date, the stage, and the
-   amount at the end, on three tracks every row shares. */
+/* The overview's deal rows: the name over its close date, and at the end the
+   amount over the stage. Two tracks, so a half-width card keeps the name's
+   measure. */
 .co-deal-rows {
   display: flex;
   flex-direction: column;
@@ -151,10 +152,22 @@
 }
 .co-deal-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 11rem 7rem;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--space-1) var(--space-4);
   align-items: center;
   padding-block: var(--space-3);
+}
+.co-deal-row > .co-deal-name {
+  grid-row: 1 / 3;
+}
+.co-deal-row > :is(.stage-pips, .co-deal-stage) {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+}
+.co-deal-row > .co-deal-amount {
+  grid-column: 2;
+  grid-row: 1;
 }
 .co-deal-name {
   display: flex;
@@ -183,15 +196,6 @@
   margin-inline-start: var(--space-2);
   font: var(--fontBody);
   color: var(--textSecondary);
-}
-@container work (max-width: 40rem) {
-  .co-deal-row {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-  .co-deal-row > .stage-pips,
-  .co-deal-row > .co-deal-stage {
-    grid-row: 2;
-  }
 }
 
 /* A row's own line: the icon sits with the text rather than on its baseline. */
@@ -1170,6 +1174,12 @@
   flex: 1;
   min-width: 0;
   margin: 0;
+}
+/* In the fields column a slice's name reads at the field rows' size, set
+   apart by weight rather than by a heading's rung. */
+.record-aside .co-sect .co-sect-title {
+  font: var(--fontBody);
+  font-weight: var(--fontWeightBold);
 }
 .co-sect-summary {
   display: flex;

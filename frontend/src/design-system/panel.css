@@ -537,6 +537,10 @@
   padding-block: var(--space-5) var(--space-2);
   border-bottom: 0;
 }
+/* The rows start a short step under the title, which has no band to clear. */
+.record-sheet .panel > .panel-head + .panel-body {
+  padding-top: var(--space-2);
+}
 /* The FIELDS COLUMN beside the sheet is unboxed too, and quieter still: what
  * the record is filed as, read by label. A group's title takes the secondary
  * ink, with no band and no rule. It keeps the pane's inset rather than
@@ -716,6 +720,38 @@
   background: none;
   box-shadow: none;
 }
+/* A cell's door is the cell itself: the word stands over the name's line
+   end, on the band's ground, while the cell is under the pointer or holds
+   focus. Hidden, it takes no width from the name. */
+.record-sheet .stat-strip-wrap:has([data-testid="company-strip"]) .stat-card {
+  display: grid;
+  align-content: start;
+}
+.record-sheet
+  .stat-strip-wrap:has([data-testid="company-strip"])
+  .stat-card
+  > :is(.stat-card-label, .stat-card-foot) {
+  grid-row: 1;
+  grid-column: 1;
+}
+.record-sheet
+  .stat-strip-wrap:has([data-testid="company-strip"])
+  .stat-card
+  > .stat-card-foot {
+  justify-self: end;
+  align-self: center;
+  margin: 0;
+  padding: 0 0 0 var(--space-2);
+  background: var(--bgWell);
+  opacity: 0;
+  transition: opacity var(--dur-state) var(--ease-out);
+}
+.record-sheet
+  .stat-strip-wrap:has([data-testid="company-strip"])
+  .stat-card:is(:hover, :focus-within)
+  > .stat-card-foot {
+  opacity: 1;
+}
 /* One row of cells has room for every name on one line. */
 .record-sheet
   .stat-strip-wrap:has([data-testid="company-strip"])
@@ -763,6 +799,8 @@
   grid-row: 1;
   justify-self: end;
   align-self: center;
+  font: var(--fontBodySmall);
+  color: var(--textSecondary);
 }
 @container work (max-width: 40rem) {
   .record-sheet .record-next > .panel-foot {

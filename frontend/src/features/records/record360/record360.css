@@ -365,7 +365,7 @@
 .record-sheet .record-next .co-move-reason {
   grid-column: 1;
   grid-row: 3;
-  margin-top: var(--space-1);
+  margin-top: var(--space-2);
   max-width: 72ch;
 }
 .record-sheet .record-next .co-move-do {
@@ -382,49 +382,63 @@
   flex-wrap: wrap;
 }
 .record-sheet .record-next .co-move-basis {
-  grid-column: 1 / -1;
+  grid-column: 1 / 3;
   grid-row: 4;
+  align-self: stretch;
   min-width: 0;
   margin-top: var(--space-4);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--r-md);
   background: var(--bgWell);
 }
-/* With records under the move, the way to the rest stands at the end of
-   their row, inside it. */
-.record-sheet .record-next:has(.co-move-basis) > .record-next-more {
-  grid-row: 4;
-  margin-top: var(--space-4);
-  padding-inline-end: var(--space-4);
-}
+/* With records under the move, the way to the rest is the row's own end:
+   the same ground, joined to it, so the two read as one row. */
 .record-sheet
   .record-next:has(.co-move-basis):has(> .record-next-more)
   .co-move-basis {
-  padding-inline-end: var(--space-12);
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+.record-sheet .record-next:has(.co-move-basis) > .record-next-more {
+  grid-row: 4;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  margin-top: var(--space-4);
+  margin-inline-start: calc(-1 * var(--space-4));
+  padding-inline: var(--space-4);
+  border-start-end-radius: var(--r-md);
+  border-end-end-radius: var(--r-md);
+  background: var(--bgWell);
 }
 /* The records are named, not labelled: the byline already says the move
    was read from them. */
 .record-sheet .record-next .co-move-basis-head {
   display: none;
 }
-/* A message the move rests on, as one row: its subject and marks on the
-   first line, the preview cut to one line under the subject. */
+/* A message the move rests on, as one row: its mark, its subject with its
+   marks beside it, and the preview cut to one line under the subject. The
+   byline dates the move, so the row draws no sender line of its own. */
 .record-sheet .record-next .co-move-basis .emailentry {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  column-gap: var(
-    --space-3
-  ); /* ds:ignore the message laid out as one evidence row, its mark beside its subject */
-  row-gap: var(
-    --space-1
-  ); /* ds:ignore the preview line tight under its subject in the evidence row */
-  align-items: baseline;
+  grid-template-columns: auto minmax(0, max-content) minmax(0, 1fr);
+  column-gap: var(--space-3); /* ds:ignore one row: mark beside subject */
+  row-gap: var(--space-1); /* ds:ignore preview tight under subject */
+  align-items: center;
   min-width: 0;
   width: 100%;
+  padding: 0; /* ds:ignore the row is the message's ground */
 }
 .record-sheet .record-next .co-move-basis .emailentry__lead {
   grid-column: 1;
   grid-row: 1;
+}
+.record-sheet
+  .record-next
+  .co-move-basis
+  .emailentry__lead
+  > :is(.emailentry__who, .emailentry__when) {
+  display: none;
 }
 .record-sheet .record-next .co-move-basis .emailentry__subject {
   grid-column: 2;
@@ -434,6 +448,7 @@
 .record-sheet .record-next .co-move-basis .emailentry__marks {
   grid-column: 3;
   grid-row: 1;
+  justify-self: start;
 }
 .record-sheet .record-next .co-move-basis .emailentry__preview {
   grid-column: 2 / -1;

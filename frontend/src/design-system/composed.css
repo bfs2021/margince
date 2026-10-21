@@ -619,80 +619,45 @@
      inside itself rather than running past the sheet's edge. */
   overflow-wrap: break-word;
 }
-/* The compact head is a grid. Row one holds the mark, the name and the verbs.
-   The caption, the pills and the facts strip take the full width under the
-   name. The name's column is as wide as the name, up to a cap; the verbs take
-   what is left and fold onto a second row before a short name would wrap. */
+/* The compact head is the base head's wrapping row. The mark, the identity
+   and the verbs share one line while they fit; past that the verbs drop whole
+   to a line of their own, one row of buttons rather than a stack of them. */
 .record-head-compact {
-  display: grid;
-  grid-template-columns: auto fit-content(60%) minmax(0, 1fr);
-  column-gap: var(--space-4);
-  row-gap: 0;
-  align-items: start;
+  align-items: flex-start;
+  gap: var(--space-4) var(--space-5);
 }
-.record-head-compact > .record-id {
-  display: contents;
-}
-.record-head-compact > .avatar {
-  grid-row: 1 / 4;
-  align-self: start;
+/* The identity asks for its whole width, so the verbs leave the line before
+   the name would break to make room for them. */
+.record-head-compact .record-id {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 .record-head-compact .record-name-row {
-  grid-column: 2;
-  grid-row: 1;
   align-items: baseline;
   gap: var(--space-3);
 }
 .record-head-compact > .record-actions-inline {
-  grid-column: 3;
-  grid-row: 1;
   /* Half the gap between the name's line box and a button's height, so the
      verbs sit level with a one-line name. */
   margin-block-start: var(--space-1);
 }
-.record-head-compact .record-sub {
-  grid-column: 2 / -1;
-  grid-row: 2;
-}
 .record-head-compact .record-pulse {
-  grid-column: 2 / -1;
-  grid-row: 3;
-  margin-top: var(--space-2);
+  margin-top: var(--space-1);
+}
+.record-head-compact > :is(.record-badges, .record-standing) {
+  flex-basis: 100%;
 }
 .record-head-compact .record-badges {
-  grid-column: 1 / -1;
-  grid-row: 5;
-  margin-top: var(--space-4);
   padding-top: var(--space-3);
   border-top: 1px solid var(--borderSubtle);
 }
-.record-head-compact > .record-standing {
-  grid-column: 1 / -1;
-  grid-row: 6;
-}
-/* A narrow head has no room for the verbs beside the name: they take a row of
-   their own under the pills, from the name's left edge, and the name takes the
-   row they left. */
-@container (max-width: 44rem) {
-  .record-head-compact .record-name-row {
-    grid-column: 2 / -1;
-  }
-  .record-head-compact > .record-actions-inline {
-    grid-column: 2 / -1;
-    grid-row: 4;
-    margin-block-start: var(--space-4);
-    justify-content: flex-start;
-  }
-}
-/* A phone-width head gives the mark's column to the name: under 30rem a 64px
+/* A phone-width head gives the mark's room to the name: under 30rem a 64px
    mark leaves a display name a handful of letters per line. */
 @container (max-width: 30rem) {
   .record-head-compact > .avatar {
     display: none;
-  }
-  .record-head-compact
-    :is(.record-name-row, .record-sub, .record-pulse, .record-actions-inline) {
-    grid-column: 1 / -1;
   }
 }
 .record-sub-inline {
@@ -700,7 +665,6 @@
 }
 .record-head-compact .record-sub {
   max-width: none;
-  margin-top: var(--space-2);
 }
 
 /* The record as one sheet: head, strip and the open tab's work on one raised
@@ -714,10 +678,10 @@
   border-radius: var(--r-lg);
   padding: var(--space-6) var(--sheetInset) var(--space-8);
 }
-/* The fields column stands beside the sheet on the page's own ground, wide
-   enough for a label and a value that does not break. */
+/* The fields column stands beside the sheet, wide enough inside its card's
+   inset for a label and a value that does not break. */
 .page-zones.record-zones {
-  --asideOpenW: 300px;
+  --asideOpenW: 332px;
   --asideFoldW: var(--space-12);
   column-gap: var(--space-6);
 }
@@ -750,7 +714,7 @@
 /* The fields column is a card of its own beside the sheet, in the sheet's
    ground and edge, so the two read as one record in two parts. */
 .record-zones > .record-aside {
-  --asideInset: var(--space-5);
+  --asideInset: var(--space-4);
   position: relative;
   gap: var(--space-6);
   padding: var(--asideInset);
@@ -1000,10 +964,6 @@
    row and not to each button — the ellipsis and the panel switch sit among the
    account's other verbs and are one more of the same. */
 .record-actions :is(.btn, .overflow-menu > .btn) {
-  /* Pills: a record's verbs are the head's one row of controls, and the round
-     end sets them apart from the square fields and cards under them. */
-  border-radius: var(--r-full);
-  corner-shape: round;
   min-block-size: var(--controlHeight);
 }
 .record-actions :is(.btn-icon, .overflow-menu > .btn-icon) {

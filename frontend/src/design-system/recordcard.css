@@ -158,3 +158,33 @@ a.record-card-open:focus-visible {
 .record-card-rows .record-card-position {
   color: var(--textSecondary);
 }
+/* A row sets its facts under the name, beside the mark: the link gives its
+   mark and name to the card's grid, and the card draws the link's focus. */
+.record-card-rows .record-card {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  column-gap: var(--space-2);
+}
+.record-card-rows .record-card-open {
+  display: contents;
+}
+.record-card-rows .record-card-open > .avatar {
+  grid-column: 1;
+  grid-row: 1 / 3;
+}
+.record-card-rows .record-card-name {
+  grid-column: 2;
+  grid-row: 1;
+  color: var(--textPrimary);
+}
+.record-card-rows .record-card-facts {
+  grid-column: 2;
+  grid-row: 2;
+}
+.record-card-rows .record-card-aside {
+  grid-column: 3;
+  grid-row: 1 / 3;
+}
+.record-card-rows .record-card:has(.record-card-open:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
