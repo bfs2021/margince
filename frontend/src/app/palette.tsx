@@ -10,7 +10,7 @@ import {
 import { Callout } from "../design-system/callout";
 import { liveDialogs, useDialogFocus } from "../design-system/dialogfocus";
 import { usePresence } from "../design-system/presence";
-import { SCHEDULED_SCREEN } from "../features/mail/scheduledsends";
+import { SCHEDULED_SCREEN } from "../features/mail/scheduledqueue";
 import { useVisibleSettingsPages } from "../features/settings/settingsnav";
 import { settingsHref } from "../features/settings/settingsrouting";
 import { settingsPageKeywords } from "../features/settings/settingssearch";
