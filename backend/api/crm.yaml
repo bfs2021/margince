@@ -7612,6 +7612,7 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/ValidationError' }
+        '502': { $ref: '#/components/responses/CalendarUnavailable' }
     delete:
       tags: [Activities]
       operationId: archiveActivity
@@ -8859,6 +8860,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/MeetingAvailability' }
+        '502': { $ref: '#/components/responses/CalendarUnavailable' }
         default:
           description: The operation could not be completed.
           content:
@@ -8880,6 +8882,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/MeetingAvailability' }
+        '502': { $ref: '#/components/responses/CalendarUnavailable' }
         default:
           description: The operation could not be completed.
           content:
@@ -8939,6 +8942,7 @@ paths:
                   id: { type: string, format: uuid }
                   url: { type: string }
                   expires_at: { type: string, format: date-time }
+        '502': { $ref: '#/components/responses/CalendarUnavailable' }
         default:
           description: The operation could not be completed.
           content:
@@ -8992,6 +8996,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/MeetingInvitation' }
+        '502': { $ref: '#/components/responses/CalendarUnavailable' }
         default:
           description: The operation could not be completed.
           content:
@@ -9013,6 +9018,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/MeetingAvailability' }
+        '502': { $ref: '#/components/responses/CalendarUnavailable' }
         default:
           description: The operation could not be completed.
           content:
@@ -9120,6 +9126,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/MeetingInvitation' }
         '422': { $ref: '#/components/responses/ValidationError' }
+        '502': { $ref: '#/components/responses/CalendarUnavailable' }
   /scheduling/invitations/{id}:
     parameters:
       - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
@@ -9227,6 +9234,7 @@ paths:
                       same field with the same values — the two surfaces do not get to disagree
                       about what an answer means.
         '422': { $ref: '#/components/responses/ValidationError' }
+        '502': { $ref: '#/components/responses/CalendarUnavailable' }
 
   /bookings:
     post:
@@ -9304,6 +9312,7 @@ paths:
             application/problem+json:
               schema: { $ref: '#/components/schemas/Problem' }
         '422': { $ref: '#/components/responses/ValidationError' }
+        '502': { $ref: '#/components/responses/CalendarUnavailable' }
 
   # ---- Public booking (feedback/14 — B-EP09.14 book.html) ----
   # Deviation from the spec source (recorded in this batch's decision file):
@@ -9352,6 +9361,7 @@ paths:
                       does not help, since the walk starts at `from` either way. Declared because a
                       capped list read as complete is how a caller concludes there is no later opening.
         '404': { $ref: '#/components/responses/NotFound' }
+        '502': { $ref: '#/components/responses/CalendarUnavailable' }
 
   /public/booking/{host_slug}:
     parameters:
@@ -9422,6 +9432,7 @@ paths:
                       mail follows.
         '409': { description: 'Slot no longer available (`code: slot_taken`).', content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } } }
         '422': { $ref: '#/components/responses/ValidationError' }
+        '502': { $ref: '#/components/responses/CalendarUnavailable' }
 
 
   # ---- Deal Room buyer edge ----
@@ -31221,6 +31232,16 @@ components:
           examples:
             locked:
               value: { type: 'https://errors.gradion.com/setting_locked_by_boot_source', title: Conflict, status: 409, code: setting_locked_by_boot_source, detail: 'capture.auto_enrich_daily_cap is set by env MARGINCE_CAPTURE_AUTO_ENRICH_DAILY_CAP; change it there' }
+    CalendarUnavailable:
+      description: |
+        The host's selected calendar could not be read (`code: calendar_unavailable`). A read offers
+        no times and a write changes nothing, because either would rest on a partial picture of the
+        host's diary. The `detail` points the host at the calendar chosen in meeting settings; the
+        calendar and the provider's reason are in the server log only. It clears once the host
+        repairs the calendar or the provider answers again.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
     ValidationError:
       description: Request failed validation (RFC 7807 with field-level `details.errors`).
       content:

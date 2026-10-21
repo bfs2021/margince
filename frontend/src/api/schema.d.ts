@@ -48501,6 +48501,21 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
+        /**
+         * @description The host's selected calendar could not be read (`code: calendar_unavailable`). A read offers
+         *     no times and a write changes nothing, because either would rest on a partial picture of the
+         *     host's diary. The `detail` points the host at the calendar chosen in meeting settings; the
+         *     calendar and the provider's reason are in the server log only. It clears once the host
+         *     repairs the calendar or the provider answers again.
+         */
+        CalendarUnavailable: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
         /** @description Request failed validation (RFC 7807 with field-level `details.errors`). */
         ValidationError: {
             headers: {
@@ -56816,6 +56831,7 @@ export interface operations {
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["ValidationError"];
+            502: components["responses"]["CalendarUnavailable"];
         };
     };
     getEmailPresentation: {
@@ -58157,6 +58173,7 @@ export interface operations {
                     "application/json": components["schemas"]["MeetingAvailability"];
                 };
             };
+            502: components["responses"]["CalendarUnavailable"];
             /** @description The operation could not be completed. */
             default: {
                 headers: {
@@ -58191,6 +58208,7 @@ export interface operations {
                     "application/json": components["schemas"]["MeetingAvailability"];
                 };
             };
+            502: components["responses"]["CalendarUnavailable"];
             /** @description The operation could not be completed. */
             default: {
                 headers: {
@@ -58286,6 +58304,7 @@ export interface operations {
                     };
                 };
             };
+            502: components["responses"]["CalendarUnavailable"];
             /** @description The operation could not be completed. */
             default: {
                 headers: {
@@ -58361,6 +58380,7 @@ export interface operations {
                     "application/json": components["schemas"]["MeetingInvitation"];
                 };
             };
+            502: components["responses"]["CalendarUnavailable"];
             /** @description The operation could not be completed. */
             default: {
                 headers: {
@@ -58395,6 +58415,7 @@ export interface operations {
                     "application/json": components["schemas"]["MeetingAvailability"];
                 };
             };
+            502: components["responses"]["CalendarUnavailable"];
             /** @description The operation could not be completed. */
             default: {
                 headers: {
@@ -58560,6 +58581,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationError"];
+            502: components["responses"]["CalendarUnavailable"];
             /** @description The operation could not be completed. */
             default: {
                 headers: {
@@ -58699,6 +58721,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationError"];
+            502: components["responses"]["CalendarUnavailable"];
         };
     };
     bookMeeting: {
@@ -58804,6 +58827,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationError"];
+            502: components["responses"]["CalendarUnavailable"];
         };
     };
     getPublicAvailability: {
@@ -58847,6 +58871,7 @@ export interface operations {
                 };
             };
             404: components["responses"]["NotFound"];
+            502: components["responses"]["CalendarUnavailable"];
         };
     };
     bookPublicMeeting: {
@@ -58952,6 +58977,7 @@ export interface operations {
                 };
             };
             422: components["responses"]["ValidationError"];
+            502: components["responses"]["CalendarUnavailable"];
         };
     };
     peekDealRoomCredential: {

@@ -2617,6 +2617,7 @@ paths:
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '422': {$ref: '#/components/responses/ValidationError'}
+        '502': {$ref: '#/components/responses/CalendarUnavailable'}
       description: |-
         Update an activity (e.g. complete a task).
 
@@ -3075,6 +3076,7 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/MeetingInvitation'}
         '422': {$ref: '#/components/responses/ValidationError'}
+        '502': {$ref: '#/components/responses/CalendarUnavailable'}
       description: |-
         Reserve a meeting and request a calendar-native invitation.
 
@@ -3146,6 +3148,7 @@ paths:
                     description: |-
                       What these slots were computed FROM, which decides what an empty window means.
         '422': {$ref: '#/components/responses/ValidationError'}
+        '502': {$ref: '#/components/responses/CalendarUnavailable'}
   /bookings:
     post:
       tags: [Activities, AI]
@@ -3216,6 +3219,7 @@ paths:
             application/problem+json:
               schema: {$ref: '#/components/schemas/Problem'}
         '422': {$ref: '#/components/responses/ValidationError'}
+        '502': {$ref: '#/components/responses/CalendarUnavailable'}
   /automations/catalog:
     get:
       tags: [Automations]
@@ -8131,6 +8135,16 @@ components:
           examples:
             skew:
               value: {type: 'https://errors.gradion.com/version_skew', title: Version conflict, status: 409, code: version_skew, detail: The resource changed since your last read; re-read and retry.}
+    CalendarUnavailable:
+      description: |-
+        The host's selected calendar could not be read (`code: calendar_unavailable`). A read offers
+        no times and a write changes nothing, because either would rest on a partial picture of the
+        host's diary. The `detail` points the host at the calendar chosen in meeting settings; the
+        calendar and the provider's reason are in the server log only. It clears once the host
+        repairs the calendar or the provider answers again.
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
     ValidationError:
       description: Request failed validation (RFC 7807 with field-level `details.errors`).
       content:
