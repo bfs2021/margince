@@ -6,9 +6,27 @@ The **Weekly** view of **Home** looks back on a closed week and plans the next o
 
 ## The weekly review
 
-The weekly review in Margince is on **Home → Weekly**. Margince writes it once, on the Monday after
-the week it covers, and marks it **Frozen**. You cannot make it again: the counts are what they
-were.
+The weekly review in Margince is on **Home → Weekly**, and reads as a report. Margince writes it
+once, on the Monday after the week it covers, and marks it **Frozen**. You cannot make it again: the
+counts are what they were.
+
+Its title is the week it covers. Above it are the calendar week and when the report was frozen.
+Beside the title, the two arrows **Earlier week** and **Later week** step through the weeks that have
+a report. Under it, a card holds what Margince wrote about the week, marked as written by AI. The
+report's parts are:
+- **At a glance**: four figures. Deals won shows what they were worth; the other three show their
+  share as a bar. Each shows its change on the week before, where there is one.
+- **Closed deals**: the deals won and lost, each with what it closed at, and a bar of won against
+  lost.
+- **Pipeline movement**: the deals that changed stage, and the stage each reached.
+- **Forecast**: one table of the forecast for the week, month and quarter.
+- **Figures**: every figure beside the week before, and the scorecard.
+- **Observations**: what worked in the week and what did not, where Margince found something.
+- **The week ahead**: your plan for this week.
+
+**Closed deals**, **Pipeline movement**, **Observations** and **The week ahead** are left out when
+they hold nothing. **Forecast** and **Figures** are always there. The last line says when the next report
+comes.
 
 If there is none yet: "No weekly review yet. The first one is created on the Monday after your first
 full week."
@@ -33,9 +51,6 @@ showing a change from nothing.
 - A meeting has a next step only when a task linked to it was made before the week ended. A task on
   the same contact is not enough.
 
-Behind a button sit more parts: a scorecard, the forecast and how the week moved it, and the
-observations.
-
 ### What the review will not claim
 The weekly review counts recorded work, and says plainly where the record is short.
 - It counts the work you hold, even for a manager. Owners and team members are fixed when the review
@@ -47,10 +62,12 @@ The weekly review counts recorded work, and says plainly where the record is sho
 
 ### The scorecard
 
-**Leads and meetings**: leads moved on, recorded replies (with how many missed the target), meetings
-held (with booked and missed meetings under them).
+The **Weekly scorecard** is one table. Each row has a count and what the count rests on.
 
-**Deals** shows stage moves on and back, and the middle value of the days a deal spent in the stage
+For leads and meetings it shows leads moved on, how many replies missed the target, and meetings
+held (with booked and missed meetings beside them).
+
+For deals it shows stage moves on and back, and the middle value of the days a deal spent in the stage
 it left. It shows how many open deals have a next step, and how many have more than one contact. It
 shows how many have a close date that is not a guess. And it shows forecast moves up against moves
 down.
@@ -62,9 +79,9 @@ Two rows appear only when a count is not complete:
 
 Margince cannot count deals touched by a deletion for the week. It lists them on their own.
 
-### Observations to review
+### Observations
 
-**Observations to review** holds at most four observations. Each names the deals it was read from,
+**Observations** holds at most four observations. Each names the deals it was read from,
 and each has a tag: **Positive outcome**, **Unsuccessful outcome**, **Pattern**, or **Experiment**.
 
 Each carries a warning: the observations show links in recorded work, and do not show what made the
