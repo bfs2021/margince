@@ -160,6 +160,77 @@ describe("the receipt draws every lane it promises", () => {
     expect(container.querySelector(".brief-section")).toBeNull();
   });
 
+  it("leaves a fully read empty receipt quiet", async () => {
+    stub(receipt({ not_shown_count_withheld: false, not_shown: [] }));
+    const { container } = renderMagic();
+    await waitFor(() =>
+      expect(vi.mocked(fetch).mock.calls.length).toBeGreaterThan(0),
+    );
+    await waitFor(() =>
+      expect(container.querySelector("[aria-busy='true']")).toBeNull(),
+    );
+    expect(
+      screen.queryByText("Some activity could not be counted."),
+    ).toBeNull();
+  });
+
+  it("keeps housekeeping separate from missing receipt coverage", async () => {
+    stub(receipt({ not_shown: [{ reason: "unadmitted_action", count: 12 }] }));
+    const { container } = renderMagic();
+    await waitFor(() =>
+      expect(vi.mocked(fetch).mock.calls.length).toBeGreaterThan(0),
+    );
+    await waitFor(() =>
+      expect(container.querySelector("[aria-busy='true']")).toBeNull(),
+    );
+    expect(
+      screen.queryByText("Some activity could not be counted."),
+    ).toBeNull();
+  });
+
+  it("does not call an empty receipt clear when entity kinds cannot be placed", async () => {
+    stub(receipt({ not_shown: [{ reason: "unknown_entity_type", count: 2 }] }));
+    renderMagic();
+    expect(
+      await screen.findByText("Some activity could not be counted."),
+    ).toBeTruthy();
+    expect(screen.queryByText("Nothing done for you")).toBeNull();
+  });
+
+  it("keeps an ordinary seat's quiet window quiet without claiming global coverage", async () => {
+    stub(receipt({ not_shown_count_withheld: true }));
+    const { container } = renderMagic();
+    await waitFor(() =>
+      expect(vi.mocked(fetch).mock.calls.length).toBeGreaterThan(0),
+    );
+    await waitFor(() =>
+      expect(container.querySelector("[aria-busy='true']")).toBeNull(),
+    );
+    expect(container.querySelector(".brief-section")).toBeNull();
+    expect(screen.queryByText("Nothing done for you")).toBeNull();
+  });
+
+  it("states a nonempty receipt's visible scope without inventing missing changes", async () => {
+    stub(receipt({ done: [line()], not_shown_count_withheld: true }));
+    renderMagic();
+    expect(
+      await screen.findByText("Only changes visible to you are shown."),
+    ).toBeTruthy();
+    expect(await screen.findByText("1 change, in full")).toBeTruthy();
+    expect(screen.queryByText("1+ change, one by one")).toBeNull();
+  });
+
+  it("qualifies visible changes when unsupported rows were actually counted", async () => {
+    stub(
+      receipt({
+        done: [line()],
+        not_shown: [{ reason: "unknown_entity_type", count: 2 }],
+      }),
+    );
+    renderMagic();
+    expect(await screen.findByText("1+ change, one by one")).toBeTruthy();
+  });
+
   it("says how much it left out, so five lines never imply five things happened", async () => {
     stub(
       receipt({
@@ -176,7 +247,7 @@ describe("the receipt draws every lane it promises", () => {
     ).toBeTruthy();
   });
 
-  it("drops a sentence this build has no key for rather than printing the key", async () => {
+  it("describes unsupported receipt sentences without printing the key", async () => {
     stub(
       receipt({
         done: [
@@ -193,6 +264,7 @@ describe("the receipt draws every lane it promises", () => {
       }),
     );
     renderMagic();
+    expect(await screen.findByText("Activity not described")).toBeTruthy();
     // The row still says what it was about, so the reader loses a sentence
     // rather than the line.
     expect(await screen.findByText("Fleet retrofit")).toBeTruthy();

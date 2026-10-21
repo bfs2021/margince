@@ -108,7 +108,11 @@ export const Pressed: Story = {
         name: /Follow up on customer commitment 3/,
       }),
     );
-    await expect(canvas.getByText("4 of 6")).toBeTruthy();
+    const chosen = within(canvas.getByRole("article"));
+    await expect(
+      await chosen.findByText("Follow up on customer commitment 3"),
+    ).toBeTruthy();
+    await expect(chosen.getByText("4")).toBeTruthy();
   },
 };
 
@@ -133,4 +137,24 @@ export const AccountInHand: Story = {
 /** The last row of a short day: the one before it is listed under the card. */
 export const NothingBehindIt: Story = {
   render: panel([waitingEmailRow(), taskRow("one", "Call the buyer")], 1),
+};
+
+const termination: WorklistItem = {
+  id: "00000000-0000-7000-8000-0000000d0001",
+  source: "approval",
+  kind: "lifecycle_change",
+  category: "decisions",
+  level: 1,
+  band: "now",
+  title: "Review Atlas account termination",
+  because: [{ kind: "account_termination" }],
+  consequence: "work_blocked",
+  actions: ["decide"],
+};
+export const AccountTermination: Story = {
+  render: panel([termination, waitingEmailRow()]),
+};
+export const AccountTerminationDark: Story = {
+  ...AccountTermination,
+  globals: { theme: "dark" },
 };

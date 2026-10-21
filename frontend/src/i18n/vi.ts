@@ -14,6 +14,90 @@ import type { MessageKey } from "./en";
 //     "pháp nhân" (onboarding's legal-block copy). The two senses share no
 //     string in this catalog and must stay that way.
 export const vi = {
+  "homeRepair.taskPermission":
+    "Cần quyền lưu trữ hoạt động để lưu trữ các công việc đã xem xét.",
+  "homeRepair.classificationPermission":
+    "Cần quyền chỉnh sửa hoạt động để đổi kết quả tin nhắn.",
+  "homeRepair.reason.classificationNotAttempted":
+    "Chưa có lần kiểm tra hoàn tất. Xem trước lại khi có thể phân loại.",
+  "homeRepair.reclassify": "Phân loại lại",
+  "homeRepair.classifications": "Kết quả tin nhắn",
+  "homeRepair.asks": "Yêu cầu hành động",
+  "homeRepair.informs": "Chỉ cung cấp thông tin",
+  "homeRepair.classificationChange": "Hiện tại: {before}. Đề xuất: {after}.",
+  "homeRepair.reason.classificationDeclined":
+    "Bộ phân loại từ chối đánh giá tin nhắn này. Hãy tự xem xét.",
+  "homeRepair.reason.classificationUncertain":
+    "Lần kiểm tra mới chưa chắc chắn. Xem xét tin nhắn trước khi đổi kết quả.",
+  "homeRepair.reason.classificationAdopted":
+    "Thay đổi của người dùng hoặc thiếu bằng chứng kiểm toán ngăn việc sửa tự động.",
+  "homeRepair.reason.classificationWithheld":
+    "Một phần ngữ cảnh tin nhắn nằm ngoài quyền truy cập hiện tại. Xem xét trước khi đổi kết quả.",
+  "homeRepair.reason.classificationCurrent":
+    "Lần kiểm tra mới khớp với kết quả hiện tại.",
+  "homeRepair.reason.classificationChanged":
+    "Lần kiểm tra mới đề xuất kết quả khác cho tin nhắn.",
+  "homeRepair.suggestionPermission":
+    "Cần quyền tạo deal để ngừng các đề xuất này.",
+  "homeRepair.supersede": "Ngừng đề xuất deal tự động",
+  "homeRepair.suggestions": "Đề xuất deal",
+  "homeRepair.reason.dealExists":
+    "Công ty này đã có deal đang mở. Xem xét deal đó trước khi mở deal khác.",
+  "homeRepair.reason.dealSource":
+    "Ngày của nguồn không còn khớp với bằng chứng dùng cho đề xuất này.",
+  "homeRepair.reason.buyer":
+    "Các nguồn đã xem xét không còn xác minh yêu cầu hiện tại của bên mua.",
+  "homeRepair.reason.engagement":
+    "Hợp đồng hoặc công việc đang thực hiện không phù hợp với việc kết thúc toàn bộ quan hệ khách hàng.",
+  "homeRepair.reason.workstream":
+    "Bằng chứng chỉ kết thúc một công việc, không phải toàn bộ quan hệ khách hàng.",
+  "homeRepair.reason.evidenceChanged":
+    "Bằng chứng mới hơn đã xác minh thay thế ngữ cảnh của đề xuất này.",
+  "homeRepair.withdraw": "Rút đề xuất tự động",
+  "homeRepair.reason.duplicate": "Một đề xuất đang chờ giống hệt vẫn còn.",
+  "homeRepair.tasks": "Công việc",
+  "homeRepair.proposals": "Đề xuất",
+  "homeRepair.kind": "Công việc cần xem xét",
+  "homeRepair.preserved": "Được giữ lại hoặc bỏ qua",
+  "homeRepair.preservedNote":
+    "Bao gồm công việc được giữ lại để xem xét và các bản ghi đã thay đổi sau khi xem trước. Xem trước lần nữa để kiểm tra những gì còn lại.",
+
+  "homeRepair.inspect": "Xem chi tiết",
+  "dataTasks.blocked.review_required":
+    "Xem xét các thay đổi được đề xuất trước khi bắt đầu.",
+  "homeRepair.archive": "Lưu trữ lời nhắc tự động",
+  "homeRepair.keepReview": "Giữ lại để xem xét",
+  "homeRepair.keepCurrent": "Giữ công việc hiện tại",
+  "homeRepair.reason.adopted":
+    "Công việc này có thể đã được người dùng tạo, sửa hoặc ghim.",
+  "homeRepair.reason.unverified":
+    "Bằng chứng hiện có chưa đủ để thay đổi tự động.",
+  "homeRepair.reason.unavailable":
+    "Quyền truy cập hiện tại không cho phép kiểm tra nguồn.",
+  "homeRepair.reason.historical": "Nguồn cũ không có thời hạn hiện tại.",
+  "homeRepair.reason.baseline": "Nguồn có trước mốc lịch sử hộp thư đã chọn.",
+  "homeRepair.reason.cancelled": "Cuộc họp nguồn đã bị hủy.",
+  "homeRepair.reason.requestAge":
+    "Yêu cầu gốc đã quá thời hạn chờ; lưu trữ không đánh dấu yêu cầu là đã trả lời.",
+  "homeRepair.reason.contextUnread": "Các tin nhắn sau đó chưa được đọc.",
+  "homeRepair.reason.contextUnassessed":
+    "Các tin nhắn sau đó chưa được đánh giá về thay đổi đối với cam kết này.",
+  "homeRepair.reason.timeUnknown": "Chưa xác định được ngày của nguồn.",
+  "homeRepair.reason.timeContradicted": "Các ngày của nguồn không khớp nhau.",
+  "homeRepair.reason.meetingPending": "Cuộc họp nguồn chưa diễn ra.",
+  "homeRepair.reason.current":
+    "Công việc này vẫn đáp ứng các quy tắc hiện tại.",
+  "homeRepair.unnamed": "Không có chi tiết",
+  "homeRepair.explain":
+    "Chỉ bao gồm công việc hiện có quyền xem. Xem xét tối đa 25 mục mỗi lần. Có thể lưu trữ lời nhắc tự động đã cũ và rút các đề xuất trùng lặp hoặc đã cũ. Công việc do người dùng xử lý được giữ lại; không mục nào được đánh dấu hoàn thành.",
+  "homeRepair.preview": "Xem trước các mục",
+  "homeRepair.next": "Xem trang tiếp theo",
+  "homeRepair.summary":
+    "Kết quả cần đổi: {reclassify}. Lời nhắc cần lưu trữ: {archive}. Đề xuất cần rút: {withdraw}. Đề xuất deal cần ngừng: {supersede}. Giữ để xem xét: {review}; giữ làm công việc hiện tại: {keep}.",
+  "homeRepair.apply_one": "Áp dụng {count} thay đổi đã xem xét",
+  "homeRepair.apply_other": "Áp dụng {count} thay đổi đã xem xét",
+  "homeRepair.started":
+    "Lượt xử lý đã xem xét đang chờ chạy. Tiến độ hiển thị ở trên.",
   "approval.scheduled.rearm":
     "Lên lịch thử gửi lại tin nhắn đang giữ sau khoảng chờ hiển thị. Quyền, người nhận và quy tắc liên lạc hiện tại được kiểm tra lại trước khi gửi.",
   "approval.scheduled.direct":
@@ -207,90 +291,6 @@ export const vi = {
   "approvalPreferences.close": "Đóng xem xét",
   "approvalPreferences.next": "Trang tiếp",
   "approvalPreferences.first": "Trang đầu",
-  "homeRepair.taskPermission":
-    "Cần quyền lưu trữ hoạt động để lưu trữ các công việc đã xem xét.",
-  "homeRepair.classificationPermission":
-    "Cần quyền chỉnh sửa hoạt động để đổi kết quả tin nhắn.",
-  "homeRepair.reason.classificationNotAttempted":
-    "Chưa có lần kiểm tra hoàn tất. Xem trước lại khi có thể phân loại.",
-  "homeRepair.reclassify": "Phân loại lại",
-  "homeRepair.classifications": "Kết quả tin nhắn",
-  "homeRepair.asks": "Yêu cầu hành động",
-  "homeRepair.informs": "Chỉ cung cấp thông tin",
-  "homeRepair.classificationChange": "Hiện tại: {before}. Đề xuất: {after}.",
-  "homeRepair.reason.classificationDeclined":
-    "Bộ phân loại từ chối đánh giá tin nhắn này. Hãy tự xem xét.",
-  "homeRepair.reason.classificationUncertain":
-    "Lần kiểm tra mới chưa chắc chắn. Xem xét tin nhắn trước khi đổi kết quả.",
-  "homeRepair.reason.classificationAdopted":
-    "Thay đổi của người dùng hoặc thiếu bằng chứng kiểm toán ngăn việc sửa tự động.",
-  "homeRepair.reason.classificationWithheld":
-    "Một phần ngữ cảnh tin nhắn nằm ngoài quyền truy cập hiện tại. Xem xét trước khi đổi kết quả.",
-  "homeRepair.reason.classificationCurrent":
-    "Lần kiểm tra mới khớp với kết quả hiện tại.",
-  "homeRepair.reason.classificationChanged":
-    "Lần kiểm tra mới đề xuất kết quả khác cho tin nhắn.",
-  "homeRepair.suggestionPermission":
-    "Cần quyền tạo deal để ngừng các đề xuất này.",
-  "homeRepair.supersede": "Ngừng đề xuất deal tự động",
-  "homeRepair.suggestions": "Đề xuất deal",
-  "homeRepair.reason.dealExists":
-    "Công ty này đã có deal đang mở. Xem xét deal đó trước khi mở deal khác.",
-  "homeRepair.reason.dealSource":
-    "Ngày của nguồn không còn khớp với bằng chứng dùng cho đề xuất này.",
-  "homeRepair.reason.buyer":
-    "Các nguồn đã xem xét không còn xác minh yêu cầu hiện tại của bên mua.",
-  "homeRepair.reason.engagement":
-    "Hợp đồng hoặc công việc đang thực hiện không phù hợp với việc kết thúc toàn bộ quan hệ khách hàng.",
-  "homeRepair.reason.workstream":
-    "Bằng chứng chỉ kết thúc một công việc, không phải toàn bộ quan hệ khách hàng.",
-  "homeRepair.reason.evidenceChanged":
-    "Bằng chứng mới hơn đã xác minh thay thế ngữ cảnh của đề xuất này.",
-  "homeRepair.withdraw": "Rút đề xuất tự động",
-  "homeRepair.reason.duplicate": "Một đề xuất đang chờ giống hệt vẫn còn.",
-  "homeRepair.tasks": "Công việc",
-  "homeRepair.proposals": "Đề xuất",
-  "homeRepair.kind": "Công việc cần xem xét",
-  "homeRepair.preserved": "Được giữ lại hoặc bỏ qua",
-  "homeRepair.preservedNote":
-    "Bao gồm công việc được giữ lại để xem xét và các bản ghi đã thay đổi sau khi xem trước. Xem trước lần nữa để kiểm tra những gì còn lại.",
-
-  "homeRepair.inspect": "Xem chi tiết",
-  "dataTasks.blocked.review_required":
-    "Xem xét các thay đổi được đề xuất trước khi bắt đầu.",
-  "homeRepair.archive": "Lưu trữ lời nhắc tự động",
-  "homeRepair.keepReview": "Giữ lại để xem xét",
-  "homeRepair.keepCurrent": "Giữ công việc hiện tại",
-  "homeRepair.reason.adopted":
-    "Công việc này có thể đã được người dùng tạo, sửa hoặc ghim.",
-  "homeRepair.reason.unverified":
-    "Bằng chứng hiện có chưa đủ để thay đổi tự động.",
-  "homeRepair.reason.unavailable":
-    "Quyền truy cập hiện tại không cho phép kiểm tra nguồn.",
-  "homeRepair.reason.historical": "Nguồn cũ không có thời hạn hiện tại.",
-  "homeRepair.reason.baseline": "Nguồn có trước mốc lịch sử hộp thư đã chọn.",
-  "homeRepair.reason.cancelled": "Cuộc họp nguồn đã bị hủy.",
-  "homeRepair.reason.requestAge":
-    "Yêu cầu gốc đã quá thời hạn chờ; lưu trữ không đánh dấu yêu cầu là đã trả lời.",
-  "homeRepair.reason.contextUnread": "Các tin nhắn sau đó chưa được đọc.",
-  "homeRepair.reason.contextUnassessed":
-    "Các tin nhắn sau đó chưa được đánh giá về thay đổi đối với cam kết này.",
-  "homeRepair.reason.timeUnknown": "Chưa xác định được ngày của nguồn.",
-  "homeRepair.reason.timeContradicted": "Các ngày của nguồn không khớp nhau.",
-  "homeRepair.reason.meetingPending": "Cuộc họp nguồn chưa diễn ra.",
-  "homeRepair.reason.current":
-    "Công việc này vẫn đáp ứng các quy tắc hiện tại.",
-  "homeRepair.unnamed": "Không có chi tiết",
-  "homeRepair.explain":
-    "Chỉ bao gồm công việc hiện có quyền xem. Xem xét tối đa 25 mục mỗi lần. Có thể lưu trữ lời nhắc tự động đã cũ và rút các đề xuất trùng lặp hoặc đã cũ. Công việc do người dùng xử lý được giữ lại; không mục nào được đánh dấu hoàn thành.",
-  "homeRepair.preview": "Xem trước các mục",
-  "homeRepair.next": "Xem trang tiếp theo",
-  "homeRepair.summary":
-    "Kết quả cần đổi: {reclassify}. Lời nhắc cần lưu trữ: {archive}. Đề xuất cần rút: {withdraw}. Đề xuất deal cần ngừng: {supersede}. Giữ để xem xét: {review}; giữ làm công việc hiện tại: {keep}.",
-  "homeRepair.apply_one": "Áp dụng {count} thay đổi đã xem xét",
-  "homeRepair.apply_other": "Áp dụng {count} thay đổi đã xem xét",
-  "homeRepair.started":
-    "Lượt xử lý đã xem xét đang chờ chạy. Tiến độ hiển thị ở trên.",
 
   "dealSuggestion.linkedUnlinked":
     "Đã liên kết bằng chứng. Một số bằng chứng giữ nguyên vì không có quyền di chuyển.",
@@ -357,6 +357,7 @@ export const vi = {
   "dataTasks.blocked.earlier_step": "Cần hoàn tất bước trước đó.",
   "dataTasks.blocked.missing_prerequisite":
     "Cần hoàn tất các bản cập nhật bắt buộc trước.",
+
   "approval.preview.createContact":
     "Cho phép bên đề xuất tạo bản ghi liên hệ này một lần với các giá trị hiển thị. Quyền hiện tại và danh tính trùng được kiểm tra lại.",
   "approval.preview.recordAcquisition":
@@ -1423,7 +1424,7 @@ export const vi = {
   "brief.schedule.reconnect": "Kết nối lại lịch",
   "brief.schedule.nextAt": "Cuộc họp tiếp theo lúc {time}",
   "brief.readings.riskPartial": "Chỉ giá trị đã biết · chưa kiểm tra hết",
-  "brief.readings.unpricedCount_one": "1 deal chưa định giá · không tính",
+  "brief.readings.unpricedCount_one": "{count} deal chưa định giá · không tính",
   "brief.readings.unpricedCount_other":
     "{count} deal chưa định giá · không tính",
   "brief.coverage.source.generic": "Công việc khác",
@@ -1546,8 +1547,14 @@ export const vi = {
   "worklist.lead.lastTouch": "hoạt động gần nhất {date}",
   "worklist.deal.omitted": "không tính vào dự báo",
   "worklist.deal.provisional": "dự kiến chốt {date} (chưa xác nhận)",
-  "brief.readings.riskBasis": "Giá trị kỳ vọng · không tính deal chưa định giá",
-  "brief.readings.risk": "Doanh thu có rủi ro",
+  "brief.readings.riskBasis":
+    "Giá trị danh nghĩa · không phải tổn thất dự kiến",
+  "magic.action.forecast_changed": "Đã điều chỉnh dự báo",
+  "magic.why.forecast_review":
+    "Deal cần được xem xét sau một thời gian không có tiến triển.",
+  "magic.why.forecast_date": "Ngày dự báo được ước tính từ tiến độ pipeline.",
+  "magic.undescribed": "Hoạt động chưa được mô tả",
+  "brief.readings.risk": "Giá trị pipeline được đánh dấu",
   "theme.toDark": "Giao diện tối",
   "theme.toLight": "Giao diện sáng",
   // Ba lựa chọn giao diện — menu tài khoản hiện cả ba cùng lúc, nên mỗi nhãn nói
@@ -4836,9 +4843,9 @@ export const vi = {
   "brief.intro.waiting": "Đang chờ bạn",
   "brief.intro.meetings": "Cuộc họp hôm nay",
   "brief.intro.urgent": "Khẩn cấp",
-  "brief.intro.read_one": "Trong lúc bạn ngủ, Margince đã đồng bộ 1 email.",
+  "brief.intro.read_one": "Lần chạy ban đêm gần nhất: đã đồng bộ 1 email.",
   "brief.intro.read_other":
-    "Trong lúc bạn ngủ, Margince đã đồng bộ {count} email.",
+    "Lần chạy ban đêm gần nhất: đã đồng bộ {count} email.",
   "brief.intro.skip": "Nhấn phím bất kỳ hoặc bấm để tiếp tục",
   "brief.order.withheld": "Thứ tự này chưa tính: {factors}",
   "brief.factor.warmth": "mức độ thân thiết của quan hệ",
@@ -14549,7 +14556,7 @@ export const vi = {
   "worklist.exceptions.truncated":
     "Danh sách đã bị cắt bớt. Vẫn còn việc khác.",
   "worklist.exceptions.kind.response_breached": "Quá hạn phản hồi lần đầu",
-  "worklist.exceptions.kind.revenue_at_risk": "Doanh thu có rủi ro",
+  "worklist.exceptions.kind.revenue_at_risk": "Giá trị pipeline được đánh dấu",
   "worklist.exceptions.kind.unassigned": "Chưa giao",
   "worklist.exceptions.kind.repeated_failure": "Lỗi lặp lại",
   "worklist.board.loading": "Đang tải việc của nhóm…",
@@ -14585,10 +14592,8 @@ export const vi = {
     "Số đếm chưa đầy đủ. Mỗi con số là mức tối thiểu.",
   "worklist.rowMenu": "Thao tác khác cho {title}",
   "worklist.readings.label": "Số liệu hôm nay",
-  "worklist.readings.revenue": "Doanh thu có rủi ro",
-  "worklist.readings.revenue.detail": "Deal đang chững lại hôm nay",
-  "worklist.readings.revenue.unpriced":
-    "Deal đang chững lại · chưa deal nào có giá trị",
+  "worklist.readings.revenue": "Giá trị pipeline được đánh dấu",
+  "worklist.readings.revenue.unpriced": "Deal được đánh dấu · chưa có giá trị",
   "worklist.readings.revenue.noFigure": "Chưa có giá trị",
   "worklist.readings.replies": "Phản hồi của bên mua",
   "worklist.readings.replies.detail": "Khách hàng đang chờ",
@@ -14684,6 +14689,8 @@ export const vi = {
   "worklist.because.champion_unknown": "chưa rõ người ủng hộ",
   "worklist.because.promised": "bạn đã cam kết",
   "worklist.because.approved_and_failed": "đã duyệt nhưng không chạy",
+  "worklist.because.account_termination":
+    "cần quyết định có chấm dứt quan hệ với khách hàng hay không",
   "worklist.because.blocks_customer_work": "khách hàng đang chờ việc này",
   "worklist.because.routine": "dọn dẹp thường lệ",
   "worklist.because.repeated_failure": "lỗi lặp lại",
@@ -15396,6 +15403,8 @@ export const vi = {
   "magic.notShown.unadmittedAction": "việc bảo trì không có gì cần báo",
   "magic.notShown.unknownEntityType": "loại hồ sơ mà trang này không thể xếp",
   "magic.notShown.outOfScope": "nằm ngoài hồ sơ của bạn",
+  "magic.visibleScope": "Chỉ hiển thị những thay đổi bạn có quyền xem.",
+  "magic.coverageIncomplete": "Chưa thể đếm một số hoạt động.",
   "magic.done.all_one": "Tất cả {count} thay đổi, từng mục một",
   "magic.done.all_other": "Tất cả {count} thay đổi, từng mục một",
   "magic.done.atLeast_one": "{count} thay đổi, từng mục một",

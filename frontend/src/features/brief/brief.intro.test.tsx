@@ -5,8 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { dayInZone, viewerZone } from "../../format/timezone";
 import { en } from "../../i18n/en";
 import { readStored, removeStored, STORAGE_KEYS } from "../../lib/storage";
-import { readingsDay } from "../../testing/brief.fixtures";
-import { render, stubApi } from "../../testing/brief.testkit";
+import { digest, readingsDay } from "../../testing/brief.fixtures";
+import { jsonResponse, render, stubApi } from "../../testing/brief.testkit";
 import { BriefIntro, LEAVE_MS, SHOW_MS } from "./brief.intro";
 
 // The morning's greeting plays once a local day, over a day that has been
@@ -83,6 +83,24 @@ describe("BriefIntro", () => {
     const name = screen.getByRole("button", curtain).textContent ?? "";
     expect(name).toContain("Good morning, Ada.");
     expect(name).toContain(en["brief.intro.waiting"]);
+  });
+
+  it("keeps nightly capture separate from current waiting work", async () => {
+    stubApi({
+      "GET /digest": () =>
+        jsonResponse({
+          ...digest,
+          capture: { ...digest.capture, messages_synced: 42 },
+          review: { ...digest.review, approvals_pending: 3 },
+        }),
+    });
+    intro(todaysRead(readingsDay({}, undefined, undefined, { total: 1 })));
+    await screen.findByText("Last nightly run: 42 emails synced.");
+    const shown = screen.getByRole("button", curtain);
+    const figures = shown.querySelector(".brief-intro-figures");
+    expect(figures?.textContent).toContain("1");
+    expect(figures?.textContent).not.toContain("3");
+    expect(figures?.textContent).toContain(en["brief.intro.waiting"]);
   });
 
   it("never plays for a reader who asked for less motion", () => {

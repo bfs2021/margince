@@ -75,7 +75,8 @@ export function MagicPanel() {
   const drawn = LANES.filter((lane) => hasLines(shown?.[lane]));
   const done = rowsOf(shown?.done);
   const doneRecords = recordsOf(done);
-  const doneFloor = sumIsFloor("done", done);
+  const coverageIncomplete = doneCoverageIncomplete(shown);
+  const doneFloor = sumIsFloor("done", done) || coverageIncomplete;
   // "All" would claim the whole of a count that is only a floor.
   const doneFold = plural(
     doneFloor ? "magic.done.atLeast" : "magic.done.all",
@@ -91,7 +92,12 @@ export function MagicPanel() {
   const byDay = shown ? spansDays(shown.since, shown.as_of) : false;
   // A quiet window and an unread one are different answers. Nothing drawn
   // over a read that answered is the quiet one, so the section stays away.
-  if (state === "ready" && drawn.length === 0 && withheld.length === 0) {
+  if (
+    state === "ready" &&
+    drawn.length === 0 &&
+    withheld.length === 0 &&
+    !coverageIncomplete
+  ) {
     return null;
   }
   return (
@@ -107,6 +113,12 @@ export function MagicPanel() {
           detail={{ onRetry: () => void magic.refetch() }}
         >
           <WithheldSources withheld={withheld} />
+          {shown?.not_shown_count_withheld && drawn.length > 0 && (
+            <p className="t-caption">{t("magic.visibleScope")}</p>
+          )}
+          {coverageIncomplete && (
+            <p className="t-caption">{t("magic.coverageIncomplete")}</p>
+          )}
         </SurfaceState>
       </PanelBody>
       {drawn.map((lane) => (
@@ -127,6 +139,14 @@ export function MagicPanel() {
         </PanelBody>
       )}
     </section>
+  );
+}
+
+function doneCoverageIncomplete(receipt: MagicReceipt | undefined): boolean {
+  return (
+    receipt?.not_shown?.some(
+      (item) => item.reason === "unknown_entity_type",
+    ) === true
   );
 }
 

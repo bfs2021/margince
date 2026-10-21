@@ -3,6 +3,95 @@
 // use {name} and are filled by t(key, params).
 // Every value is written to docs/reference/ui-copy-style.md.
 export const en = {
+  "homeRepair.taskPermission":
+    "Activity archive permission is required to archive reviewed tasks.",
+  "homeRepair.classificationPermission":
+    "Activity editing permission is required to change message results.",
+  "homeRepair.reason.classificationNotAttempted":
+    "No completed check is available. Preview again when classification is available.",
+  "homeRepair.reclassify": "Reclassify message",
+  "homeRepair.classifications": "Message results",
+  "homeRepair.asks": "Requests action",
+  "homeRepair.informs": "Information only",
+  "homeRepair.classificationChange": "Current: {before}. Proposed: {after}.",
+  "homeRepair.reason.classificationDeclined":
+    "The classifier declined to assess this message. Review it yourself.",
+  "homeRepair.reason.classificationUncertain":
+    "The new check is uncertain. Review the message before changing its result.",
+  "homeRepair.reason.classificationAdopted":
+    "Human changes or missing audit evidence prevent an automatic correction.",
+  "homeRepair.reason.classificationWithheld":
+    "Some message context is outside current access. Review it before changing this result.",
+  "homeRepair.reason.classificationCurrent":
+    "The new check agrees with the current result.",
+  "homeRepair.reason.classificationChanged":
+    "The new check proposes a different message result.",
+  "homeRepair.suggestionPermission":
+    "Deal creation permission is required to retire these suggestions.",
+  "homeRepair.supersede": "Retire automatic deal suggestion",
+  "homeRepair.suggestions": "Deal suggestions",
+  "homeRepair.reason.dealExists":
+    "This company already has an open deal. Review that deal before opening another.",
+  "homeRepair.reason.dealSource":
+    "The source dates no longer match the evidence used for this suggestion.",
+  "homeRepair.reason.buyer":
+    "The reviewed sources no longer verify a current buyer request.",
+  "homeRepair.reason.engagement":
+    "An active contract or delivery contradicts ending the whole account.",
+  "homeRepair.reason.workstream":
+    "The evidence ends one engagement, not the whole account.",
+  "homeRepair.reason.evidenceChanged":
+    "Newer verified evidence replaces the context of this proposal.",
+  "homeRepair.withdraw": "Withdraw automatic proposal",
+  "homeRepair.reason.duplicate":
+    "An identical pending proposal remains available.",
+  "homeRepair.tasks": "Tasks",
+  "homeRepair.proposals": "Proposals",
+  "homeRepair.kind": "Work to review",
+  "homeRepair.preserved": "Preserved or skipped",
+  "homeRepair.preservedNote":
+    "Includes work kept for review and records changed since the preview. Preview again to inspect what remains.",
+
+  "homeRepair.inspect": "Inspect",
+  "dataTasks.blocked.review_required":
+    "Review the proposed changes before starting.",
+  "homeRepair.archive": "Archive automatic reminder",
+  "homeRepair.keepReview": "Keep for human review",
+  "homeRepair.keepCurrent": "Keep current work",
+  "homeRepair.reason.adopted":
+    "A human may have created, edited or pinned this work.",
+  "homeRepair.reason.unverified":
+    "The available evidence does not justify an automatic change.",
+  "homeRepair.reason.unavailable":
+    "The source cannot be checked with your current access.",
+  "homeRepair.reason.historical":
+    "Historical source without a current deadline.",
+  "homeRepair.reason.baseline":
+    "The source predates the mailbox history baseline.",
+  "homeRepair.reason.cancelled": "The source meeting was canceled.",
+  "homeRepair.reason.requestAge":
+    "The original request is past the waiting horizon; archiving does not mark it answered.",
+  "homeRepair.reason.contextUnread": "Later messages have not been read.",
+  "homeRepair.reason.contextUnassessed":
+    "Later messages have not been assessed for changes to this commitment.",
+  "homeRepair.reason.timeUnknown": "The source date is unknown.",
+  "homeRepair.reason.timeContradicted": "The source dates conflict.",
+  "homeRepair.reason.meetingPending":
+    "The source meeting has not taken place yet.",
+  "homeRepair.reason.current":
+    "The current admission rules still allow this work.",
+  "homeRepair.unnamed": "Details unavailable",
+  "homeRepair.explain":
+    "Only work you can currently inspect is included. Review up to 25 items at a time. Obsolete automatic reminders can be archived and duplicate or obsolete proposals withdrawn. Human work is preserved; nothing is marked completed.",
+  "homeRepair.preview": "Preview items",
+  "homeRepair.next": "Review next page",
+  "homeRepair.summary":
+    "Results to change: {reclassify}. Reminders to archive: {archive}. Proposals to withdraw: {withdraw}. Deal suggestions to retire: {supersede}. Keep for review: {review}; keep as current work: {keep}.",
+  "homeRepair.apply_one": "Apply {count} reviewed change",
+  "homeRepair.apply_other": "Apply {count} reviewed changes",
+  "homeRepair.started":
+    "The reviewed run is queued. Its progress appears above.",
+
   "approval.scheduled.rearm":
     "Schedules the displayed held message to be retried after the delay shown. Current permissions, recipients and communication rules are checked again before sending.",
   "approval.scheduled.direct":
@@ -181,95 +270,6 @@ export const en = {
   "approval.capture.full_name": "Captured name",
   "approval.capture.company_name": "Captured company",
   "approval.capture.title": "Captured role",
-  "homeRepair.taskPermission":
-    "Activity archive permission is required to archive reviewed tasks.",
-  "homeRepair.classificationPermission":
-    "Activity editing permission is required to change message results.",
-  "homeRepair.reason.classificationNotAttempted":
-    "No completed check is available. Preview again when classification is available.",
-  "homeRepair.reclassify": "Reclassify message",
-  "homeRepair.classifications": "Message results",
-  "homeRepair.asks": "Requests action",
-  "homeRepair.informs": "Information only",
-  "homeRepair.classificationChange": "Current: {before}. Proposed: {after}.",
-  "homeRepair.reason.classificationDeclined":
-    "The classifier declined to assess this message. Review it yourself.",
-  "homeRepair.reason.classificationUncertain":
-    "The new check is uncertain. Review the message before changing its result.",
-  "homeRepair.reason.classificationAdopted":
-    "Human changes or missing audit evidence prevent an automatic correction.",
-  "homeRepair.reason.classificationWithheld":
-    "Some message context is outside current access. Review it before changing this result.",
-  "homeRepair.reason.classificationCurrent":
-    "The new check agrees with the current result.",
-  "homeRepair.reason.classificationChanged":
-    "The new check proposes a different message result.",
-  "homeRepair.suggestionPermission":
-    "Deal creation permission is required to retire these suggestions.",
-  "homeRepair.supersede": "Retire automatic deal suggestion",
-  "homeRepair.suggestions": "Deal suggestions",
-  "homeRepair.reason.dealExists":
-    "This company already has an open deal. Review that deal before opening another.",
-  "homeRepair.reason.dealSource":
-    "The source dates no longer match the evidence used for this suggestion.",
-  "homeRepair.reason.buyer":
-    "The reviewed sources no longer verify a current buyer request.",
-  "homeRepair.reason.engagement":
-    "An active contract or delivery contradicts ending the whole account.",
-  "homeRepair.reason.workstream":
-    "The evidence ends one engagement, not the whole account.",
-  "homeRepair.reason.evidenceChanged":
-    "Newer verified evidence replaces the context of this proposal.",
-  "homeRepair.withdraw": "Withdraw automatic proposal",
-  "homeRepair.reason.duplicate":
-    "An identical pending proposal remains available.",
-  "homeRepair.tasks": "Tasks",
-  "homeRepair.proposals": "Proposals",
-  "homeRepair.kind": "Work to review",
-  "homeRepair.preserved": "Preserved or skipped",
-  "homeRepair.preservedNote":
-    "Includes work kept for review and records changed since the preview. Preview again to inspect what remains.",
-
-  "homeRepair.inspect": "Inspect",
-  "dataTasks.blocked.review_required":
-    "Review the proposed changes before starting.",
-  "homeRepair.archive": "Archive automatic reminder",
-  "homeRepair.keepReview": "Keep for human review",
-  "homeRepair.keepCurrent": "Keep current work",
-  "homeRepair.reason.adopted":
-    "A human may have created, edited or pinned this work.",
-  "homeRepair.reason.unverified":
-    "The available evidence does not justify an automatic change.",
-  "homeRepair.reason.unavailable":
-    "The source cannot be checked with your current access.",
-  "homeRepair.reason.historical":
-    "Historical source without a current deadline.",
-  "homeRepair.reason.baseline":
-    "The source predates the mailbox history baseline.",
-  "homeRepair.reason.cancelled": "The source meeting was canceled.",
-  "homeRepair.reason.requestAge":
-    "The original request is past the waiting horizon; archiving does not mark it answered.",
-  "homeRepair.reason.contextUnread": "Later messages have not been read.",
-  "homeRepair.reason.contextUnassessed":
-    "Later messages have not been assessed for changes to this commitment.",
-  "homeRepair.reason.timeUnknown": "The source date is unknown.",
-  "homeRepair.reason.timeContradicted": "The source dates conflict.",
-  "homeRepair.reason.meetingPending":
-    "The source meeting has not taken place yet.",
-  "homeRepair.reason.current":
-    "The current admission rules still allow this work.",
-  "homeRepair.unnamed": "Details unavailable",
-  "homeRepair.explain":
-    "Only work you can currently inspect is included. Review up to 25 items at a time. Obsolete automatic reminders can be archived and duplicate or obsolete proposals withdrawn. Human work is preserved; nothing is marked completed.",
-  "homeRepair.preview": "Preview items",
-  "homeRepair.next": "Review next page",
-  "homeRepair.summary":
-    "Results to change: {reclassify}. Reminders to archive: {archive}. Proposals to withdraw: {withdraw}. Deal suggestions to retire: {supersede}. Keep for review: {review}; keep as current work: {keep}.",
-  "homeRepair.apply_one": "Apply {count} reviewed change",
-  "homeRepair.apply_other": "Apply {count} reviewed changes",
-  "homeRepair.started":
-    "The reviewed run is queued. Its progress appears above.",
-
   "approvalPreferences.title": "Personal approval mutes",
   "approvalPreferences.explain":
     "Muted kinds leave your queue only. Other readers keep their proposals. Muting or restoring a kind turns off your automatic changes for that kind. Sends, bookings, merges and proposals from agent passports stay visible.",
@@ -1412,7 +1412,7 @@ export const en = {
   "brief.schedule.reconnect": "Reconnect your calendar",
   "brief.schedule.nextAt": "Next meeting at {time}",
   "brief.readings.riskPartial": "Known value only · not all checked",
-  "brief.readings.unpricedCount_one": "1 deal not priced · excluded",
+  "brief.readings.unpricedCount_one": "{count} deal not priced · excluded",
   "brief.readings.unpricedCount_other": "{count} deals not priced · excluded",
   "brief.coverage.source.generic": "Other work",
   "brief.coverage.source.weekly_commitment": "Weekly commitments",
@@ -1532,8 +1532,14 @@ export const en = {
   "worklist.lead.lastTouch": "last activity {date}",
   "worklist.deal.omitted": "omitted from forecast",
   "worklist.deal.provisional": "forecast close {date} (unconfirmed)",
-  "brief.readings.riskBasis": "Expected value · unpriced excluded",
-  "brief.readings.risk": "Revenue at risk",
+  "brief.readings.riskBasis": "Face value · not expected loss",
+  "magic.action.forecast_changed": "Adjusted forecast",
+  "magic.why.forecast_review":
+    "The deal needs review after a period without progress.",
+  "magic.why.forecast_date":
+    "The forecast date was estimated from pipeline progress.",
+  "magic.undescribed": "Activity not described",
+  "brief.readings.risk": "Flagged pipeline value",
   "theme.toDark": "Dark theme",
   "theme.toLight": "Light theme",
   // The three appearance choices, as the options of a chooser — the account menu
@@ -4960,8 +4966,8 @@ export const en = {
   "brief.intro.waiting": "Waiting on you",
   "brief.intro.meetings": "Meetings today",
   "brief.intro.urgent": "Urgent",
-  "brief.intro.read_one": "While you slept, Margince synced 1 email.",
-  "brief.intro.read_other": "While you slept, Margince synced {count} emails.",
+  "brief.intro.read_one": "Last nightly run: 1 email synced.",
+  "brief.intro.read_other": "Last nightly run: {count} emails synced.",
   "brief.intro.skip": "Press any key or click to continue",
   // What the ORDER could not weigh, as against what scored low. A fragment
   // like the source lines it sits with, and it names no cause: the run says
@@ -14878,7 +14884,7 @@ export const en = {
   "worklist.exceptions.ownerWithheld": "Hidden",
   "worklist.exceptions.truncated": "List truncated. More items exist.",
   "worklist.exceptions.kind.response_breached": "First reply overdue",
-  "worklist.exceptions.kind.revenue_at_risk": "Revenue at risk",
+  "worklist.exceptions.kind.revenue_at_risk": "Flagged pipeline value",
   "worklist.exceptions.kind.unassigned": "Unassigned",
   "worklist.exceptions.kind.repeated_failure": "Repeated failure",
   "worklist.board.loading": "Loading team work…",
@@ -14915,9 +14921,8 @@ export const en = {
     "Counts are incomplete. Each figure is a minimum.",
   "worklist.rowMenu": "More actions for {title}",
   "worklist.readings.label": "Today’s figures",
-  "worklist.readings.revenue": "Revenue at risk",
-  "worklist.readings.revenue.detail": "Deals drifting today",
-  "worklist.readings.revenue.unpriced": "Drifting deals · none priced",
+  "worklist.readings.revenue": "Flagged pipeline value",
+  "worklist.readings.revenue.unpriced": "Flagged deals · no value available",
   "worklist.readings.revenue.noFigure": "Not priced",
   "worklist.readings.replies": "Buyer replies",
   "worklist.readings.replies.detail": "Customers waiting",
@@ -15012,6 +15017,8 @@ export const en = {
   "worklist.because.champion_unknown": "champion unknown",
   "worklist.because.promised": "committed by you",
   "worklist.because.approved_and_failed": "approved but did not run",
+  "worklist.because.account_termination":
+    "account termination needs a decision",
   "worklist.because.blocks_customer_work": "customer waiting on this",
   "worklist.because.routine": "routine cleanup",
   "worklist.because.repeated_failure": "repeated failure",
@@ -15758,6 +15765,8 @@ export const en = {
   "magic.notShown.unadmittedAction": "housekeeping with nothing to tell you",
   "magic.notShown.unknownEntityType": "a record type this page cannot place",
   "magic.notShown.outOfScope": "outside your own records",
+  "magic.visibleScope": "Only changes visible to you are shown.",
+  "magic.coverageIncomplete": "Some activity could not be counted.",
   "magic.done.all_one": "{count} change, in full",
   "magic.done.all_other": "All {count} changes, one by one",
   "magic.done.atLeast_one": "{count} change, one by one",

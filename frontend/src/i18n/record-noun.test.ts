@@ -158,6 +158,8 @@ const HUMAN_SENSE_KEYS: Record<string, readonly string[]> = {
     "privacy.inboxAdminOnly",
   ],
   de: [
+    // Reviewed work names its human author, never a contact record.
+    "homeRepair.reason.adopted",
     // These name users, recipients and participants, not contact records.
     "approval.preview.companyPrivateReadings",
     "approval.merge.handoff_sender",
@@ -175,8 +177,6 @@ const HUMAN_SENSE_KEYS: Record<string, readonly string[]> = {
     "approval.preview.signaturePrivate",
     "approval.preview.recordMeeting",
     "approval.preview.intendedAttendee",
-    // Reviewed work names its human author, never a contact record.
-    "homeRepair.reason.adopted",
     // These name the human making a promise or decision, not a contact record.
     "approval.commitment.unresolved",
     "approval.commitment.assignDecider",
@@ -262,6 +262,10 @@ const HUMAN_SENSE_KEYS: Record<string, readonly string[]> = {
     "sendPermission.reason.withdrawn",
   ],
   vi: [
+    // Reviewed work names its human author, never a contact record.
+    "homeRepair.reason.classificationAdopted",
+    "homeRepair.reason.adopted",
+    "homeRepair.explain",
     // These name users, recipients and participants, not contact records.
     "approval.scheduled.rearm",
     "approval.read.retained",
@@ -297,10 +301,6 @@ const HUMAN_SENSE_KEYS: Record<string, readonly string[]> = {
     "approval.preview.recordMeeting",
     "approval.preview.meetingHost",
     "approval.preview.intendedAttendee",
-    // Reviewed work names its human author, never a contact record.
-    "homeRepair.reason.classificationAdopted",
-    "homeRepair.reason.adopted",
-    "homeRepair.explain",
     // These name the human making a promise or decision, not a contact record.
     "approval.responsibility.requestedFrom",
     "approval.commitment.promiser",

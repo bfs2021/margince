@@ -5,6 +5,97 @@ import type { MessageKey } from "./en";
 // build without typechecking still fails loudly. Every value is translated from
 // en.ts and written to docs/reference/ui-copy-style-de.md.
 export const de = {
+  "homeRepair.taskPermission":
+    "Zum Archivieren geprüfter Aufgaben brauchst du die Berechtigung, Aktivitäten zu archivieren.",
+  "homeRepair.classificationPermission":
+    "Zum Ändern von Nachrichtenergebnissen ist die Berechtigung zum Bearbeiten von Aktivitäten erforderlich.",
+  "homeRepair.reason.classificationNotAttempted":
+    "Es liegt keine abgeschlossene Prüfung vor. Prüfe erneut, sobald die Einordnung verfügbar ist.",
+  "homeRepair.reclassify": "Nachricht neu einordnen",
+  "homeRepair.classifications": "Nachrichtenergebnisse",
+  "homeRepair.asks": "Handlung angefragt",
+  "homeRepair.informs": "Nur Information",
+  "homeRepair.classificationChange":
+    "Aktuell: {before}. Vorgeschlagen: {after}.",
+  "homeRepair.reason.classificationDeclined":
+    "Die Klassifizierung hat diese Nachricht nicht bewertet. Prüfe sie selbst.",
+  "homeRepair.reason.classificationUncertain":
+    "Die neue Prüfung ist unsicher. Prüfe die Nachricht, bevor du das Ergebnis änderst.",
+  "homeRepair.reason.classificationAdopted":
+    "Menschliche Änderungen oder fehlende Nachweise verhindern eine automatische Korrektur.",
+  "homeRepair.reason.classificationWithheld":
+    "Ein Teil des Nachrichtenkontexts ist nicht zugänglich. Prüfe ihn vor einer Änderung.",
+  "homeRepair.reason.classificationCurrent":
+    "Die neue Prüfung bestätigt das aktuelle Ergebnis.",
+  "homeRepair.reason.classificationChanged":
+    "Die neue Prüfung schlägt ein anderes Ergebnis vor.",
+  "homeRepair.suggestionPermission":
+    "Zum Zurückziehen dieser Vorschläge brauchst du die Berechtigung, Deals zu erstellen.",
+  "homeRepair.supersede": "Automatischen Deal-Vorschlag zurückziehen",
+  "homeRepair.suggestions": "Deal-Vorschläge",
+  "homeRepair.reason.dealExists":
+    "Dieses Unternehmen hat bereits einen offenen Deal. Prüfe ihn, bevor du einen weiteren eröffnest.",
+  "homeRepair.reason.dealSource":
+    "Die Quelldaten stimmen nicht mehr mit den Belegen dieses Vorschlags überein.",
+  "homeRepair.reason.buyer":
+    "Die geprüften Quellen belegen keine aktuelle Käuferanfrage mehr.",
+  "homeRepair.reason.engagement":
+    "Ein aktiver Vertrag oder eine laufende Leistung spricht gegen das Ende der gesamten Kundenbeziehung.",
+  "homeRepair.reason.workstream":
+    "Die Belege betreffen das Ende eines einzelnen Auftrags, nicht der gesamten Kundenbeziehung.",
+  "homeRepair.reason.evidenceChanged":
+    "Neuere geprüfte Belege ersetzen den Kontext dieses Vorschlags.",
+  "homeRepair.withdraw": "Automatischen Vorschlag zurückziehen",
+  "homeRepair.reason.duplicate":
+    "Ein identischer offener Vorschlag bleibt verfügbar.",
+  "homeRepair.tasks": "Aufgaben",
+  "homeRepair.proposals": "Vorschläge",
+  "homeRepair.kind": "Zu prüfende Arbeit",
+  "homeRepair.preserved": "Behalten oder übersprungen",
+  "homeRepair.preservedNote":
+    "Enthält zur Prüfung behaltene und seit der Vorschau geänderte Aufgaben. Prüfe erneut, was übrig bleibt.",
+
+  "homeRepair.inspect": "Prüfen",
+  "dataTasks.blocked.review_required":
+    "Prüfe die vorgeschlagenen Änderungen vor dem Start.",
+  "homeRepair.archive": "Automatische Erinnerung archivieren",
+  "homeRepair.keepReview": "Zur persönlichen Prüfung behalten",
+  "homeRepair.keepCurrent": "Aktuelle Aufgabe behalten",
+  "homeRepair.reason.adopted":
+    "Diese Aufgabe wurde möglicherweise von einer Person erstellt, bearbeitet oder angeheftet.",
+  "homeRepair.reason.unverified":
+    "Die verfügbaren Belege rechtfertigen keine automatische Änderung.",
+  "homeRepair.reason.unavailable":
+    "Die Quelle kann mit deinem aktuellen Zugriff nicht geprüft werden.",
+  "homeRepair.reason.historical": "Historische Quelle ohne aktuelle Frist.",
+  "homeRepair.reason.baseline":
+    "Die Quelle liegt vor dem gewählten Beginn des Postfachverlaufs.",
+  "homeRepair.reason.cancelled": "Der zugrunde liegende Termin wurde abgesagt.",
+  "homeRepair.reason.requestAge":
+    "Die ursprüngliche Anfrage liegt außerhalb des Wartezeitraums. Archivieren markiert sie nicht als beantwortet.",
+  "homeRepair.reason.contextUnread":
+    "Spätere Nachrichten wurden noch nicht gelesen.",
+  "homeRepair.reason.contextUnassessed":
+    "Spätere Nachrichten wurden noch nicht auf Änderungen dieser Zusage geprüft.",
+  "homeRepair.reason.timeUnknown": "Das Datum der Quelle ist unbekannt.",
+  "homeRepair.reason.timeContradicted":
+    "Die Datumsangaben der Quelle widersprechen sich.",
+  "homeRepair.reason.meetingPending":
+    "Der zugrunde liegende Termin hat noch nicht stattgefunden.",
+  "homeRepair.reason.current":
+    "Die aktuellen Regeln lassen diese Aufgabe weiterhin zu.",
+  "homeRepair.unnamed": "Details nicht verfügbar",
+  "homeRepair.explain":
+    "Es wird nur Arbeit angezeigt, die du derzeit einsehen kannst. Prüfe bis zu 25 Einträge gleichzeitig. Veraltete automatische Erinnerungen können archiviert und doppelte oder veraltete Vorschläge zurückgezogen werden. Menschlich bearbeitete Aufgaben bleiben erhalten; nichts wird als erledigt markiert.",
+  "homeRepair.preview": "Einträge prüfen",
+  "homeRepair.next": "Nächste Seite prüfen",
+  "homeRepair.summary":
+    "Zu ändernde Ergebnisse: {reclassify}. Erinnerungen zum Archivieren: {archive}. Zurückzuziehende Vorschläge: {withdraw}. Zurückzuziehende Deal-Vorschläge: {supersede}. Zur Prüfung behalten: {review}; als aktuelle Arbeit behalten: {keep}.",
+  "homeRepair.apply_one": "{count} geprüfte Änderung anwenden",
+  "homeRepair.apply_other": "{count} geprüfte Änderungen anwenden",
+  "homeRepair.started":
+    "Der geprüfte Lauf ist vorgemerkt. Der Fortschritt erscheint oben.",
+
   "approval.scheduled.rearm":
     "Plant einen erneuten Versuch der angehaltenen Nachricht nach der angegebenen Wartezeit. Berechtigungen, Empfangende und Kommunikationsregeln werden vor dem Versand erneut geprüft.",
   "approval.scheduled.direct":
@@ -188,97 +279,6 @@ export const de = {
   "approval.capture.full_name": "Erfasster Name",
   "approval.capture.company_name": "Erfasstes Unternehmen",
   "approval.capture.title": "Erfasste Position",
-  "homeRepair.taskPermission":
-    "Zum Archivieren geprüfter Aufgaben brauchst du die Berechtigung, Aktivitäten zu archivieren.",
-  "homeRepair.classificationPermission":
-    "Zum Ändern von Nachrichtenergebnissen ist die Berechtigung zum Bearbeiten von Aktivitäten erforderlich.",
-  "homeRepair.reason.classificationNotAttempted":
-    "Es liegt keine abgeschlossene Prüfung vor. Prüfe erneut, sobald die Einordnung verfügbar ist.",
-  "homeRepair.reclassify": "Nachricht neu einordnen",
-  "homeRepair.classifications": "Nachrichtenergebnisse",
-  "homeRepair.asks": "Handlung angefragt",
-  "homeRepair.informs": "Nur Information",
-  "homeRepair.classificationChange":
-    "Aktuell: {before}. Vorgeschlagen: {after}.",
-  "homeRepair.reason.classificationDeclined":
-    "Die Klassifizierung hat diese Nachricht nicht bewertet. Prüfe sie selbst.",
-  "homeRepair.reason.classificationUncertain":
-    "Die neue Prüfung ist unsicher. Prüfe die Nachricht, bevor du das Ergebnis änderst.",
-  "homeRepair.reason.classificationAdopted":
-    "Menschliche Änderungen oder fehlende Nachweise verhindern eine automatische Korrektur.",
-  "homeRepair.reason.classificationWithheld":
-    "Ein Teil des Nachrichtenkontexts ist nicht zugänglich. Prüfe ihn vor einer Änderung.",
-  "homeRepair.reason.classificationCurrent":
-    "Die neue Prüfung bestätigt das aktuelle Ergebnis.",
-  "homeRepair.reason.classificationChanged":
-    "Die neue Prüfung schlägt ein anderes Ergebnis vor.",
-  "homeRepair.suggestionPermission":
-    "Zum Zurückziehen dieser Vorschläge brauchst du die Berechtigung, Deals zu erstellen.",
-  "homeRepair.supersede": "Automatischen Deal-Vorschlag zurückziehen",
-  "homeRepair.suggestions": "Deal-Vorschläge",
-  "homeRepair.reason.dealExists":
-    "Dieses Unternehmen hat bereits einen offenen Deal. Prüfe ihn, bevor du einen weiteren eröffnest.",
-  "homeRepair.reason.dealSource":
-    "Die Quelldaten stimmen nicht mehr mit den Belegen dieses Vorschlags überein.",
-  "homeRepair.reason.buyer":
-    "Die geprüften Quellen belegen keine aktuelle Käuferanfrage mehr.",
-  "homeRepair.reason.engagement":
-    "Ein aktiver Vertrag oder eine laufende Leistung spricht gegen das Ende der gesamten Kundenbeziehung.",
-  "homeRepair.reason.workstream":
-    "Die Belege betreffen das Ende eines einzelnen Auftrags, nicht der gesamten Kundenbeziehung.",
-  "homeRepair.reason.evidenceChanged":
-    "Neuere geprüfte Belege ersetzen den Kontext dieses Vorschlags.",
-  "homeRepair.withdraw": "Automatischen Vorschlag zurückziehen",
-  "homeRepair.reason.duplicate":
-    "Ein identischer offener Vorschlag bleibt verfügbar.",
-  "homeRepair.tasks": "Aufgaben",
-  "homeRepair.proposals": "Vorschläge",
-  "homeRepair.kind": "Zu prüfende Arbeit",
-  "homeRepair.preserved": "Behalten oder übersprungen",
-  "homeRepair.preservedNote":
-    "Enthält zur Prüfung behaltene und seit der Vorschau geänderte Aufgaben. Prüfe erneut, was übrig bleibt.",
-
-  "homeRepair.inspect": "Prüfen",
-  "dataTasks.blocked.review_required":
-    "Prüfe die vorgeschlagenen Änderungen vor dem Start.",
-  "homeRepair.archive": "Automatische Erinnerung archivieren",
-  "homeRepair.keepReview": "Zur persönlichen Prüfung behalten",
-  "homeRepair.keepCurrent": "Aktuelle Aufgabe behalten",
-  "homeRepair.reason.adopted":
-    "Diese Aufgabe wurde möglicherweise von einer Person erstellt, bearbeitet oder angeheftet.",
-  "homeRepair.reason.unverified":
-    "Die verfügbaren Belege rechtfertigen keine automatische Änderung.",
-  "homeRepair.reason.unavailable":
-    "Die Quelle kann mit deinem aktuellen Zugriff nicht geprüft werden.",
-  "homeRepair.reason.historical": "Historische Quelle ohne aktuelle Frist.",
-  "homeRepair.reason.baseline":
-    "Die Quelle liegt vor dem gewählten Beginn des Postfachverlaufs.",
-  "homeRepair.reason.cancelled": "Der zugrunde liegende Termin wurde abgesagt.",
-  "homeRepair.reason.requestAge":
-    "Die ursprüngliche Anfrage liegt außerhalb des Wartezeitraums. Archivieren markiert sie nicht als beantwortet.",
-  "homeRepair.reason.contextUnread":
-    "Spätere Nachrichten wurden noch nicht gelesen.",
-  "homeRepair.reason.contextUnassessed":
-    "Spätere Nachrichten wurden noch nicht auf Änderungen dieser Zusage geprüft.",
-  "homeRepair.reason.timeUnknown": "Das Datum der Quelle ist unbekannt.",
-  "homeRepair.reason.timeContradicted":
-    "Die Datumsangaben der Quelle widersprechen sich.",
-  "homeRepair.reason.meetingPending":
-    "Der zugrunde liegende Termin hat noch nicht stattgefunden.",
-  "homeRepair.reason.current":
-    "Die aktuellen Regeln lassen diese Aufgabe weiterhin zu.",
-  "homeRepair.unnamed": "Details nicht verfügbar",
-  "homeRepair.explain":
-    "Es wird nur Arbeit angezeigt, die du derzeit einsehen kannst. Prüfe bis zu 25 Einträge gleichzeitig. Veraltete automatische Erinnerungen können archiviert und doppelte oder veraltete Vorschläge zurückgezogen werden. Menschlich bearbeitete Aufgaben bleiben erhalten; nichts wird als erledigt markiert.",
-  "homeRepair.preview": "Einträge prüfen",
-  "homeRepair.next": "Nächste Seite prüfen",
-  "homeRepair.summary":
-    "Zu ändernde Ergebnisse: {reclassify}. Erinnerungen zum Archivieren: {archive}. Zurückzuziehende Vorschläge: {withdraw}. Zurückzuziehende Deal-Vorschläge: {supersede}. Zur Prüfung behalten: {review}; als aktuelle Arbeit behalten: {keep}.",
-  "homeRepair.apply_one": "{count} geprüfte Änderung anwenden",
-  "homeRepair.apply_other": "{count} geprüfte Änderungen anwenden",
-  "homeRepair.started":
-    "Der geprüfte Lauf ist vorgemerkt. Der Fortschritt erscheint oben.",
-
   "approvalPreferences.title": "Persönlich stummgeschaltete Freigaben",
   "approvalPreferences.explain":
     "Stummgeschaltete Arten verschwinden nur aus deiner Worklist. Andere Mitglieder behalten ihre Vorschläge. Stummschalten und Wiederherstellen deaktivieren deine automatischen Änderungen dieser Art. Versand, Buchungen, Zusammenführungen und Vorschläge mit Agentenpass bleiben sichtbar.",
@@ -1462,7 +1462,8 @@ export const de = {
   "brief.schedule.reconnect": "Kalender neu verbinden",
   "brief.schedule.nextAt": "Nächster Termin um {time}",
   "brief.readings.riskPartial": "Nur bekannter Wert · nicht alles geprüft",
-  "brief.readings.unpricedCount_one": "1 Deal ohne Preis · nicht enthalten",
+  "brief.readings.unpricedCount_one":
+    "{count} Deal ohne Preis · nicht enthalten",
   "brief.readings.unpricedCount_other":
     "{count} Deals ohne Preis · nicht enthalten",
   "brief.coverage.source.generic": "Sonstige Einträge",
@@ -1590,9 +1591,14 @@ export const de = {
   "worklist.deal.omitted": "nicht in der Prognose",
   "worklist.deal.provisional":
     "prognostizierter Abschluss {date} (unbestätigt)",
-  "brief.readings.riskBasis":
-    "Erwarteter Wert · Deals ohne Preis nicht enthalten",
-  "brief.readings.risk": "Gefährdeter Umsatz",
+  "brief.readings.riskBasis": "Nennwert · kein erwarteter Verlust",
+  "magic.action.forecast_changed": "Prognose angepasst",
+  "magic.why.forecast_review":
+    "Der Deal muss nach einer Zeit ohne Fortschritt geprüft werden.",
+  "magic.why.forecast_date":
+    "Das Prognosedatum wurde anhand des Pipeline-Fortschritts geschätzt.",
+  "magic.undescribed": "Aktivität nicht beschrieben",
+  "brief.readings.risk": "Wert markierter Pipeline-Deals",
   "theme.toDark": "Dunkles Design",
   "theme.toLight": "Helles Design",
   // Die drei Auswahlmöglichkeiten fürs Erscheinungsbild: das Kontomenü zeigt
@@ -4953,9 +4959,9 @@ export const de = {
   "brief.intro.waiting": "Wartet auf dich",
   "brief.intro.meetings": "Termine heute",
   "brief.intro.urgent": "Dringend",
-  "brief.intro.read_one": "Über Nacht hat Margince 1 E-Mail synchronisiert.",
+  "brief.intro.read_one": "Letzter Nachtlauf: 1 E-Mail synchronisiert.",
   "brief.intro.read_other":
-    "Über Nacht hat Margince {count} E-Mails synchronisiert.",
+    "Letzter Nachtlauf: {count} E-Mails synchronisiert.",
   "brief.intro.skip": "Beliebige Taste drücken oder klicken, um fortzufahren",
   "brief.order.withheld":
     "In dieser Reihenfolge nicht berücksichtigt: {factors}",
@@ -14914,7 +14920,7 @@ export const de = {
   "worklist.exceptions.ownerWithheld": "Ausgeblendet",
   "worklist.exceptions.truncated": "Liste gekürzt. Es gibt weitere Einträge.",
   "worklist.exceptions.kind.response_breached": "Erste Antwort überfällig",
-  "worklist.exceptions.kind.revenue_at_risk": "Gefährdeter Umsatz",
+  "worklist.exceptions.kind.revenue_at_risk": "Wert markierter Pipeline-Deals",
   "worklist.exceptions.kind.unassigned": "Nicht zugewiesen",
   "worklist.exceptions.kind.repeated_failure": "Wiederholter Fehler",
   "worklist.board.loading": "Teamarbeit wird geladen…",
@@ -14949,9 +14955,8 @@ export const de = {
     "Die Zählung ist unvollständig. Jede Zahl ist ein Mindestwert.",
   "worklist.rowMenu": "Weitere Aktionen für {title}",
   "worklist.readings.label": "Zahlen von heute",
-  "worklist.readings.revenue": "Gefährdeter Umsatz",
-  "worklist.readings.revenue.detail": "Heute stagnierende Deals",
-  "worklist.readings.revenue.unpriced": "Stagnierende Deals · keiner mit Preis",
+  "worklist.readings.revenue": "Wert markierter Pipeline-Deals",
+  "worklist.readings.revenue.unpriced": "Markierte Deals · kein Wert verfügbar",
   "worklist.readings.revenue.noFigure": "Ohne Preis",
   "worklist.readings.replies": "Antworten der Käuferseite",
   "worklist.readings.replies.detail": "Wartende Kontakte",
@@ -15048,6 +15053,8 @@ export const de = {
   "worklist.because.champion_unknown": "Champion unbekannt",
   "worklist.because.promised": "von dir zugesagt",
   "worklist.because.approved_and_failed": "freigegeben, aber nicht ausgeführt",
+  "worklist.because.account_termination":
+    "Kontobeendigung braucht eine Entscheidung",
   "worklist.because.blocks_customer_work": "ein Kontakt wartet darauf",
   "worklist.because.routine": "routinemäßiges Aufräumen",
   "worklist.because.repeated_failure": "wiederholter Fehler",
@@ -15796,6 +15803,10 @@ export const de = {
   "magic.notShown.unknownEntityType":
     "ein Datensatztyp, den diese Seite nicht einordnen kann",
   "magic.notShown.outOfScope": "außerhalb deiner eigenen Datensätze",
+  "magic.visibleScope":
+    "Hier siehst du nur Änderungen, auf die du zugreifen darfst.",
+  "magic.coverageIncomplete":
+    "Einige Aktivitäten konnten nicht gezählt werden.",
   "magic.done.all_one": "{count} Änderung im Einzelnen",
   "magic.done.all_other": "Alle {count} Änderungen im Einzelnen",
   "magic.done.atLeast_one": "{count} Änderung im Einzelnen",

@@ -270,6 +270,12 @@ func approvalItem(approval crmcontracts.Approval, machine MachineSender) crmcont
 	if staged, ok := stagedFacts(approval, machine); ok {
 		item.Staged = &staged
 	}
+	if accountTerminationPreview(approval) && len(item.Actions) > 0 {
+		if item.Staged == nil {
+			item.Staged = &crmcontracts.AttentionStagedFacts{}
+		}
+		item.Staged.AccountTermination = new(true)
+	}
 	return item
 }
 
