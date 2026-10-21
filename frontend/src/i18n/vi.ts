@@ -24,6 +24,28 @@ export const vi = {
   "approvalPreferences.next": "Trang tiếp",
   "approvalPreferences.first": "Trang đầu",
 
+  "dealSuggestion.linkedUnlinked":
+    "Đã liên kết bằng chứng. Một số bằng chứng giữ nguyên vì không có quyền di chuyển.",
+  "dealSuggestion.searchExisting": "Tìm giao dịch",
+  "dealSuggestion.existingDeal": "Giao dịch hiện có",
+  "dealSuggestion.moreDeals": "Tải thêm giao dịch",
+  "dealSuggestion.noMatchingDeals":
+    "Không có giao dịch phù hợp tại công ty này.",
+  "dealSuggestion.changed":
+    "Đề xuất này không còn khả dụng. Tải lại các mục cần kiểm tra để xem trạng thái hiện tại.",
+  "dealSuggestion.linkExisting": "Liên kết với giao dịch hiện có",
+  "dealSuggestion.linked": "Đã liên kết bằng chứng với giao dịch.",
+  "dealSuggestion.dismissTitle": "Bỏ qua đề xuất giao dịch",
+  "dealSuggestion.linkEffect":
+    "Liên kết bằng chứng được trích dẫn với giao dịch tại {company}; không tạo giao dịch mới.",
+  "dealSuggestion.dismissEffect":
+    "Đóng đề xuất này cho {company} và lưu lý do.",
+  "dealSuggestion.dismissReason": "Lý do",
+  "dealSuggestion.dismissReason.not_a_deal": "Không có ý định mua",
+  "dealSuggestion.dismissReason.already_tracked": "Đã được theo dõi",
+  "dealSuggestion.dismissReason.wrong_company": "Sai công ty",
+  "dealSuggestion.dismissReason.historical": "Hoạt động trong quá khứ",
+  "dealSuggestion.dismissReason.other": "Lý do khác",
   "dataTasks.unknownState": "Cập nhật ứng dụng để quản lý trạng thái này.",
   "dataTasks.blockedBy": "Đang chờ: {name}",
   "roles.object.data_task": "Cập nhật dữ liệu",
@@ -95,6 +117,22 @@ export const vi = {
     "Làm rõ thông tin mâu thuẫn trước khi phê duyệt thay đổi này.",
   "history.field.closed_at": "Ngày chốt",
   "history.field.amount_minor_base": "Giá trị theo tiền tệ cơ sở",
+  "approval.preview.activeContract":
+    "Một hợp đồng vẫn đang hoạt động. Kiểm tra trước khi kết thúc quan hệ với khách hàng.",
+  "approval.preview.activeDelivery":
+    "Một dự án vẫn đang được thực hiện. Kiểm tra trước khi kết thúc quan hệ với khách hàng.",
+  "approval.preview.unknownScope":
+    "Nguồn chưa xác nhận toàn bộ quan hệ với khách hàng đã kết thúc.",
+  "approval.preview.incompleteEvidence":
+    "Bằng chứng hiện tại chưa đầy đủ. Kiểm tra công ty trước khi đổi trạng thái.",
+  "approval.preview.newerEvidence":
+    "Nguồn đã thay đổi sau đề xuất này. Kiểm tra bằng chứng hiện tại.",
+  "approval.preview.scopeCompany": "Toàn bộ quan hệ với khách hàng",
+  "approval.preview.scopeWorkstream": "Một công việc",
+  "approval.preview.scopeUnknown": "Chưa xác định phạm vi",
+  "approval.preview.scope": "Phạm vi kết thúc",
+  "approval.preview.sourceDate": "Ngày của nguồn",
+  "approval.preview.workstream": "Công việc",
   "approval.preview.conflict": "Thông tin mâu thuẫn",
   "approval.preview.execution": "Được xác định khi áp dụng",
   "approval.preview.effects": "Thay đổi kèm theo",

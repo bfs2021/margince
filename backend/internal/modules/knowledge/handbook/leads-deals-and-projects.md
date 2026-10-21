@@ -1,8 +1,7 @@
 <!-- prose:plain -->
 # Leads, deals and projects
 
-A lead is someone you may sell to. A deal is one opportunity with one company, and a project is a body of work a deal may belong to.
-See [Contacts, companies, leads, deals and projects](records.md) for contacts, companies, archiving, undo, custom fields and tags.
+A lead is someone you may sell to. A deal is one opportunity with one company, and a project is work a deal may belong to. See [Records](records.md) for contacts, companies, archiving, undo, custom fields and tags.
 
 ## Leads
 
@@ -170,11 +169,11 @@ command palette, or by qualifying a lead. How a deal then moves through stages,
 closes and reopens is on [The pipeline: how a deal moves](the-pipeline.md).
 
 ### How do I review a possible deal?
-A deal suggestion names the buyer's company and shows the dated evidence behind it. Read the source before accepting it. A meeting, an invitation or a proposal you sent does not establish a buying need.
+A deal suggestion names the buyer's company and shows the dated evidence behind it. Read the source before accepting it. A meeting, an invitation or a proposal you sent does not establish that someone wants your services.
 
-Choose **Link to existing deal** when the request belongs to a deal already at that company. For a new deal, check the proposed details before creating it. Dismiss a suggestion with a reason when it should not become a deal.
+Choose **Link to existing deal** when the request belongs to a deal already at that company. For a new deal, check the proposed details before creating a deal. Dismiss a suggestion with a reason when it should not become a deal.
 
-Buying evidence without a proposal appears in **Input checks**. Open **Answer** to read the source, check who is buying, and choose a deal. You can create a deal there when you have permission, then save the answer to file the source on it. **Not relevant** and **Remind later** keep the decision on record.
+Buying evidence without a proposal appears in **Input checks**. Open **Answer** to read the source, check who is buying, and choose a deal. You can create a deal there when you have permission, then save the answer to file the source on it. **Not relevant** and **Remind later** record your choice.
 
 Old buying evidence carries its source date and a warning to check whether the buyer still wants it. The mailbox history date can exclude old promises from automatic work while leaving this evidence available for review.
 
