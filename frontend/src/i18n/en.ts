@@ -14637,6 +14637,8 @@ export const en = {
   "sched.moved": "Message moved to {when}",
   "sched.undo": "Undo",
   "sched.moveFor": "Reschedule: {subject}",
+  "sched.edit": "Edit",
+  "sched.editFor": "Edit: {subject}",
   "sched.withdrawFor": "Withdraw: {subject}",
   "outbox.name": "Scheduled messages",
   "outbox.nameWaiting_one": "Scheduled messages, {count} waiting",
