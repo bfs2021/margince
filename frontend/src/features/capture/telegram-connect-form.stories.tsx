@@ -9,13 +9,10 @@ import {
   jsonResponse,
   StoryProviders,
 } from "../../testing/story-utils";
-import { TelegramConnectForm } from "./telegram-connect-form";
+import { ChannelConnectForm } from "./telegram-connect-form";
 
-// TelegramConnectForm stories for the fe-uat render gate: the idle
-// first-connect form, the resolved-username success view, the edit-in-place
-// form on a pending connection (rendered as pending, never as connected —
-// design §9.1), and the webhook-conflict refusal (§5) — each captured after
-// a play() drives the actual interaction, not just the empty form.
+// The Telegram connect form, each state reached by a play(). They cover idle,
+// a resolved username, a token replace on a pending bot and a conflict.
 
 type ChannelConnection = components["schemas"]["ChannelConnection"];
 
@@ -33,12 +30,12 @@ const connectedConnection: ChannelConnection = {
   status: "connected",
 };
 
-const meta: Meta<typeof TelegramConnectForm> = {
+const meta: Meta<typeof ChannelConnectForm> = {
   title: "Settings/You/Connections/Telegram connect form",
-  component: TelegramConnectForm,
+  component: ChannelConnectForm,
 };
 export default meta;
-type Story = StoryObj<typeof TelegramConnectForm>;
+type Story = StoryObj<typeof ChannelConnectForm>;
 
 // `screen`, not the story canvas: the form is inside a portalled Modal.
 async function fillAndSubmit(cta: string) {
@@ -55,7 +52,7 @@ export const Idle: Story = {
     installFetchStub({});
     return (
       <StoryProviders>
-        <TelegramConnectForm open onClose={() => {}} />
+        <ChannelConnectForm provider="telegram" open onClose={() => {}} />
       </StoryProviders>
     );
   },
@@ -68,7 +65,7 @@ export const Connected: Story = {
     });
     return (
       <StoryProviders>
-        <TelegramConnectForm open onClose={() => {}} />
+        <ChannelConnectForm provider="telegram" open onClose={() => {}} />
       </StoryProviders>
     );
   },
@@ -83,7 +80,8 @@ export const EditPendingConnection: Story = {
     installFetchStub({});
     return (
       <StoryProviders>
-        <TelegramConnectForm
+        <ChannelConnectForm
+          provider="telegram"
           open
           onClose={() => {}}
           connection={pendingConnection}
@@ -108,7 +106,7 @@ export const WorkspaceAlreadyBound: Story = {
     });
     return (
       <StoryProviders>
-        <TelegramConnectForm open onClose={() => {}} />
+        <ChannelConnectForm provider="telegram" open onClose={() => {}} />
       </StoryProviders>
     );
   },

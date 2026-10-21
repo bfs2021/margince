@@ -4035,12 +4035,15 @@ func (e ChangeContractStatusRequestStatus) Valid() bool {
 
 // Defines values for ChannelConnectionProvider.
 const (
+	ChannelConnectionProviderDispact  ChannelConnectionProvider = "dispact"
 	ChannelConnectionProviderTelegram ChannelConnectionProvider = "telegram"
 )
 
 // Valid indicates whether the value is a known member of the ChannelConnectionProvider enum.
 func (e ChannelConnectionProvider) Valid() bool {
 	switch e {
+	case ChannelConnectionProviderDispact:
+		return true
 	case ChannelConnectionProviderTelegram:
 		return true
 	default:
@@ -6204,12 +6207,15 @@ func (e ConfirmSubmissionResolution) Valid() bool {
 
 // Defines values for ConnectChannelRequestProvider.
 const (
+	ConnectChannelRequestProviderDispact  ConnectChannelRequestProvider = "dispact"
 	ConnectChannelRequestProviderTelegram ConnectChannelRequestProvider = "telegram"
 )
 
 // Valid indicates whether the value is a known member of the ConnectChannelRequestProvider enum.
 func (e ConnectChannelRequestProvider) Valid() bool {
 	switch e {
+	case ConnectChannelRequestProviderDispact:
+		return true
 	case ConnectChannelRequestProviderTelegram:
 		return true
 	default:
@@ -29826,10 +29832,10 @@ type ChangeUserRoleRequest struct {
 
 // ChannelConnection One workspace-level messaging-channel binding. The bot token never appears in this shape — it lives sealed in the vault, and it is the only secret a binding holds.
 type ChannelConnection struct {
-	// ChannelId The provider's own id for the bot — the key the binding is unique on.
+	// ChannelId The provider's own id for the bot — the key the binding is unique on. For `dispact`, the bot user's id, which survives a token rotation.
 	ChannelId string `json:"channelId"`
 
-	// ChannelLabel The bot's @username. Display only — a username is mutable and re-assignable, so it identifies nothing.
+	// ChannelLabel The bot's @username (for `dispact`, its name and the Dispact workspace). Display only — a name is mutable and re-assignable, so it identifies nothing.
 	ChannelLabel string                    `json:"channelLabel"`
 	CreatedAt    *time.Time                `json:"createdAt,omitempty"`
 	Id           openapi_types.UUID        `json:"id"`
@@ -32971,12 +32977,14 @@ type ConfirmSubmissionReceipt struct {
 
 // ConnectChannelRequest defines model for ConnectChannelRequest.
 type ConnectChannelRequest struct {
-	// BotToken The BotFather token, `<bot id>:<secret>`. Sealed into the vault on arrival and never echoed back.
-	BotToken string                        `json:"botToken"`
+	// BotToken The BotFather token, `<bot id>:<secret>`, or the Dispact app bot token, `gwapp_<secret>`. Sealed into the vault on arrival and never echoed back.
+	BotToken string `json:"botToken"`
+
+	// Provider `dispact` is a Gradion Dispact app bot. Once one is connected, each deal gets a private Dispact channel when it is created or next changes. Its owner, assignees and assigned teams are invited when they can open the deal, and the channel shows the deal's stage, amount, close date and owner.
 	Provider ConnectChannelRequestProvider `json:"provider"`
 }
 
-// ConnectChannelRequestProvider defines model for ConnectChannelRequest.Provider.
+// ConnectChannelRequestProvider `dispact` is a Gradion Dispact app bot. Once one is connected, each deal gets a private Dispact channel when it is created or next changes. Its owner, assignees and assigned teams are invited when they can open the deal, and the channel shows the deal's stage, amount, close date and owner.
 type ConnectChannelRequestProvider string
 
 // ConnectConnectorRequest Connect a capture source. Providers differ in kind, not in path: an OAuth provider
@@ -46079,7 +46087,7 @@ type ReopenCondition string
 
 // ReplaceChannelTokenRequest defines model for ReplaceChannelTokenRequest.
 type ReplaceChannelTokenRequest struct {
-	// BotToken The replacement BotFather token. Sealed into the vault on arrival and never echoed back.
+	// BotToken The replacement BotFather token, or for `dispact` the replacement app bot token. Sealed into the vault on arrival and never echoed back.
 	BotToken string `json:"botToken"`
 }
 

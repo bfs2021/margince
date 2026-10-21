@@ -14,7 +14,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { components } from "../../api/schema";
 import { LocaleProvider } from "../../i18n";
 import { installFetchStub, jsonResponse } from "../../testing/story-utils";
-import { TelegramConnectForm } from "./telegram-connect-form";
+import { ChannelConnectForm } from "./telegram-connect-form";
 
 // The inline Telegram connect form (Task 17, design §9.1/§9.2): the one
 // messaging-channel bot connects for the whole workspace through the same
@@ -58,7 +58,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("TelegramConnectForm", () => {
+describe("ChannelConnectForm for Telegram", () => {
   it("submits the bot token and shows the resolved bot username", async () => {
     const calls: { url: string; body: unknown }[] = [];
     installFetchStub({
@@ -69,7 +69,12 @@ describe("TelegramConnectForm", () => {
     });
     const onConnected = vi.fn();
     render(
-      <TelegramConnectForm open onClose={() => {}} onConnected={onConnected} />,
+      <ChannelConnectForm
+        provider="telegram"
+        open
+        onClose={() => {}}
+        onConnected={onConnected}
+      />,
     );
     await userEvent.type(
       screen.getByLabelText("Bot token *"),
@@ -90,7 +95,8 @@ describe("TelegramConnectForm", () => {
   it("renders a pending connection as pending, never as connected", async () => {
     installFetchStub({});
     render(
-      <TelegramConnectForm
+      <ChannelConnectForm
+        provider="telegram"
         open
         onClose={() => {}}
         connection={pendingConnection}
@@ -117,7 +123,8 @@ describe("TelegramConnectForm", () => {
       },
     });
     render(
-      <TelegramConnectForm
+      <ChannelConnectForm
+        provider="telegram"
         open
         onClose={() => {}}
         connection={connectedConnection}
@@ -142,7 +149,7 @@ describe("TelegramConnectForm", () => {
       "POST /channel-connections": () => jsonResponse(connectedConnection, 201),
     });
     const { rerender } = render(
-      <TelegramConnectForm open onClose={() => {}} />,
+      <ChannelConnectForm provider="telegram" open onClose={() => {}} />,
     );
     await userEvent.type(
       screen.getByLabelText("Bot token *"),
@@ -151,8 +158,16 @@ describe("TelegramConnectForm", () => {
     await userEvent.click(screen.getByRole("button", { name: "Connect" }));
     expect(await screen.findByText(/@acme_sales_bot/)).toBeInTheDocument();
 
-    rerender(<TelegramConnectForm open={false} onClose={() => {}} />);
-    rerender(<TelegramConnectForm open onClose={() => {}} />);
+    rerender(
+      <ChannelConnectForm
+        provider="telegram"
+        open={false}
+        onClose={() => {}}
+      />,
+    );
+    rerender(
+      <ChannelConnectForm provider="telegram" open onClose={() => {}} />,
+    );
 
     // Rotating the token is the next thing this form is for, and a stale
     // success view offers only a Done button — no way back to the field
@@ -177,7 +192,7 @@ describe("TelegramConnectForm", () => {
           409,
         ),
     });
-    render(<TelegramConnectForm open onClose={() => {}} />);
+    render(<ChannelConnectForm provider="telegram" open onClose={() => {}} />);
     await userEvent.type(
       screen.getByLabelText("Bot token *"),
       "555000111:AAG-fake-bot-father-token",

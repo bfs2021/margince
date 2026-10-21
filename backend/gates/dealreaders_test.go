@@ -59,6 +59,7 @@ var dealGate = objectGate{
 // the gated set: removing the deal condition could only WIDEN the result the
 // caller already sees.
 var predicateDealReads = gatekit.Waive(map[string]string{
+	"internal/compose/dispactdealsread.go:dispactInvitees":                           "the Gradion Dispact sync's choice of whom to invite: the deal appears only as a sub-select of its owner_id, to find the owner among the candidate colleagues. No deal column leaves the statement, and each candidate is then asked auth.VisibleTo under their own grants before anything is shown to them",
 	"internal/compose/dealscoutbuyer.go:unlinkedCommercialMatter":                    "existence-only refusal of an automatic proposal already handled by a same-company deal or project; no deal fields leave the predicate",
 	"internal/modules/activities/awaitingreply.go":                                   "the follow-up reminder's customer test: an EXISTS asking whether the reader's own sent message is filed under an open deal. No deal column is selected, and the deal id it returns comes off the gated link join",
 	"internal/modules/deals/stagesemanticflip.go:refuseFlipUnderDecidedDeals":        "the mirror of the terminal rule: a COUNT of the deals in one stage whose status the stage's current semantic decided, taken to refuse a configuration change. No deal column leaves the statement and the refusal carries no number, so an admin holding pipeline:update learns that the stage holds decided deals and nothing about any of them. Its only effect is to REFUSE a write, never to surface a deal",
@@ -147,6 +148,7 @@ var lifecycleDealReads = gatekit.Waive(map[string]string{
 // graph is by NAME and a gated Store.X would then vouch for an ungated
 // Handlers.X.
 var calleeGatedDealReads = gatekit.Waive(map[string]string{
+	"internal/compose/dispactdealsread.go:readDispactDeal":                 "the Gradion Dispact deal card's read, as the sync's system actor. The card reaches only the deal's channel, and cardShownTo in the same file invites a colleague there only when auth.VisibleTo under their own grants opens the deal and no mask withholds a card field",
 	"internal/compose/magic/undoversion.go":                                "the version an undo on the magic receipt is sent with, for the restore route's If-Match; no other column. Reached only from magic.Service.Read and LineRecords, and only for a record their done lane already placed through doneForType, which asks auth.Require for the object grant and renders auth.ScopeClauseFor on the same row; the restore write re-asks everything under its own lock",
 	"internal/compose/briefs/briefcontinuity.go:previousRanking":           "the previous run's ranking, so a brief can say what moved. The briefs package asks the deal object gate at its own entry points",
 	"internal/compose/briefs/brieflineage.go:briefLineage":                 "a brief item's lineage across runs, behind those same gated entry points",

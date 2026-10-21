@@ -17,7 +17,14 @@ dist release is versioned separately, on the `YYYY.edition.bugfix` scheme.
   history and closes the related outstanding privacy notices. Schema upgrades do not wait for
   the correction. A migration rewrite guard and an append-only task registry check keep future
   corrections on the same path.
-
+- **Each deal gets a Gradion Dispact channel.** An admin connects a Dispact
+  app bot on Settings → **Connections**, beside the Telegram bot. Every deal then
+  gets a private Dispact channel, and the colleagues responsible for it who
+  can open the deal are invited. A card with the deal's stage, amount, close date
+  and owner is posted there and edited on every change; a stage move, an owner
+  change or an archive also posts one line. The operator sets
+  `dispact_base_url` on the API and the worker; see
+  [docs/how-to/connect-dispact.md](docs/how-to/connect-dispact.md).
 - A mailbox can set a date its automatic commitment suggestions start from.
   Mail that mailbox delivered on an earlier local day suggests no automatic
   commitments for its owner; the mail stays captured and searchable, and the

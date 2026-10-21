@@ -73,6 +73,7 @@ export const SETTINGS_SECTIONS = {
     "mailSharing.title",
     "connectors.title",
     "connectors.telegramTitle",
+    "connectors.dispactTitle",
     "ownerIdentities.title",
     "overnightGrant.title",
     "linkedinImport.title",

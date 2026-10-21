@@ -1656,6 +1656,7 @@ export const de = {
   "systemJob.capture_trace_sweep": "Bereinigung der E-Mail-Spuren",
   "systemJob.close_date": "Prüfung der Abschlussdaten",
   "systemJob.commission_accrual": "Provisionsabgrenzung",
+  "systemJob.dispact_sync": "Abgleich der Deals mit Gradion Dispact",
   "systemJob.commitment_settle": "Abschluss von Zusagen",
   "systemJob.comms_send": "Nachrichtenversand",
   "systemJob.connector_app_read": "Lesen der Connector-Einstellungen",
@@ -8991,24 +8992,40 @@ export const de = {
   "connectors.telegramConnectCta": "Telegram-Bot verbinden",
   "connectors.telegramReadOnly":
     "Nur Admins und Operations können den Bot verbinden oder ändern.",
-  "connectors.telegramEditToken": "Token ersetzen",
-  "connectors.telegramDisconnectTitle": "Diesen Bot trennen?",
+  "connectors.channelEditToken": "Token ersetzen",
+  "connectors.channelDisconnectTitle": "Diesen Bot trennen?",
   "connectors.telegramDisconnectBody":
     "Dadurch wird das gespeicherte Token gelöscht und der Bot nicht mehr abgefragt. Erfassung und Versand stoppen sofort. Erfasste Datensätze bleiben im CRM.",
   "connectors.telegramModalTitle": "Telegram-Bot verbinden",
-  "connectors.telegramEditTitle": "Bot-Token ersetzen",
-  "connectors.telegramBotToken": "Bot-Token",
+  "connectors.channelEditTitle": "Bot-Token ersetzen",
+  "connectors.channelBotToken": "Bot-Token",
   "connectors.telegramBotTokenHint":
     "Das Token, das BotFather für den Bot ausgestellt hat. Das Token wird im Schlüsseltresor gespeichert und nie wieder angezeigt.",
-  "connectors.telegramSubmitCta": "Verbinden",
-  "connectors.telegramReplaceCta": "Token ersetzen",
+  "connectors.channelSubmitCta": "Verbinden",
+  "connectors.channelReplaceCta": "Token ersetzen",
   "connectors.telegramConnectedAs": "Verbunden als @{username}.",
-  "connectors.telegramConnectFailed": "Bot nicht verbunden",
+  "connectors.channelConnectFailed": "Bot nicht verbunden",
+  "connectors.provDispact": "Gradion Dispact",
+  "connectors.dispactTitle": "Gradion-Dispact-Bot",
+  "connectors.dispactSub":
+    "Jeder Deal bekommt einen privaten Dispact-Kanal, sobald er erstellt oder das nächste Mal geändert wird. Verantwortliche, Zuständige und zugewiesene Teams werden eingeladen, wenn sie den Deal öffnen dürfen, und die Deal-Karte dort zeigt stets Phase, Betrag, Abschlussdatum und Verantwortliche.",
+  "connectors.dispactNotConfigured":
+    "Gradion Dispact ist in dieser Installation nicht konfiguriert.",
+  "connectors.dispactConnectCta": "Dispact-Bot verbinden",
+  "connectors.dispactReadOnly":
+    "Nur Admins und Operations können den Dispact-Bot verbinden oder ändern.",
+  "connectors.dispactDisconnectBody":
+    "Dadurch wird das gespeicherte Token gelöscht. Neue Deals bekommen keinen Dispact-Kanal, und die Deal-Karten werden nicht mehr aktualisiert.",
+  "connectors.dispactModalTitle": "Gradion-Dispact-Bot verbinden",
+  "connectors.dispactBotTokenHint":
+    "Das App-Bot-Token, das Gradion Dispact bei der Installation der App anzeigt. Das Token beginnt mit gwapp_, wird im Schlüsseltresor gespeichert und nie wieder angezeigt.",
+  "connectors.dispactConnectedAs": "Verbunden als {username}.",
   "connectors.openNamed": "{name} öffnen",
   "connectors.emptyLabel": "Kein Postfach verbunden",
   "connectors.emptyHint":
     "Verbinde ein Postfach oder einen Kalender, um E-Mails und Termine zu erfassen.",
   "connectors.telegramEmptyLabel": "Kein Bot verbunden",
+  "connectors.dispactEmptyLabel": "Kein Dispact-Bot verbunden",
 
   // Die Consumer-Mail-Liste des Workspace (CAP-PARAM-5).
   "consumerMail.title": "Freemail-Domains",

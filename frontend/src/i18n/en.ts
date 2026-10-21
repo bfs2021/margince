@@ -1606,6 +1606,7 @@ export const en = {
   "systemJob.capture_trace_sweep": "Mail trace cleanup",
   "systemJob.close_date": "Close date check",
   "systemJob.commission_accrual": "Commission accrual",
+  "systemJob.dispact_sync": "Gradion Dispact deal sync",
   "systemJob.commitment_settle": "Commitment settlement",
   "systemJob.comms_send": "Message send",
   "systemJob.connector_app_read": "Connector settings read",
@@ -9028,24 +9029,40 @@ export const en = {
   "connectors.telegramConnectCta": "Connect Telegram bot",
   "connectors.telegramReadOnly":
     "Only an administrator or operations user can connect or change the bot.",
-  "connectors.telegramEditToken": "Replace token",
-  "connectors.telegramDisconnectTitle": "Disconnect this bot?",
+  "connectors.channelEditToken": "Replace token",
+  "connectors.channelDisconnectTitle": "Disconnect this bot?",
   "connectors.telegramDisconnectBody":
     "This deletes the stored token and stops polling the bot. Capture and sending stop immediately; captured records stay in the CRM.",
   "connectors.telegramModalTitle": "Connect Telegram bot",
-  "connectors.telegramEditTitle": "Replace bot token",
-  "connectors.telegramBotToken": "Bot token",
+  "connectors.channelEditTitle": "Replace bot token",
+  "connectors.channelBotToken": "Bot token",
   "connectors.telegramBotTokenHint":
     "The token BotFather issued for the bot. It is stored in the key vault and never shown again.",
-  "connectors.telegramSubmitCta": "Connect",
-  "connectors.telegramReplaceCta": "Replace token",
+  "connectors.channelSubmitCta": "Connect",
+  "connectors.channelReplaceCta": "Replace token",
   "connectors.telegramConnectedAs": "Connected as @{username}.",
-  "connectors.telegramConnectFailed": "Bot not connected",
+  "connectors.channelConnectFailed": "Bot not connected",
+  "connectors.provDispact": "Gradion Dispact",
+  "connectors.dispactTitle": "Gradion Dispact bot",
+  "connectors.dispactSub":
+    "Each deal gets a private Dispact channel when it is created or next changes. Its owner, assignees and assigned teams are invited if they can open the deal, and the deal card there stays current with stage, amount, close date and owner.",
+  "connectors.dispactNotConfigured":
+    "Gradion Dispact is not configured on this installation.",
+  "connectors.dispactConnectCta": "Connect Dispact bot",
+  "connectors.dispactReadOnly":
+    "Only an administrator or operations user can connect or change the Dispact bot.",
+  "connectors.dispactDisconnectBody":
+    "This deletes the stored token. New deals get no Dispact channel, and deal cards stop updating.",
+  "connectors.dispactModalTitle": "Connect Gradion Dispact bot",
+  "connectors.dispactBotTokenHint":
+    "The app bot token Gradion Dispact shows when you install the app. It starts with gwapp_. It is stored in the key vault and never shown again.",
+  "connectors.dispactConnectedAs": "Connected as {username}.",
   "connectors.openNamed": "Open {name}",
   "connectors.emptyLabel": "No mailbox connected",
   "connectors.emptyHint":
     "Connect a mailbox or calendar to capture its mail and meetings.",
   "connectors.telegramEmptyLabel": "No bot connected",
+  "connectors.dispactEmptyLabel": "No Dispact bot connected",
 
   // The workspace's own consumer-mail list (CAP-PARAM-5): what the shipped
   // baseline missed, and what it got wrong. Admin-curated and shared, because

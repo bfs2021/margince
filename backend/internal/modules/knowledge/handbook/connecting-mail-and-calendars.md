@@ -64,6 +64,7 @@ not connected yet.
 | **Outlook Calendar** | "Your Outlook calendar, connected separately from Outlook mail." | No |
 | **IMAP mailbox** | "Any other mail host, using an app password. Capture only." | No |
 | **Telegram** | One bot for the whole company. An administrator connects it, not you. | Yes |
+| **Gradion Dispact** | One bot for the whole company that gives each deal a chat. An administrator connects it, not you. | No |
 
 A mailbox connected before sending existed cannot add sending in place. The
 provider grants sending only on a new connection, so you have to reconnect.
@@ -153,7 +154,7 @@ To replace the bot token, choose **Replace token** in the bot's **…** (**Actio
 2. In the **Telegram bot** card, open the bot's **…** (**Actions**) menu and choose **Replace token**.
 3. Paste the new token into **Bot token** in **Replace bot token**, and press **Replace token**.
 The connection stays, with all captured chats and contacts. You can even point it at a different bot.
-Replacing the token keeps the status. A bot in **Needs reconnect** or **Sync error** needs **Disconnect**, then connecting again.
+A bot in **Needs reconnect** works again once you replace its token. A bot in **Sync error** needs **Disconnect**, then connecting again.
 Also called: change the bot token, new BotFather token, change the bot.
 
 ### How do I disconnect the Telegram bot?
@@ -191,6 +192,40 @@ The date applies only to this mailbox and only to your own commitments. A collea
 
 Changing the date or pressing **Clear date** completes and deletes nothing. Tasks you already have stay as they are.
 Also called: ignore old promises, start date for suggestions.
+
+## The company's Gradion Dispact bot
+
+A Gradion Dispact bot gives every deal a private chat in Gradion Dispact. It sits on
+**Settings → Connections** in the **Gradion Dispact bot** card, below the Telegram bot.
+Every user can see whether it is connected. Only an administrator or operations user
+can connect or change it, and an agent never can.
+
+Once it is connected, each deal gets its own private chat. The deal's owner and the
+colleagues on the deal are invited. Each of them must be able to open the deal, and
+needs a Dispact account with the same email.
+Margince never takes anyone out of a chat. A colleague who can no longer open the
+deal stays in it until someone removes them in Gradion Dispact.
+
+A card in the chat shows the deal's stage, amount, close
+date and owner, and it changes when the deal does. A stage move, a new owner or an
+archived deal also adds one line. Customers are never invited. Messages in the chat
+do not come back into Margince.
+
+### How do I connect the company's Gradion Dispact bot?
+To connect the bot, add the Margince app in Gradion Dispact, then press **Connect Dispact bot** on **Settings → Connections**.
+1. In Gradion Dispact, an administrator adds the app and copies the bot token it shows. It starts with `gwapp_`.
+2. In Margince, open **Settings**, then **Connections**.
+3. In the **Gradion Dispact bot** card, press **Connect Dispact bot**.
+4. Paste the token into **Bot token** and press **Connect**.
+A deal gets its chat when it is created, and an older deal gets one the next time it changes.
+The card may say "Gradion Dispact is not configured on this installation." Then an administrator has to set it up first.
+Also called: link Dispact, deal channels, Dispact bot token.
+
+### How do I replace or disconnect the Gradion Dispact bot?
+Open the bot's **…** (**Actions**) menu in the **Gradion Dispact bot** card and choose **Replace token** or **Disconnect**.
+A bot in **Needs reconnect** means Dispact refused the token. Replace the token and the chats are kept up to date again.
+**Disconnect** deletes the stored token and stops all updates. The chats stay in Gradion Dispact.
+Also called: remove the Dispact bot, stop deal chats.
 
 ## Importing your mail history
 

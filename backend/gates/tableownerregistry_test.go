@@ -331,6 +331,9 @@ var tableOwners = map[string]string{
 	// status. It is a connection, so it sits with capture_connection under the
 	// ONE connector.Sink rather than with the identities it delivers.
 	"channel_connection": "internal/modules/capture",
+	// Where each deal posts in Gradion Dispact, recorded by the deal sync over
+	// the Dispact connection above.
+	"deal_channel": "internal/modules/capture",
 	// The installation-settings table (ADR-0090/A135). Owned by the platform
 	// mechanism rather than by any module, which is the point: a setting's
 	// MEANING belongs to the module that declares its entry, but no module

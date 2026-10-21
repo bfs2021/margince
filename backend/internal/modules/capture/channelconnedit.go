@@ -20,7 +20,6 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/margince/margince/backend/internal/modules/capture/telegram"
 	"github.com/margince/margince/backend/internal/platform/auth"
 	"github.com/margince/margince/backend/internal/platform/database/storekit"
 	"github.com/margince/margince/backend/internal/platform/keyvault"
@@ -47,7 +46,7 @@ type channelRow struct {
 // this row or on the bot, so rotating the token — or swapping in a different bot —
 // loses no history.
 //
-// The incoming bot's webhook is cleared for the same reason connect clears one:
+// An incoming Telegram bot's webhook is cleared for the same reason connect clears one:
 // Telegram refuses getUpdates while a webhook is registered. The OUTGOING bot
 // needs nothing: it stops being polled the instant the row stops naming it, and
 // this installation never registered anything against it that could outlive that.
@@ -58,26 +57,23 @@ func (s *ChannelStore) ReplaceToken(ctx context.Context, id ids.UUID, token stri
 	if err := auth.RequireHuman(ctx); err != nil {
 		return err
 	}
-	if err := s.requireConnectWiring(ProviderTelegram); err != nil {
-		return err
-	}
-	if err := telegram.ValidateToken(token); err != nil {
-		return err
-	}
 	ws, ok := principal.WorkspaceID(ctx)
 	if !ok {
 		return errors.New("capture: channel token replacement called outside a workspace context")
 	}
-
 	current, err := s.readChannelRow(ctx, id)
 	if err != nil {
 		return err
 	}
-	bot, err := s.api.GetMe(ctx, token)
+	binder, err := s.requireConnectWiring(current.Provider)
 	if err != nil {
 		return err
 	}
-	if err := s.clearWebhook(ctx, token); err != nil {
+	if err := binder.validate(token); err != nil {
+		return err
+	}
+	bot, err := binder.bind(ctx, token)
+	if err != nil {
 		return err
 	}
 
@@ -108,8 +104,9 @@ func (s *ChannelStore) ReplaceToken(ctx context.Context, id ids.UUID, token stri
 }
 
 // repoint re-points the connection at the new bot and its newly sealed token, in
-// one transaction with its audit row. The status is untouched: the row was live
-// before and is live after, under a different token.
+// one transaction with its audit row. A row parked because the provider refused
+// its token is live again, since the binder just proved the new one. Any other
+// status is untouched: a token does not repair it.
 //
 // The row is locked first because the decision to repoint was made from a read
 // taken before two provider round trips: without the lock a concurrent rotation
@@ -120,23 +117,27 @@ func (s *ChannelStore) ReplaceToken(ctx context.Context, id ids.UUID, token stri
 // Zero rows matched means another replacement already moved this connection on,
 // and this one would otherwise destroy the credential that winner is now polling
 // with.
-func (s *ChannelStore) repoint(ctx context.Context, current channelRow, bot telegram.Bot, credentialRef keyvault.Ref) error {
+func (s *ChannelStore) repoint(ctx context.Context, current channelRow, bot channelIdentity, credentialRef keyvault.Ref) error {
 	err := s.db.Tx(ctx, func(tx pgx.Tx) error {
 		if _, err := storekit.LockRow(ctx, tx, "channel_connection", current.ID, storekit.LiveOnly); err != nil {
 			return err
 		}
 		out, err := scanChannelConnection(tx.QueryRow(ctx, `
 			UPDATE channel_connection
-			   SET channel_id = $2, channel_label = $3, credential_ref = $4, poll_offset = 0
+			   SET channel_id = $2, channel_label = $3, credential_ref = $4, poll_offset = 0,
+			       status = CASE WHEN status = $6 THEN $7 ELSE status END
 			 WHERE id = $1 AND version = $5 AND archived_at IS NULL
 			 RETURNING `+channelConnectionColumns,
-			current.ID, channelIDOf(bot), bot.Username, string(credentialRef), current.Version))
+			current.ID, bot.ID, bot.Label, string(credentialRef), current.Version,
+			channelStatusReauthRequired, channelStatusConnected))
 		if err != nil {
 			return err
 		}
+		if err := forgetOtherBotsChannels(ctx, tx, current, bot); err != nil {
+			return err
+		}
 		return auditLifecycle(ctx, tx, "update", channelConnectionObject, out.ID,
-			channelAuditImage(current.ChannelID, current.ChannelLabel, current.Status),
-			channelAuditImage(out.ChannelID, out.ChannelLabel, out.Status))
+			channelAuditImage(current.ChannelConnection), channelAuditImage(out))
 	})
 	if errors.Is(err, pgx.ErrNoRows) {
 		// The lock resolved a LIVE row, so the live clause held and only the
@@ -205,8 +206,7 @@ func (s *ChannelStore) archiveDisconnected(ctx context.Context, current channelR
 			return err
 		}
 		return auditLifecycle(ctx, tx, "archive", channelConnectionObject, after.ID,
-			channelAuditImage(current.ChannelID, current.ChannelLabel, current.Status),
-			channelAuditImage(after.ChannelID, after.ChannelLabel, after.Status))
+			channelAuditImage(current.ChannelConnection), channelAuditImage(after))
 	})
 	if errors.Is(err, pgx.ErrNoRows) {
 		// The lock resolved a LIVE row — an already-archived or absent one fails
@@ -237,4 +237,15 @@ func (s *ChannelStore) readChannelRow(ctx context.Context, id ids.UUID) (channel
 	}
 	out.credentialRef = keyvault.Ref(credentialRef)
 	return out, nil
+}
+
+// forgetOtherBotsChannels drops the deal channels a Dispact connection recorded
+// when its token now names a different bot. The new bot is in none of them, and
+// a slug it reused could name some other channel of its own.
+func forgetOtherBotsChannels(ctx context.Context, tx pgx.Tx, current channelRow, bot channelIdentity) error {
+	if current.Provider != ProviderDispact || current.ChannelID == bot.ID {
+		return nil
+	}
+	_, err := tx.Exec(ctx, `DELETE FROM deal_channel WHERE connection_id = $1`, current.ID)
+	return err
 }

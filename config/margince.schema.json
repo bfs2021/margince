@@ -845,6 +845,13 @@
         }
       }
     },
+    "dispact_base_url": {
+      "description": "Origin of the Gradion Dispact install; unset, Dispact cannot be connected and no deal is synced to it.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "dsn": {
       "description": "Postgres DSN of the runtime app role; migrate falls back to it when MARGINCE_OWNER_DSN is unset.",
       "type": [

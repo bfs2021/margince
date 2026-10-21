@@ -15,21 +15,26 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/margince/margince/backend/internal/modules/capture"
+	"github.com/margince/margince/backend/internal/modules/capture/dispact"
 	"github.com/margince/margince/backend/internal/modules/capture/telegram"
 )
 
-// WithChannelSurface composes the channel-connection transport. It takes no
-// deployment configuration at all: connecting a bot needs a token and a vault,
-// and a poll dials out, so there is nothing about this installation's own address
-// for an operator to get wrong.
+// WithChannelSurface composes the channel-connection transport. Connecting a bot
+// needs a token and a vault, and a poll dials out. So no address of this
+// installation's own is configured here.
 //
 // The vault arrives later, through WithKeyvault — until then the read surface
 // lists what is bound and every mutating path refuses by name
 // (`channel_credentials_not_configured`) rather than sealing a token nothing
 // could unseal.
-func WithChannelSurface() Option {
+//
+// dispactBase is where Gradion Dispact lives; empty leaves Dispact unconnectable.
+func WithChannelSurface(dispactBase string) Option {
 	return func(s *Server, pool *pgxpool.Pool) {
-		s.channelHandlers = capture.NewChannelHandlers(
-			capture.NewChannelStore(InstallationDB(pool), nil, telegram.NewAPI(nil, ""), s.log))
+		store := capture.NewChannelStore(InstallationDB(pool), nil, telegram.NewAPI(nil, ""), s.log)
+		if dispactBase != "" {
+			store = store.WithDispact(dispact.NewAPI(nil, dispactBase))
+		}
+		s.channelHandlers = capture.NewChannelHandlers(store)
 	}
 }

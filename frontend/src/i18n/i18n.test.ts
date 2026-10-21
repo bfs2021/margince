@@ -192,6 +192,7 @@ const KEPT_IN_ENGLISH = new Set<string>([
   "connectors.provGmail",
   "connectors.provGcal",
   "connectors.provGraph",
+  "connectors.provDispact",
   "connectors.provTelegram",
   "ob.s4.provGoogle",
   "ob.s4.provMicrosoft",

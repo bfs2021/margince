@@ -1955,7 +1955,7 @@ public.channel_connection acl=margince_owner=arwdDxt/margince_owner,margince_app
 public.channel_connection.archived_at timestamp with time zone gen=- def=-
 public.channel_connection.channel_connection_connected_by_fkey FOREIGN KEY (connected_by) REFERENCES app_user(id) ON DELETE RESTRICT
 public.channel_connection.channel_connection_pkey PRIMARY KEY (id)
-public.channel_connection.channel_connection_provider_check CHECK ((provider = 'telegram'::text))
+public.channel_connection.channel_connection_provider_check CHECK ((provider = ANY (ARRAY['telegram'::text, 'dispact'::text])))
 public.channel_connection.channel_connection_status_check CHECK ((status = ANY (ARRAY['connected'::text, 'disconnected'::text, 'error'::text, 'reauth_required'::text])))
 public.channel_connection.channel_connection_version_js_safe CHECK (((version >= '-9007199254740991'::bigint) AND (version <= '9007199254740991'::bigint)))
 public.channel_connection.channel_id text NOT NULL gen=- def=-
@@ -3546,6 +3546,22 @@ public.deal_acquisition_source.updated_at timestamp with time zone NOT NULL gen=
 public.deal_acquisition_source.version bigint NOT NULL gen=- def=1
 public.deal_acquisition_source_key_key CREATE UNIQUE INDEX deal_acquisition_source_key_key ON public.deal_acquisition_source USING btree (key)
 public.deal_acquisition_source_pkey CREATE UNIQUE INDEX deal_acquisition_source_pkey ON public.deal_acquisition_source USING btree (id)
+public.deal_channel acl=margince_owner=arwdDxt/margince_owner,margince_app=arwd/margince_owner rls=false force=false
+public.deal_channel.card_ts text NOT NULL gen=- def=-
+public.deal_channel.channel_id text NOT NULL gen=- def=-
+public.deal_channel.channel_slug text NOT NULL gen=- def=-
+public.deal_channel.connection_id uuid NOT NULL gen=- def=-
+public.deal_channel.created_at timestamp with time zone NOT NULL gen=- def=now()
+public.deal_channel.deal_channel_card_ts_check CHECK ((card_ts <> ''::text))
+public.deal_channel.deal_channel_channel_id_check CHECK ((channel_id <> ''::text))
+public.deal_channel.deal_channel_channel_slug_check CHECK ((channel_slug <> ''::text))
+public.deal_channel.deal_channel_connection_id_fkey FOREIGN KEY (connection_id) REFERENCES channel_connection(id) ON DELETE CASCADE
+public.deal_channel.deal_channel_deal_id_fkey FOREIGN KEY (deal_id) REFERENCES deal(id) ON DELETE CASCADE
+public.deal_channel.deal_channel_pkey PRIMARY KEY (deal_id)
+public.deal_channel.deal_id uuid NOT NULL gen=- def=-
+public.deal_channel.updated_at timestamp with time zone NOT NULL gen=- def=now()
+public.deal_channel_connection_idx CREATE INDEX deal_channel_connection_idx ON public.deal_channel USING btree (connection_id)
+public.deal_channel_pkey CREATE UNIQUE INDEX deal_channel_pkey ON public.deal_channel USING btree (deal_id)
 public.deal_clear_partner_attribution_on_company_delete() secdef=false cfg=- acl=- 
 BEGIN
   UPDATE deal

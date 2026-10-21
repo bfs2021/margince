@@ -70,8 +70,8 @@ func contractPath(t *testing.T, name string) string {
 // provider registered tomorrow is covered without touching this test.
 //
 // Written as ONE assertion with a NAMED exception set rather than a headline
-// plus a proviso: the two workspace-bot enums legitimately contain `telegram`
-// because they bind a bot to a workspace, a surface an extension unit never
+// plus a proviso. The two workspace-bot enums hold `telegram` and `dispact`:
+// they bind a bot to a workspace, a surface an extension unit never
 // writes (ADR-0107 §6). Anything outside that set is the conflation returning.
 func TestNoContractEnumSpellsARegisteredTransport(t *testing.T) {
 	integration.Setup(t)
@@ -105,7 +105,7 @@ func TestNoContractEnumSpellsARegisteredTransport(t *testing.T) {
 	// connectors. Identified by the enum's exact content rather than by a
 	// schema name, because the name is not visible in a raw scan and a
 	// content match cannot silently widen.
-	allowed := map[string]bool{"telegram": true}
+	allowed := map[string]bool{"telegram": true, "dispact": true}
 
 	for _, members := range contractEnums(string(raw)) {
 		trimmed := make(map[string]bool, len(members))

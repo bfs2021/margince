@@ -331,7 +331,7 @@ func baseComposeOptions(ctx context.Context, cfg apiConfig, capCfg compose.Captu
 	// The channel-connection surface needs no public origin of its own: Telegram
 	// ingress polls, so nothing is ever told where to reach this installation.
 	// It must precede kvOpts below, which hands it the vault it seals with.
-	opts = append(opts, compose.WithChannelSurface())
+	opts = append(opts, compose.WithChannelSurface(cfg.dispactBaseURL))
 	// The trace READ surface, carrying the same payload posture the Sink writes
 	// under, so the API's answer about that posture and the pipeline's behaviour
 	// come from one value rather than two that can drift.

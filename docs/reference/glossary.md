@@ -31,6 +31,7 @@ here: put it in the area's word list instead. A name that no plain page uses mus
 | dev | The development mode of a local install, set by `MARGINCE_ENV`. |
 | Diátaxis | A way to sort docs into tutorials, how-to guides, reference and explanation. |
 | dmy | The date order day, month, year, as a setting value. |
+| Dispact | Gradion Dispact, a team chat app; a connected bot gives each deal a chat of its own. |
 | Docker | The container tool used to run the local stack and the images. |
 | English | The language the docs and the source catalog are written in. |
 | EU | The European Union, whose laws several pages refer to. |

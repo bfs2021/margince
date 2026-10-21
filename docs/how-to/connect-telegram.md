@@ -101,8 +101,9 @@ entry itself when another write takes the unique index first.
 | **Disconnected** | `disconnected` | Archived, and not in the list. |
 
 Margince does not poll either stopped status again. The scan for due rows picks only `connected` rows,
-and that ends the retry loop. Rotating the token leaves the status as it is, and only connect writes
-`connected`. So a stopped binding comes back only by disconnect and connect again. The audit log records
+and that ends the retry loop. Rotating the token sets a `reauth_required` binding back to `connected`,
+because the new token just passed `getMe`. A binding in `error` keeps its status: a new token does not
+stop the other reader. It comes back only by disconnect and connect again. The audit log records
 the reason in `poll_stopped_because`, because the row itself has no column for it.
 
 ## Rotate the token

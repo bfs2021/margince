@@ -9,7 +9,7 @@ import {
   StoryProviders,
   stubWithSession,
 } from "../../testing/story-utils";
-import { TelegramConnectorsPanel } from "./connectors.telegram";
+import { ChannelConnectorsPanel } from "./connectors.telegram";
 import "./connectors.css";
 
 // The workspace's bot: none yet, and live bots with a row each. A deployment
@@ -34,7 +34,7 @@ function telegramStory(
     });
     return (
       <StoryProviders>
-        <TelegramConnectorsPanel />
+        <ChannelConnectorsPanel provider="telegram" />
       </StoryProviders>
     );
   };
@@ -57,12 +57,13 @@ const supportBotPending = {
   status: "pending",
 };
 
-const meta: Meta<typeof TelegramConnectorsPanel> = {
+const meta: Meta<typeof ChannelConnectorsPanel> = {
   title: "Settings/You/Connections/Telegram bot",
-  component: TelegramConnectorsPanel,
+  component: ChannelConnectorsPanel,
+  args: { provider: "telegram" },
 };
 export default meta;
-type Story = StoryObj<typeof TelegramConnectorsPanel>;
+type Story = StoryObj<typeof ChannelConnectorsPanel>;
 
 // No bot: one row says so and carries the connect verb.
 export const NoBotYet: Story = { render: telegramStory([]) };

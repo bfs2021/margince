@@ -19,7 +19,7 @@ import {
 import { AddConnectionDialog, ALL_PROVIDERS } from "./connectors.add";
 import { OAuthOutcomeNote } from "./connectors.notices";
 import { ConnectorRow, OAUTH_PROVIDERS } from "./connectors.row";
-import { TelegramConnectorsPanel } from "./connectors.telegram";
+import { ChannelConnectorsPanel } from "./connectors.telegram";
 import { ImapConnectForm } from "./imap-connect-form";
 import "./connectors.css";
 
@@ -394,7 +394,8 @@ export function ConnectorsCard() {
   return (
     <>
       <MailConnectorsPanel />
-      <TelegramConnectorsPanel />
+      <ChannelConnectorsPanel provider="telegram" />
+      <ChannelConnectorsPanel provider="dispact" />
     </>
   );
 }

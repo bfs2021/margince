@@ -24853,10 +24853,10 @@ export interface components {
             /** Format: uuid */
             id: string;
             /** @enum {string} */
-            provider: "telegram";
-            /** @description The provider's own id for the bot — the key the binding is unique on. */
+            provider: "telegram" | "dispact";
+            /** @description The provider's own id for the bot — the key the binding is unique on. For `dispact`, the bot user's id, which survives a token rotation. */
             channelId: string;
-            /** @description The bot's @username. Display only — a username is mutable and re-assignable, so it identifies nothing. */
+            /** @description The bot's @username (for `dispact`, its name and the Dispact workspace). Display only — a name is mutable and re-assignable, so it identifies nothing. */
             channelLabel: string;
             /**
              * @description Only `connected` is live, and it is the only state a connect can produce: a pull ingress makes no provider call after the write, so there is no half-connected state. `error` and `reauth_required` are where ingress parks a binding it can no longer poll (another consumer holds the bot's updates; the token was refused), and neither is polled again until an operator acts. `pending` is a value NO server produces: it is retained because the code generator disambiguates enum member names across the whole document, so dropping it renames unrelated generated constants in other schemas.
@@ -24874,13 +24874,16 @@ export interface components {
             data: components["schemas"]["ChannelConnection"][];
         };
         ConnectChannelRequest: {
-            /** @enum {string} */
-            provider: "telegram";
-            /** @description The BotFather token, `<bot id>:<secret>`. Sealed into the vault on arrival and never echoed back. */
+            /**
+             * @description `dispact` is a Gradion Dispact app bot. Once one is connected, each deal gets a private Dispact channel when it is created or next changes. Its owner, assignees and assigned teams are invited when they can open the deal, and the channel shows the deal's stage, amount, close date and owner.
+             * @enum {string}
+             */
+            provider: "telegram" | "dispact";
+            /** @description The BotFather token, `<bot id>:<secret>`, or the Dispact app bot token, `gwapp_<secret>`. Sealed into the vault on arrival and never echoed back. */
             botToken: string;
         };
         ReplaceChannelTokenRequest: {
-            /** @description The replacement BotFather token. Sealed into the vault on arrival and never echoed back. */
+            /** @description The replacement BotFather token, or for `dispact` the replacement app bot token. Sealed into the vault on arrival and never echoed back. */
             botToken: string;
         };
         /**
@@ -62957,7 +62960,7 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["PermissionDenied"];
-            /** @description This deployment serves no messaging channels (`code: channel_connections_not_configured`), or has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`). */
+            /** @description This deployment serves no messaging channels (`code: channel_connections_not_configured`), has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`), or was not told where Gradion Dispact is (`code: channel_provider_not_configured`). */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -63012,7 +63015,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description This deployment serves no messaging channels (`code: channel_connections_not_configured`), or has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`). */
+            /** @description This deployment serves no messaging channels (`code: channel_connections_not_configured`), has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`), or was not told where Gradion Dispact is (`code: channel_provider_not_configured`). */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -63045,7 +63048,7 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["PermissionDenied"];
             404: components["responses"]["NotFound"];
-            /** @description This deployment serves no messaging channels (`code: channel_connections_not_configured`), or has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`). */
+            /** @description This deployment serves no messaging channels (`code: channel_connections_not_configured`), has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`), or was not told where Gradion Dispact is (`code: channel_provider_not_configured`). */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -63104,7 +63107,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
-            /** @description This deployment serves no messaging channels (`code: channel_connections_not_configured`), or has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`). */
+            /** @description This deployment serves no messaging channels (`code: channel_connections_not_configured`), has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`), or was not told where Gradion Dispact is (`code: channel_provider_not_configured`). */
             503: {
                 headers: {
                     [name: string]: unknown;

@@ -13476,7 +13476,7 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/PermissionDenied' }
         '503':
-          description: 'This deployment serves no messaging channels (`code: channel_connections_not_configured`), or has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`).'
+          description: 'This deployment serves no messaging channels (`code: channel_connections_not_configured`), has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`), or was not told where Gradion Dispact is (`code: channel_provider_not_configured`).'
           content:
             application/problem+json:
               schema: { $ref: '#/components/schemas/Problem' }
@@ -13525,7 +13525,7 @@ paths:
             application/problem+json:
               schema: { $ref: '#/components/schemas/Problem' }
         '503':
-          description: 'This deployment serves no messaging channels (`code: channel_connections_not_configured`), or has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`).'
+          description: 'This deployment serves no messaging channels (`code: channel_connections_not_configured`), has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`), or was not told where Gradion Dispact is (`code: channel_provider_not_configured`).'
           content:
             application/problem+json:
               schema: { $ref: '#/components/schemas/Problem' }
@@ -13576,7 +13576,7 @@ paths:
             application/problem+json:
               schema: { $ref: '#/components/schemas/Problem' }
         '503':
-          description: 'This deployment serves no messaging channels (`code: channel_connections_not_configured`), or has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`).'
+          description: 'This deployment serves no messaging channels (`code: channel_connections_not_configured`), has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`), or was not told where Gradion Dispact is (`code: channel_provider_not_configured`).'
           content:
             application/problem+json:
               schema: { $ref: '#/components/schemas/Problem' }
@@ -13596,7 +13596,7 @@ paths:
         '403': { $ref: '#/components/responses/PermissionDenied' }
         '404': { $ref: '#/components/responses/NotFound' }
         '503':
-          description: 'This deployment serves no messaging channels (`code: channel_connections_not_configured`), or has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`).'
+          description: 'This deployment serves no messaging channels (`code: channel_connections_not_configured`), has no credential store configured to seal a bot token in (`code: channel_credentials_not_configured`), or was not told where Gradion Dispact is (`code: channel_provider_not_configured`).'
           content:
             application/problem+json:
               schema: { $ref: '#/components/schemas/Problem' }
@@ -35430,13 +35430,13 @@ components:
       required: [id, provider, channelId, channelLabel, status, version]
       properties:
         id: { type: string, format: uuid }
-        provider: { type: string, enum: [telegram] }
+        provider: { type: string, enum: [telegram, dispact] }
         channelId:
           type: string
-          description: The provider's own id for the bot — the key the binding is unique on.
+          description: The provider's own id for the bot — the key the binding is unique on. For `dispact`, the bot user's id, which survives a token rotation.
         channelLabel:
           type: string
-          description: The bot's @username. Display only — a username is mutable and re-assignable, so it identifies nothing.
+          description: The bot's @username (for `dispact`, its name and the Dispact workspace). Display only — a name is mutable and re-assignable, so it identifies nothing.
         status:
           type: string
           enum: [pending, connected, disconnected, error, reauth_required]
@@ -35459,11 +35459,14 @@ components:
       type: object
       required: [provider, botToken]
       properties:
-        provider: { type: string, enum: [telegram] }
+        provider:
+          type: string
+          enum: [telegram, dispact]
+          description: '`dispact` is a Gradion Dispact app bot. Once one is connected, each deal gets a private Dispact channel when it is created or next changes. Its owner, assignees and assigned teams are invited when they can open the deal, and the channel shows the deal''s stage, amount, close date and owner.'
         botToken:
           type: string
           minLength: 1
-          description: The BotFather token, `<bot id>:<secret>`. Sealed into the vault on arrival and never echoed back.
+          description: The BotFather token, `<bot id>:<secret>`, or the Dispact app bot token, `gwapp_<secret>`. Sealed into the vault on arrival and never echoed back.
     ReplaceChannelTokenRequest:
       type: object
       required: [botToken]
@@ -35471,7 +35474,7 @@ components:
         botToken:
           type: string
           minLength: 1
-          description: The replacement BotFather token. Sealed into the vault on arrival and never echoed back.
+          description: The replacement BotFather token, or for `dispact` the replacement app bot token. Sealed into the vault on arrival and never echoed back.
 
     ImportObject:
       type: string

@@ -38,6 +38,9 @@
 // per workspace turn, so "when did it last succeed" outlives River's day of
 // retention — bookkeeping about a pass, not audited).
 //
+// deal_channel holds the Gradion Dispact channel and card message each deal
+// posts to. It is sync bookkeeping, so it is not audited.
+//
 // Two more tables back the undo of an owner identity.
 // capture_owner_identity_withdrawn holds a withdrawn identity for the ten
 // minutes of its undo. capture_alias_refused holds a learned alias the seat

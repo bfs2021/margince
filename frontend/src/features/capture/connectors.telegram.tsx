@@ -2,7 +2,6 @@
 // SPDX-FileCopyrightText: 2026 Gradion
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Send } from "lucide-react";
 import { useState } from "react";
 import { api } from "../../api/client";
 import type { components } from "../../api/schema";
@@ -27,7 +26,11 @@ import {
   unwrap,
 } from "../../lib/problem";
 import { useMe } from "../../lib/session";
-import { TelegramConnectForm } from "./telegram-connect-form";
+import {
+  type ChannelProvider,
+  channelConnectorCopy,
+} from "./channelconnectorcopy";
+import { ChannelConnectForm } from "./telegram-connect-form";
 
 // The workspace's messaging bot, as its own file. It shares the connections
 // card with the mail roster and nothing else: a different endpoint, a different
@@ -67,7 +70,7 @@ function useChannelConnections() {
 
 // One live bot as a row: its handle, a badge only when it is not live, and
 // whichever of the two verbs this reader holds.
-function TelegramConnectionRow({
+function ChannelConnectionRow({
   connection,
   onEdit,
   onDisconnect,
@@ -77,13 +80,14 @@ function TelegramConnectionRow({
   onDisconnect?: () => void;
 }>) {
   const t = useT();
-  const handle = `@${connection.channelLabel}`;
+  const copy = channelConnectorCopy(connection.provider);
+  const handle = copy.handle(connection.channelLabel);
   return (
     <SettingRow
-      testId="telegram-connection"
+      testId={`${connection.provider}-connection`}
       label={
         <span className="connector-head">
-          <KeyedName name={t("connectors.provTelegram")} code={handle} />
+          <KeyedName name={t(copy.name)} code={handle} />
           {connection.status !== "connected" && (
             <Badge tone={statusTone(connection.status)}>
               {t(statusLabel(connection.status))}
@@ -97,7 +101,7 @@ function TelegramConnectionRow({
             <OverflowMenu label={t("table.rowActions", { name: handle })}>
               {onEdit && (
                 <Button aria-haspopup="dialog" onClick={onEdit}>
-                  {t("connectors.telegramEditToken")}
+                  {t("connectors.channelEditToken")}
                 </Button>
               )}
               {onDisconnect && (
@@ -117,11 +121,15 @@ function TelegramConnectionRow({
   );
 }
 
-// Everything the Telegram panel shows INSTEAD of its rows. Split out so the
-// panel function keeps one return and its hooks stay unconditional.
-function TelegramNotice({
+// What a bot panel shows in place of its rows, split out so the panel keeps
+// one return and unconditional hooks.
+function ChannelNotice({
+  provider,
   query,
-}: Readonly<{ query: ReturnType<typeof useChannelConnections> }>) {
+}: Readonly<{
+  provider: ChannelProvider;
+  query: ReturnType<typeof useChannelConnections>;
+}>) {
   const t = useT();
   if (query.isPending) {
     return <p>{t("connectors.loading")}</p>;
@@ -136,27 +144,27 @@ function TelegramNotice({
   if (query.data.notConfigured) {
     return (
       <EmptyState>
-        <p>{t("connectors.telegramNotConfigured")}</p>
+        <p>{t(channelConnectorCopy(provider).notConfigured)}</p>
       </EmptyState>
     );
   }
   return null;
 }
 
-// The workspace's messaging bot, as its own panel.
+// One provider's workspace bot as its own panel. Telegram and Dispact bots
+// coexist, so each panel lists only its own provider's rows.
 //
-// A bot connects for the WHOLE workspace rather than per-user (Task 17,
-// design §9.1/§9.2), and a send needs exactly one of them: with a second
-// live bot the workspace can send nothing at all until an admin removes it.
-// This panel is the only surface that can, so it must show every connection
-// the list returns — a bot it hides is a bot nobody can disconnect. Every one
-// of them is a row of its own for exactly that reason.
+// A send needs one live bot per provider, and this panel is the only place to
+// remove a second one. So it lists every row of its provider.
 //
-// Editing goes through the SAME TelegramConnectForm modal, whose PATCH takes
-// the place of a disconnect-reconnect cycle (§9.2). The panel mounts one
-// form instance, keyed to whichever row opened it.
-export function TelegramConnectorsPanel() {
+// Editing reuses ChannelConnectForm, whose PATCH replaces a disconnect and
+// reconnect. One form instance is keyed to the row that opened it.
+export function ChannelConnectorsPanel({
+  provider,
+}: Readonly<{ provider: ChannelProvider }>) {
   const t = useT();
+  const copy = channelConnectorCopy(provider);
+  const Icon = copy.icon;
   const qc = useQueryClient();
   const query = useChannelConnections();
   const [connectOpen, setConnectOpen] = useState(false);
@@ -189,7 +197,9 @@ export function TelegramConnectorsPanel() {
   // flight, and the read-only line must not flash at an admin on each load.
   const me = useMe();
   const live = query.isSuccess && !query.data.notConfigured;
-  const connections = live ? query.data.data : [];
+  const connections = live
+    ? query.data.data.filter((connection) => connection.provider === provider)
+    : [];
   // A deployment with no messaging channels withholds the verbs from every
   // seat, so the not-configured notice is the reason and this line stays quiet.
   const readOnly =
@@ -200,36 +210,34 @@ export function TelegramConnectorsPanel() {
   };
 
   return (
-    <Panel title={t("connectors.telegramTitle")}>
+    <Panel title={t(copy.title)}>
       {(!live || readOnly) && (
         <PanelBody>
-          {readOnly && (
-            <PanelIntro>{t("connectors.telegramReadOnly")}</PanelIntro>
-          )}
-          <TelegramNotice query={query} />
+          {readOnly && <PanelIntro>{t(copy.readOnly)}</PanelIntro>}
+          <ChannelNotice provider={provider} query={query} />
         </PanelBody>
       )}
       {live && (
         <SettingList bleed={connections.length > 0 ? "records" : "settings"}>
           {connections.length === 0 ? (
             <SettingRow
-              testId="telegram-empty"
-              label={t("connectors.telegramEmptyLabel")}
-              description={t("connectors.telegramSub")}
+              testId={`${provider}-empty`}
+              label={t(copy.emptyLabel)}
+              description={t(copy.sub)}
               control={
                 canCreate && (
                   <Button
-                    data-testid="telegram-connect"
+                    data-testid={`${provider}-connect`}
                     onClick={() => setConnectOpen(true)}
                   >
-                    <Send aria-hidden /> {t("connectors.telegramConnectCta")}
+                    <Icon aria-hidden /> {t(copy.connectCta)}
                   </Button>
                 )
               }
             />
           ) : (
             connections.map((connection) => (
-              <TelegramConnectionRow
+              <ChannelConnectionRow
                 key={connection.id}
                 connection={connection}
                 onEdit={
@@ -243,7 +251,8 @@ export function TelegramConnectorsPanel() {
           )}
         </SettingList>
       )}
-      <TelegramConnectForm
+      <ChannelConnectForm
+        provider={provider}
         // Keyed to the row that opened it, so the form never carries one
         // connection's in-progress state onto another's rotation.
         key={editingConnection?.id ?? "new"}
@@ -255,7 +264,7 @@ export function TelegramConnectorsPanel() {
       <ConfirmModal
         open={disconnecting !== null}
         onClose={() => setDisconnecting(null)}
-        title={t("connectors.telegramDisconnectTitle")}
+        title={t("connectors.channelDisconnectTitle")}
         confirmLabel={t("connectors.disconnect")}
         confirmVariant="danger"
         pending={disconnect.isPending}
@@ -268,7 +277,7 @@ export function TelegramConnectorsPanel() {
           }
         }}
       >
-        <p>{t("connectors.telegramDisconnectBody")}</p>
+        <p>{t(copy.disconnectBody)}</p>
       </ConfirmModal>
     </Panel>
   );

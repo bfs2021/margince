@@ -96,6 +96,9 @@ bootstrap_admin:
 # # HMAC key of at least 32 bytes signing the OAuth connect state; required for the Gmail and Graph
 # # connect flows.
 # connector_state_key: ${file:/run/secrets/connector_state_key}
+# # Origin of the Gradion Dispact install; unset, Dispact cannot be connected and no deal is synced
+# # to it.
+# dispact_base_url:
 # # Postgres DSN of the runtime app role; migrate falls back to it when MARGINCE_OWNER_DSN is unset.
 # dsn: ${file:/run/secrets/dsn}
 # # Nominatim base URL, or public; set it on the api and the worker together, or a lookup is never

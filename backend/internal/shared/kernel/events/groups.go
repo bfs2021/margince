@@ -74,6 +74,10 @@ func Groups() []Group {
 		// where deal.stage_changed carries both the win and the reopen that
 		// reverses one.
 		{Name: "cg:commissions", Streams: forEntities(dealStreamEntity)},
+		// Keeping each deal's Gradion Dispact channel current. Its own group
+		// because every event costs calls to another system: a Dispact outage
+		// must stall only this lane, never accrual or the projections.
+		{Name: "cg:dispact", Streams: forEntities(dealStreamEntity)},
 		// Turning records that already settle something into stage evidence: a
 		// contract turning active, a buyer confirming a room version, a held
 		// meeting. Both streams, because contract.* and deal_room.* ride the

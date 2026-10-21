@@ -82,6 +82,7 @@ var anonymousOutbound = gatekit.Waive(map[string]string{
 	"internal/modules/capture/graphcal/client.go:func get":          "runs inside an OAuth grant the contact made to this app, which names the caller to the provider more precisely than an agent could",
 	"internal/modules/capture/oauthflow/oauthflow.go:func token":    "exchanges a code against a token endpoint using this app's registered client id, which is the identity that endpoint checks",
 	"internal/modules/capture/telegram/api.go:func request":         "calls a bot API under the bot's own token, and the bot IS the identity there",
+	"internal/modules/capture/dispact/api.go:func call":             "calls a bot API under the bot's own token, and the bot IS the identity there",
 	"internal/modules/capture/telegram/sendfiles.go:func SendFiles": "calls a bot API under the bot's own token, and the bot IS the identity there",
 })
 

@@ -20,6 +20,7 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 
 	crmcontracts "github.com/margince/margince/backend/internal/contracts"
+	"github.com/margince/margince/backend/internal/modules/capture/dispact"
 	"github.com/margince/margince/backend/internal/modules/capture/telegram"
 	"github.com/margince/margince/backend/internal/platform/httperr"
 	"github.com/margince/margince/backend/internal/platform/keyvault"
@@ -164,6 +165,18 @@ func writeChannelErr(w http.ResponseWriter, r *http.Request, err error) {
 			Code:   "channel_token_rejected",
 			Detail: "The bot token was rejected. Check the token BotFather issued, and that it has not been revoked.",
 		})
+	case errors.Is(err, dispact.ErrTokenRejected):
+		httperr.Write(w, r, &httperr.DetailedError{
+			Status: http.StatusBadRequest,
+			Code:   "channel_token_rejected",
+			Detail: "The bot token was rejected. Paste the token Gradion Dispact showed when the app was installed, and check it has not been rotated.",
+		})
+	case errors.Is(err, ErrChannelProviderNotConfigured):
+		httperr.Write(w, r, &httperr.DetailedError{
+			Status: http.StatusServiceUnavailable,
+			Code:   "channel_provider_not_configured",
+			Detail: "This installation does not know where Gradion Dispact is. Set dispact_base_url and restart.",
+		})
 	case errors.Is(err, ErrChannelWorkspaceBotAlreadyBound):
 		httperr.Write(w, r, &httperr.DetailedError{
 			Status: http.StatusConflict,
@@ -176,17 +189,17 @@ func writeChannelErr(w http.ResponseWriter, r *http.Request, err error) {
 			Code:   "channel_credentials_not_configured",
 			Detail: "This installation has no credential store configured, so a bot's token cannot be sealed or removed. Configure one and restart.",
 		})
-	case errors.Is(err, telegram.ErrUnreachable):
+	case errors.Is(err, telegram.ErrUnreachable), errors.Is(err, dispact.ErrUnreachable):
 		httperr.Write(w, r, &httperr.DetailedError{
 			Status: http.StatusBadGateway,
 			Code:   "channel_provider_unreachable",
 			Detail: "The messaging provider could not be reached. Nothing was changed — retry once the provider is back.",
 		})
-	case errors.Is(err, telegram.ErrRequestRejected):
+	case errors.Is(err, telegram.ErrRequestRejected), errors.Is(err, dispact.ErrRequestRejected):
 		httperr.Write(w, r, &httperr.DetailedError{
 			Status: http.StatusBadGateway,
 			Code:   "channel_provider_rejected",
-			Detail: "The messaging provider refused this request. Nothing was changed — check the bot has not been restricted or deleted in BotFather.",
+			Detail: "The messaging provider refused this request. Nothing was changed — check the bot has not been restricted, deleted or uninstalled.",
 		})
 	default:
 		httperr.Write(w, r, err)

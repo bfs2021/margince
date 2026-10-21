@@ -16,7 +16,11 @@ import { Callout } from "../../design-system/callout";
 import { Heading } from "../../design-system/heading";
 import { useT } from "../../i18n";
 import { statusLabel, statusTone } from "../../lib/connector-status";
-import { problemMessageOf, unwrap } from "../../lib/problem";
+import { problemCodeOf, problemMessageOf, unwrap } from "../../lib/problem";
+import {
+  type ChannelProvider,
+  channelConnectorCopy,
+} from "./channelconnectorcopy";
 import "../../design-system/querystates.css";
 
 // The Telegram connector: one bot connects for the WHOLE workspace, not
@@ -31,14 +35,18 @@ import "../../design-system/querystates.css";
 // first-connect (no `connection` prop) and that in-place edit (a `connection`
 // prop supplies the id PATCH targets).
 
+// A Gradion Dispact bot takes the same form; the provider prop picks its words.
+
 type ChannelConnection = components["schemas"]["ChannelConnection"];
 
-export function TelegramConnectForm({
+export function ChannelConnectForm({
+  provider,
   open,
   onClose,
   connection,
   onConnected,
 }: Readonly<{
+  provider: ChannelProvider;
   open: boolean;
   onClose: () => void;
   // Present only when replacing an existing connection's token; absent for
@@ -48,13 +56,20 @@ export function TelegramConnectForm({
   onConnected?: () => void;
 }>) {
   const t = useT();
+  const copy = channelConnectorCopy(provider);
   const headingId = useId();
   const formId = useId();
   const queryClient = useQueryClient();
   const [botToken, setBotToken] = useState("");
 
   const connect = useMutation({
-    mutationFn: async (token: string): Promise<ChannelConnection> => {
+    mutationFn: async ({
+      token,
+      target,
+    }: Readonly<{
+      token: string;
+      target: ChannelProvider;
+    }>): Promise<ChannelConnection> => {
       if (connection) {
         return unwrap(
           await api.PATCH("/channel-connections/{id}", {
@@ -66,7 +81,7 @@ export function TelegramConnectForm({
       }
       return unwrap(
         await api.POST("/channel-connections", {
-          body: { provider: "telegram", botToken: token },
+          body: { provider: target, botToken: token },
         }),
         t,
       );
@@ -108,20 +123,22 @@ export function TelegramConnectForm({
   const errorMessage = connect.isError
     ? problemMessageOf(connect.error, t)
     : null;
+  // An installation that was never told where this provider lives is a calm
+  // feature-off state, not a refusal of the token the admin pasted.
+  const providerNotConfigured =
+    problemCodeOf(connect.error) === "channel_provider_not_configured";
   const resolved = connect.isSuccess ? connect.data : null;
 
   return (
     <Modal open={open} onClose={onClose} labelledBy={headingId} intent="form">
       <Heading size="large" id={headingId} className="t-h2 modal-title">
-        {connection
-          ? t("connectors.telegramEditTitle")
-          : t("connectors.telegramModalTitle")}
+        {connection ? t("connectors.channelEditTitle") : t(copy.modalTitle)}
       </Heading>
       {resolved ? (
         <>
           <div className="form-stack">
             <p className="t-body">
-              {t("connectors.telegramConnectedAs", {
+              {t(copy.connectedAs, {
                 username: resolved.channelLabel,
               })}
             </p>
@@ -153,7 +170,7 @@ export function TelegramConnectForm({
               if (!ready || connect.isPending) {
                 return;
               }
-              connect.mutate(botToken.trim());
+              connect.mutate({ token: botToken.trim(), target: provider });
             }}
           >
             {/* A parked binding still reads as parked while its token is replaced. */}
@@ -165,9 +182,9 @@ export function TelegramConnectForm({
               </div>
             )}
             <Field
-              label={t("connectors.telegramBotToken")}
+              label={t("connectors.channelBotToken")}
               required
-              hint={t("connectors.telegramBotTokenHint")}
+              hint={t(copy.tokenHint)}
             >
               {(control) => (
                 <TextInput
@@ -179,14 +196,22 @@ export function TelegramConnectForm({
                 />
               )}
             </Field>
-            {errorMessage && (
+            {providerNotConfigured ? (
               <Callout
-                tone="danger"
+                tone="info"
                 kind="outcome"
-                title={t("connectors.telegramConnectFailed")}
-              >
-                {errorMessage}
-              </Callout>
+                title={t(copy.notConfigured)}
+              />
+            ) : (
+              errorMessage && (
+                <Callout
+                  tone="danger"
+                  kind="outcome"
+                  title={t("connectors.channelConnectFailed")}
+                >
+                  {errorMessage}
+                </Callout>
+              )
             )}
           </form>
           <div className="actions">
@@ -206,8 +231,8 @@ export function TelegramConnectForm({
               busyLabel={t("create.saving")}
             >
               {connection
-                ? t("connectors.telegramReplaceCta")
-                : t("connectors.telegramSubmitCta")}
+                ? t("connectors.channelReplaceCta")
+                : t("connectors.channelSubmitCta")}
             </Button>
           </div>
         </>

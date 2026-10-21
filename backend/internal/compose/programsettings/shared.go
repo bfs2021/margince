@@ -66,6 +66,10 @@ var (
 		Key: "vat_check_base_url", Env: "MARGINCE_VAT_CHECK_BASE_URL", Flag: "vat-check-base-url", Type: config.String, Roles: both,
 		Doc: "VIES base URL, or public; set it on the api and the worker together, or a VAT check is never queued.",
 	})
+	DispactBaseURL = config.Define(config.Spec[string]{
+		Key: "dispact_base_url", Env: "MARGINCE_DISPACT_BASE_URL", Flag: "dispact-base-url", Type: config.String, Roles: both,
+		Doc: "Origin of the Gradion Dispact install; unset, Dispact cannot be connected and no deal is synced to it.",
+	})
 	GeocodeBaseURL = config.Define(config.Spec[string]{
 		Key: "geocode_base_url", Env: "MARGINCE_GEOCODE_BASE_URL", Flag: "geocode-base-url", Type: config.String, Roles: both,
 		Doc: "Nominatim base URL, or public; set it on the api and the worker together, or a lookup is never queued.",
@@ -127,7 +131,7 @@ func FakeModelFault(c *config.Config, posture runtimeenv.Environment) error {
 func Settings() []config.Any {
 	return []config.Any{
 		Redis, RedisPassword, AIRouting, AIFake, LogLevel, LogFormat, PublicBaseURL, WebhookKey,
-		VATCheckBaseURL, GeocodeBaseURL, GmailClientID, GmailClientSecret, GraphClientID, GraphClientSecret, GraphTenant,
+		VATCheckBaseURL, GeocodeBaseURL, DispactBaseURL, GmailClientID, GmailClientSecret, GraphClientID, GraphClientSecret, GraphTenant,
 		SchemaDSN, Addr, InlineRelay, MCPAppsBaseURL, APIBaseURL, ConnectorStateKey, MetricsToken, MetricsAccess,
 		TrustedProxies, GmailPushToken, GmailPushAudience, GmailPushServiceAccount, GmailJWKSURL, GraphPushToken,
 		MicrosoftSignInTenant,

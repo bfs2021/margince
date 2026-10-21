@@ -28,9 +28,9 @@ module to put a change in, read [modules.md](../modules.md).
 
 | | |
 |---|--:|
-| Tables | 317 |
-| Columns | 3759 |
-| Foreign keys | 521 |
+| Tables | 318 |
+| Columns | 3766 |
+| Foreign keys | 523 |
 | Owning areas | 36 |
 
 ## The 12 records everything else hangs off
@@ -43,7 +43,7 @@ Ranked by how many foreign keys point at them.
 | [`contact`](contacts.md#contact) | [contacts](contacts.md) | 32 | 45 |
 | [`company`](contacts.md#company) | [contacts](contacts.md) | 43 | 42 |
 | [`activity`](activities.md#activity) | [activities](activities.md) | 63 | 38 |
-| [`deal`](deals.md#deal) | [deals](deals.md) | 43 | 26 |
+| [`deal`](deals.md#deal) | [deals](deals.md) | 43 | 27 |
 | [`lead`](contacts.md#lead) | [contacts](contacts.md) | 38 | 17 |
 | [`project`](projects.md#project) | [projects](projects.md) | 23 | 10 |
 | [`stage`](deals.md#stage) | [deals](deals.md) | 10 | 10 |
@@ -97,7 +97,7 @@ erDiagram
 | [assignments](assignments.md) | 2 |
 | [assurance](assurance.md) | 7 |
 | [automation](automation.md) | 3 |
-| [capture](capture.md) | 24 |
+| [capture](capture.md) | 25 |
 | [collections](collections.md) | 13 |
 | [commissions](commissions.md) | 1 |
 | [comms](comms.md) | 1 |
@@ -207,7 +207,7 @@ erDiagram
 | [`capture_test_mailbox_sent`](capture.md#capture_test_mailbox_sent) | capture | 8 | 0 |
 | [`capture_thread_verdict`](capture.md#capture_thread_verdict) | capture | 16 | 0 |
 | [`capture_trace`](capture.md#capture_trace) | capture | 12 | 0 |
-| [`channel_connection`](capture.md#channel_connection) | capture | 12 | 0 |
+| [`channel_connection`](capture.md#channel_connection) | capture | 12 | 1 |
 | [`channel_provider`](compose.md#channel_provider) | compose | 5 | 2 |
 | [`close_date_run`](deals.md#close_date_run) | deals | 15 | 2 |
 | [`close_date_run_member`](deals.md#close_date_run_member) | deals | 5 | 0 |
@@ -260,8 +260,9 @@ erDiagram
 | [`data_task_review`](platform.md#data_task_review) | platform | 6 | 0 |
 | [`data_task_run`](platform.md#data_task_run) | platform | 22 | 0 |
 | [`data_task_run_history`](platform.md#data_task_run_history) | platform | 5 | 0 |
-| [`deal`](deals.md#deal) | deals | 43 | 26 |
+| [`deal`](deals.md#deal) | deals | 43 | 27 |
 | [`deal_acquisition_source`](deals.md#deal_acquisition_source) | deals | 9 | 1 |
+| [`deal_channel`](capture.md#deal_channel) | capture | 7 | 0 |
 | [`deal_correction`](deals.md#deal_correction) | deals | 18 | 0 |
 | [`deal_document_hide`](activities.md#deal_document_hide) | activities | 4 | 0 |
 | [`deal_forecast_history`](deals.md#deal_forecast_history) | deals | 7 | 0 |

@@ -58,6 +58,7 @@ type apiConfig struct {
 	metricsAccess         string
 	vatCheckBaseURL       string
 	geocodeBaseURL        string
+	dispactBaseURL        string
 	// posture is what MARGINCE_ENV says this deployment is, read ONCE here
 	// (OPS-CFG-2) rather than at each of the three places that used to ask.
 	// It selects which license authorities are honoured, and decides nothing
@@ -147,7 +148,8 @@ func fromRegistry(loaded *config.Config, posture runtimeenv.Environment) (apiCon
 		microsoftSignInTenant: config.Val(loaded, ps.MicrosoftSignInTenant), connectorStateKey: config.Val(loaded, ps.ConnectorStateKey),
 		webhookKey: config.Val(loaded, ps.WebhookKey), metricsToken: config.Val(loaded, ps.MetricsToken), metricsAccess: config.Val(loaded, ps.MetricsAccess),
 		vatCheckBaseURL: config.Val(loaded, ps.VATCheckBaseURL), geocodeBaseURL: config.Val(loaded, ps.GeocodeBaseURL),
-		passwordLogin: config.Val(loaded, ps.PasswordLogin), settings: loaded,
+		dispactBaseURL: config.Val(loaded, ps.DispactBaseURL),
+		passwordLogin:  config.Val(loaded, ps.PasswordLogin), settings: loaded,
 		mcpConnector: config.Val(loaded, ps.MCPConnector),
 		clientRegistration: identity.RegistrationMethods{
 			Dynamic:          config.Val(loaded, ps.MCPDynamicRegistration),

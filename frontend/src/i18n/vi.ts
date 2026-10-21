@@ -1609,6 +1609,7 @@ export const vi = {
   "systemJob.capture_trace_sweep": "Dọn dẹp dấu vết thư",
   "systemJob.close_date": "Kiểm tra ngày chốt",
   "systemJob.commission_accrual": "Ghi nhận hoa hồng",
+  "systemJob.dispact_sync": "Đồng bộ deal với Gradion Dispact",
   "systemJob.commitment_settle": "Chốt kết quả cam kết",
   "systemJob.comms_send": "Gửi tin nhắn",
   "systemJob.connector_app_read": "Đọc cài đặt trình kết nối",
@@ -8758,24 +8759,40 @@ export const vi = {
   "connectors.telegramConnectCta": "Kết nối bot Telegram",
   "connectors.telegramReadOnly":
     "Chỉ quản trị viên hoặc thành viên Vận hành mới có thể kết nối hoặc đổi bot.",
-  "connectors.telegramEditToken": "Thay token",
-  "connectors.telegramDisconnectTitle": "Ngắt kết nối bot này?",
+  "connectors.channelEditToken": "Thay token",
+  "connectors.channelDisconnectTitle": "Ngắt kết nối bot này?",
   "connectors.telegramDisconnectBody":
     "Thao tác này xóa token đã lưu và ngừng kiểm tra tin nhắn của bot. Việc thu thập và gửi sẽ dừng ngay; các hồ sơ đã thu thập vẫn ở trong CRM.",
   "connectors.telegramModalTitle": "Kết nối bot Telegram",
-  "connectors.telegramEditTitle": "Thay token bot",
-  "connectors.telegramBotToken": "Token bot",
+  "connectors.channelEditTitle": "Thay token bot",
+  "connectors.channelBotToken": "Token bot",
   "connectors.telegramBotTokenHint":
     "Token BotFather đã cấp cho bot. Token được lưu trong kho khóa và sẽ không hiển thị lại.",
-  "connectors.telegramSubmitCta": "Kết nối",
-  "connectors.telegramReplaceCta": "Thay token",
+  "connectors.channelSubmitCta": "Kết nối",
+  "connectors.channelReplaceCta": "Thay token",
   "connectors.telegramConnectedAs": "Đã kết nối với tên @{username}.",
-  "connectors.telegramConnectFailed": "Không thể kết nối bot",
+  "connectors.channelConnectFailed": "Không thể kết nối bot",
+  "connectors.provDispact": "Gradion Dispact",
+  "connectors.dispactTitle": "Bot Gradion Dispact",
+  "connectors.dispactSub":
+    "Mỗi deal có một kênh Dispact riêng khi được tạo hoặc khi thay đổi lần tới. Thành viên chịu trách nhiệm, thành viên được giao và nhóm được giao được mời vào nếu họ có quyền mở deal, và thẻ deal trong kênh luôn cập nhật giai đoạn, số tiền, ngày chốt và thành viên chịu trách nhiệm.",
+  "connectors.dispactNotConfigured":
+    "Bản cài đặt này chưa cấu hình Gradion Dispact.",
+  "connectors.dispactConnectCta": "Kết nối bot Dispact",
+  "connectors.dispactReadOnly":
+    "Chỉ quản trị viên hoặc thành viên Vận hành mới có thể kết nối hoặc đổi bot Dispact.",
+  "connectors.dispactDisconnectBody":
+    "Thao tác này xóa token đã lưu. Deal mới sẽ không có kênh Dispact, và thẻ deal sẽ ngừng cập nhật.",
+  "connectors.dispactModalTitle": "Kết nối bot Gradion Dispact",
+  "connectors.dispactBotTokenHint":
+    "Token bot ứng dụng mà Gradion Dispact hiển thị khi bạn cài ứng dụng. Token bắt đầu bằng gwapp_. Token được lưu trong kho khóa và sẽ không hiển thị lại.",
+  "connectors.dispactConnectedAs": "Đã kết nối với tên {username}.",
   "connectors.openNamed": "Mở {name}",
   "connectors.emptyLabel": "Chưa kết nối hộp thư",
   "connectors.emptyHint":
     "Kết nối hộp thư hoặc lịch để thu thập thư và cuộc họp.",
   "connectors.telegramEmptyLabel": "Chưa kết nối bot",
+  "connectors.dispactEmptyLabel": "Chưa kết nối bot Dispact",
 
   // The workspace's own consumer-mail list (CAP-PARAM-5): what the shipped
   // baseline missed, and what it got wrong. Admin-curated and shared, because

@@ -60,6 +60,7 @@ type workerConfig struct {
 	webhookKey        string
 	geocodeBaseURL    string
 	vatCheckBaseURL   string
+	dispactBaseURL    string
 	certLogBaseURL    string
 	// jobDrainWindow is how long a job already running at shutdown keeps its
 	// work context; see programsettings.DefaultJobDrainWindow for the budget it is part of.
@@ -138,6 +139,7 @@ func fromRegistry(loaded *config.Config, posture runtimeenv.Environment) workerC
 		graphTenant: config.Val(loaded, ps.GraphTenant), gmailPubsubTopic: config.Val(loaded, ps.GmailPubsubTopic),
 		graphNotifyURL: config.Val(loaded, ps.GraphNotificationURL), webhookKey: config.Val(loaded, ps.WebhookKey),
 		geocodeBaseURL: config.Val(loaded, ps.GeocodeBaseURL), vatCheckBaseURL: config.Val(loaded, ps.VATCheckBaseURL),
+		dispactBaseURL: config.Val(loaded, ps.DispactBaseURL),
 		certLogBaseURL: config.Val(loaded, ps.CertLogBaseURL), jobDrainWindow: config.Val(loaded, ps.JobDrainWindow), dataTasksPace: config.Val(loaded, ps.DataTasksPace),
 		logLevel: config.Val(loaded, ps.LogLevel), logFormat: config.Val(loaded, ps.LogFormat),
 		observeAddr: config.Val(loaded, ps.ObserveAddr), observePprof: config.Val(loaded, ps.ObservePprof),

@@ -24,10 +24,12 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"maps"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 
+	"github.com/margince/margince/backend/internal/modules/capture/dispact"
 	"github.com/margince/margince/backend/internal/modules/capture/telegram"
 	"github.com/margince/margince/backend/internal/platform/auth"
 	"github.com/margince/margince/backend/internal/platform/database"
@@ -45,9 +47,11 @@ import (
 // role may read the status.
 const channelConnectionObject = "channel_connection"
 
-// ProviderTelegram is the only channel provider implemented, and the only
-// value channel_connection.provider's CHECK admits.
-const ProviderTelegram = telegram.ProviderName
+// The channel providers, the values channel_connection.provider's CHECK admits.
+const (
+	ProviderTelegram = telegram.ProviderName
+	ProviderDispact  = dispact.ProviderName
+)
 
 // The channel_connection lifecycle states. There is deliberately no
 // half-connected state: a pull ingress makes no provider call after the insert,
@@ -116,6 +120,10 @@ type ConnectRequest struct {
 // reply on either.
 var ErrChannelWorkspaceBotAlreadyBound = errors.New("capture: this installation already has a live channel connection")
 
+// ErrChannelProviderNotConfigured reports that this deployment knows the provider
+// but was not told where to reach it, which an operator fixes in configuration.
+var ErrChannelProviderNotConfigured = errors.New("capture: this channel provider is not configured on this installation")
+
 // ErrChannelWiringIncomplete reports that this deployment composed no credential
 // custodian, so a bot token can neither be sealed nor destroyed. It is a
 // DEPLOYMENT FACT an operator can act on, not an internal fault, so it refuses by
@@ -124,22 +132,22 @@ var ErrChannelWorkspaceBotAlreadyBound = errors.New("capture: this installation 
 var ErrChannelWiringIncomplete = errors.New("capture: no credential custodian is composed for the channel surface")
 
 // ChannelStore owns channel_connection and its write shape. vault is the
-// custodian of the sealed bot token; api is the Telegram boundary.
+// custodian of the sealed bot token; binders hold each provider's boundary.
 //
 // Connecting needs no public address of our own: a poll dials OUT, so this store
 // has nothing to tell the provider about where we are.
 //
-// api is REQUIRED — every composition of this store supplies one, and a role
-// that serves no channel surface composes no store at all rather than a
-// client-less one. vault may be absent on a deployment that configured none, and
+// The Telegram binder is REQUIRED, and a role that serves no channel surface
+// composes no store at all. The Dispact binder is present only when the operator
+// configured where Dispact lives. vault may be absent on a deployment that configured none, and
 // every entry point that needs it refuses by name rather than proceeding
 // half-wired.
 type ChannelStore struct {
 	// db binds the workspace this store runs for (ADR-0091 §9 step 3).
-	db    *database.DB
-	vault keyvault.Vault
-	api   telegram.API
-	log   *slog.Logger
+	db      *database.DB
+	vault   keyvault.Vault
+	binders map[string]channelBinder
+	log     *slog.Logger
 }
 
 // NewChannelStore wires the channel-connection store. vault may be nil when the
@@ -150,7 +158,17 @@ func NewChannelStore(db *database.DB, vault keyvault.Vault, api telegram.API, lo
 	if log == nil {
 		log = slog.Default()
 	}
-	return &ChannelStore{db: db, vault: vault, api: api, log: log}
+	binders := map[string]channelBinder{ProviderTelegram: telegramBinder{api: api}}
+	return &ChannelStore{db: db, vault: vault, binders: binders, log: log}
+}
+
+// WithDispact returns a copy of the store that also binds Dispact bots, reached
+// through api.
+func (s *ChannelStore) WithDispact(api dispact.API) *ChannelStore {
+	next := *s
+	next.binders = maps.Clone(s.binders)
+	next.binders[ProviderDispact] = dispactBinder{api: api}
+	return &next
 }
 
 // withVault returns a copy of the store carrying the credential custodian. The
@@ -168,9 +186,9 @@ func (s *ChannelStore) withVault(vault keyvault.Vault) *ChannelStore {
 //
 //  1. getMe — validates the token and yields the bot id and username. A bad
 //     token fails here, before anything is sealed or written.
-//  2. deleteWebhook — clears any registration the bot still carries, because
-//     Telegram refuses getUpdates while one exists. Pending updates are
-//     deliberately KEPT: they are the customer's messages.
+//  2. For Telegram, deleteWebhook — clears any registration the bot still
+//     carries, because Telegram refuses getUpdates while one exists. Pending
+//     updates are deliberately KEPT: they are the customer's messages.
 //  3. Seal the token in the vault.
 //  4. Insert the row `connected` with a zero cursor, in one transaction with its
 //     audit row.
@@ -191,10 +209,11 @@ func (s *ChannelStore) Connect(ctx context.Context, req ConnectRequest) (Channel
 	if err := auth.RequireHuman(ctx); err != nil {
 		return ChannelConnection{}, err
 	}
-	if err := s.requireConnectWiring(req.Provider); err != nil {
+	binder, err := s.requireConnectWiring(req.Provider)
+	if err != nil {
 		return ChannelConnection{}, err
 	}
-	if err := telegram.ValidateToken(req.BotToken); err != nil {
+	if err := binder.validate(req.BotToken); err != nil {
 		return ChannelConnection{}, err
 	}
 	ws, ok := principal.WorkspaceID(ctx)
@@ -202,11 +221,8 @@ func (s *ChannelStore) Connect(ctx context.Context, req ConnectRequest) (Channel
 		return ChannelConnection{}, errors.New("capture: channel connect called outside a workspace context")
 	}
 
-	bot, err := s.api.GetMe(ctx, req.BotToken)
+	bot, err := binder.bind(ctx, req.BotToken)
 	if err != nil {
-		return ChannelConnection{}, err
-	}
-	if err := s.clearWebhook(ctx, req.BotToken); err != nil {
 		return ChannelConnection{}, err
 	}
 
@@ -214,7 +230,7 @@ func (s *ChannelStore) Connect(ctx context.Context, req ConnectRequest) (Channel
 	if err != nil {
 		return ChannelConnection{}, err
 	}
-	row, err := s.insertConnected(ctx, bot, credentialRef)
+	row, err := s.insertConnected(ctx, req.Provider, bot, credentialRef)
 	if err != nil {
 		// A lost race for either unique index is the one failure that
 		// GUARANTEES no row persisted, so the just-sealed ref is definitely
@@ -259,37 +275,23 @@ func channelUniquenessRefusal(constraint string) error {
 const channelOneLiveBotIndex = "uq_channel_connection_provider"
 
 // requireConnectWiring refuses a connect this deployment cannot honestly
-// complete: an unimplemented provider, or a missing vault (nothing could seal the
-// token). Each refusal names what to fix.
-func (s *ChannelStore) requireConnectWiring(provider string) error {
-	if provider != ProviderTelegram {
-		return fmt.Errorf("channel provider %q is not implemented: %w", provider, apperrors.ErrConflict)
-	}
-	if s.vault == nil {
-		return fmt.Errorf("configure a credential store for this installation, so a bot token can be sealed: %w",
+// complete: an unknown or unconfigured provider, or a missing vault (nothing
+// could seal the token). Each refusal names what to fix.
+//
+//nolint:ireturn // each provider's binder behind the one connect ordering
+func (s *ChannelStore) requireConnectWiring(provider string) (channelBinder, error) {
+	binder, ok := s.binders[provider]
+	switch {
+	case !ok && provider == ProviderDispact:
+		return nil, fmt.Errorf("set dispact_base_url so this installation can reach Dispact: %w",
+			ErrChannelProviderNotConfigured)
+	case !ok:
+		return nil, fmt.Errorf("channel provider %q is not implemented: %w", provider, apperrors.ErrConflict)
+	case s.vault == nil:
+		return nil, fmt.Errorf("configure a credential store for this installation, so a bot token can be sealed: %w",
 			ErrChannelWiringIncomplete)
 	}
-	return nil
-}
-
-// clearWebhook removes any webhook a bot still carries, because Telegram refuses
-// getUpdates for a bot with one registered (telegram.ErrWebhookActive). It runs
-// before anything is sealed or written, so a provider refusal leaves no trace to
-// clean up.
-//
-// drop_pending_updates is NOT sent: those pending updates are the customer's
-// messages, and the first poll is meant to collect them.
-//
-// This DOES take a bot away from whatever had registered that webhook — a staging
-// installation, or an unrelated integration. That is unavoidable rather than
-// overlooked: the two ingress modes cannot coexist on one bot, so binding a bot
-// here means taking it, and the operator pasting the token is the one asserting
-// they may.
-func (s *ChannelStore) clearWebhook(ctx context.Context, token string) error {
-	if err := s.api.DeleteWebhook(ctx, token); err != nil {
-		return fmt.Errorf("capture: clearing the bot's webhook so its updates can be polled: %w", err)
-	}
-	return nil
+	return binder, nil
 }
 
 // sealBotToken puts the token in the vault before any row names it
@@ -306,7 +308,7 @@ func (s *ChannelStore) sealBotToken(ctx context.Context, ws ids.UUID, token stri
 // insertConnected writes the live row and its audit in one transaction. The
 // cursor starts at 0 — "whatever Telegram still holds" — so a freshly connected
 // bot collects the messages waiting for it rather than starting from silence.
-func (s *ChannelStore) insertConnected(ctx context.Context, bot telegram.Bot, credentialRef keyvault.Ref) (ChannelConnection, error) {
+func (s *ChannelStore) insertConnected(ctx context.Context, provider string, bot channelIdentity, credentialRef keyvault.Ref) (ChannelConnection, error) {
 	connectedBy, err := channelActor(ctx)
 	if err != nil {
 		return ChannelConnection{}, err
@@ -318,26 +320,18 @@ func (s *ChannelStore) insertConnected(ctx context.Context, bot telegram.Bot, cr
 			  (provider, channel_id, channel_label, credential_ref, status, poll_offset, connected_by)
 			VALUES ($1, $2, $3, $4, $5, 0, $6)
 			RETURNING `+channelConnectionColumns,
-			ProviderTelegram, channelIDOf(bot), bot.Username,
+			provider, bot.ID, bot.Label,
 			string(credentialRef), channelStatusConnected, connectedBy))
 		if err != nil {
 			return err
 		}
 		return auditLifecycle(ctx, tx, "create", channelConnectionObject, out.ID, nil,
-			channelAuditImage(out.ChannelID, out.ChannelLabel, out.Status))
+			channelAuditImage(out))
 	})
 	if err != nil {
 		return ChannelConnection{}, err
 	}
 	return out, nil
-}
-
-// channelIDOf renders the bot's global numeric id as the channel_id column's
-// text. Text rather than bigint because channel_id is the provider's opaque
-// handle for whatever a future provider calls a channel, not an integer this
-// system does arithmetic on.
-func channelIDOf(bot telegram.Bot) string {
-	return fmt.Sprintf("%d", bot.ID)
 }
 
 // channelActor resolves the human a connection is attributed to. connected_by
@@ -361,12 +355,12 @@ func channelActor(ctx context.Context) (ids.UUID, error) {
 // channelAuditImage is one side of a channel connection's audit trail. Neither
 // vault ref appears: the audit spine must not become a second custodian of the
 // credentials, and a ref tells a reader nothing the bot's own identity does not.
-func channelAuditImage(channelID, label, status string) map[string]any {
+func channelAuditImage(c ChannelConnection) map[string]any {
 	return map[string]any{
-		"provider":      ProviderTelegram,
-		"channel_id":    channelID,
-		"channel_label": label,
-		"status":        status,
+		"provider":      c.Provider,
+		"channel_id":    c.ChannelID,
+		"channel_label": c.ChannelLabel,
+		"status":        c.Status,
 	}
 }
 

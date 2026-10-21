@@ -173,6 +173,7 @@ func startEventLanes(laneCtx context.Context, background *sync.WaitGroup, cfg wo
 	if err := startContactDataEnrich(laneCtx, pool, rdb, providers, vault, lanes.background, logger, stdout); err != nil {
 		return lanes, err
 	}
+	startDispactDeals(laneCtx, cfg, pool, rdb, vault, lanes.background, logger, stdout)
 
 	// A company appearing queues its workspace's enrich pass now; the daily
 	// sweep stays the reconciler. Beside the enqueuing lanes rather than the

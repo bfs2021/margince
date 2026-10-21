@@ -200,14 +200,13 @@ func StopPollingChannelConnection(ctx context.Context, pool *pgxpool.Pool, id id
 		if _, err := storekit.LockRow(ctx, tx, "channel_connection", id, storekit.LiveOnly); err != nil {
 			return err
 		}
-		var was string
-		var channelID, label string
+		var was ChannelConnection
 		if err := tx.QueryRow(ctx,
-			`SELECT channel_id, channel_label, status FROM channel_connection WHERE id = $1`, id).
-			Scan(&channelID, &label, &was); err != nil {
+			`SELECT provider, channel_id, channel_label, status FROM channel_connection WHERE id = $1`, id).
+			Scan(&was.Provider, &was.ChannelID, &was.ChannelLabel, &was.Status); err != nil {
 			return fmt.Errorf("capture: reading channel connection %s before stopping its poll: %w", id, err)
 		}
-		if was == status {
+		if was.Status == status {
 			// Already recorded — a redelivered poll job re-learning the same
 			// provider fact. Writing again would append an audit row saying
 			// nothing changed.
@@ -218,8 +217,8 @@ func StopPollingChannelConnection(ctx context.Context, pool *pgxpool.Pool, id id
 			return fmt.Errorf("capture: taking channel connection %s out of the poll rotation: %w", id, err)
 		}
 		return auditLifecycle(ctx, tx, "update", channelConnectionObject, id,
-			channelPollHealthImage(channelID, label, was, ""),
-			channelPollHealthImage(channelID, label, status, reason))
+			channelPollHealthImage(was, ""),
+			channelPollHealthImage(stopped(was, status), reason))
 	})
 	if errors.Is(err, apperrors.ErrNotFound) {
 		// Archived or gone while the provider was being asked. There is nothing
@@ -234,8 +233,14 @@ func StopPollingChannelConnection(ctx context.Context, pool *pgxpool.Pool, id id
 // `poll_stopped_because` is the only record of WHICH provider fact moved the
 // connection — the row itself has no column for it, so an operator reading a
 // bare `error` status would otherwise have nothing to act on.
-func channelPollHealthImage(channelID, label, status, reason string) map[string]any {
-	image := channelAuditImage(channelID, label, status)
+func channelPollHealthImage(conn ChannelConnection, reason string) map[string]any {
+	image := channelAuditImage(conn)
 	image["poll_stopped_because"] = reason
 	return image
+}
+
+// stopped is conn under the status a failing poll parks it at.
+func stopped(conn ChannelConnection, status string) ChannelConnection {
+	conn.Status = status
+	return conn
 }
