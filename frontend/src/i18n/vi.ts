@@ -14,15 +14,90 @@ import type { MessageKey } from "./en";
 //     "pháp nhân" (onboarding's legal-block copy). The two senses share no
 //     string in this catalog and must stay that way.
 export const vi = {
-  "approvalPreferences.title": "Ẩn phê duyệt cho riêng bạn",
-  "approvalPreferences.explain":
-    "Loại bị ẩn chỉ rời hàng đợi của bạn. Thành viên khác vẫn thấy đề xuất. Ẩn hoặc khôi phục một loại sẽ tắt thay đổi tự động của bạn cho loại đó. Gửi tin, đặt lịch, hợp nhất và đề xuất có passport vẫn hiển thị.",
-  "approvalPreferences.review": "Xem cả đề xuất đã ẩn",
-  "approvalPreferences.reviewExplain":
-    "Chế độ này gồm đề xuất đã ẩn và hết hạn. Gói trong hàng đợi thường có thể hiển thị ít mục hơn do tùy chọn cá nhân. Xem từng đề xuất trước khi quyết định.",
-  "approvalPreferences.close": "Đóng xem xét",
-  "approvalPreferences.next": "Trang tiếp",
-  "approvalPreferences.first": "Trang đầu",
+  "homeRepair.taskPermission":
+    "Cần quyền lưu trữ hoạt động để lưu trữ các công việc đã xem xét.",
+  "homeRepair.classificationPermission":
+    "Cần quyền chỉnh sửa hoạt động để đổi kết quả tin nhắn.",
+  "homeRepair.reason.classificationNotAttempted":
+    "Chưa có lần kiểm tra hoàn tất. Xem trước lại khi có thể phân loại.",
+  "homeRepair.reclassify": "Phân loại lại",
+  "homeRepair.classifications": "Kết quả tin nhắn",
+  "homeRepair.asks": "Yêu cầu hành động",
+  "homeRepair.informs": "Chỉ cung cấp thông tin",
+  "homeRepair.classificationChange": "Hiện tại: {before}. Đề xuất: {after}.",
+  "homeRepair.reason.classificationDeclined":
+    "Bộ phân loại từ chối đánh giá tin nhắn này. Hãy tự xem xét.",
+  "homeRepair.reason.classificationUncertain":
+    "Lần kiểm tra mới chưa chắc chắn. Xem xét tin nhắn trước khi đổi kết quả.",
+  "homeRepair.reason.classificationAdopted":
+    "Thay đổi của người dùng hoặc thiếu bằng chứng kiểm toán ngăn việc sửa tự động.",
+  "homeRepair.reason.classificationWithheld":
+    "Một phần ngữ cảnh tin nhắn nằm ngoài quyền truy cập hiện tại. Xem xét trước khi đổi kết quả.",
+  "homeRepair.reason.classificationCurrent":
+    "Lần kiểm tra mới khớp với kết quả hiện tại.",
+  "homeRepair.reason.classificationChanged":
+    "Lần kiểm tra mới đề xuất kết quả khác cho tin nhắn.",
+  "homeRepair.suggestionPermission":
+    "Cần quyền tạo deal để ngừng các đề xuất này.",
+  "homeRepair.supersede": "Ngừng đề xuất deal tự động",
+  "homeRepair.suggestions": "Đề xuất deal",
+  "homeRepair.reason.dealExists":
+    "Công ty này đã có deal đang mở. Xem xét deal đó trước khi mở deal khác.",
+  "homeRepair.reason.dealSource":
+    "Ngày của nguồn không còn khớp với bằng chứng dùng cho đề xuất này.",
+  "homeRepair.reason.buyer":
+    "Các nguồn đã xem xét không còn xác minh yêu cầu hiện tại của bên mua.",
+  "homeRepair.reason.engagement":
+    "Hợp đồng hoặc công việc đang thực hiện không phù hợp với việc kết thúc toàn bộ quan hệ khách hàng.",
+  "homeRepair.reason.workstream":
+    "Bằng chứng chỉ kết thúc một công việc, không phải toàn bộ quan hệ khách hàng.",
+  "homeRepair.reason.evidenceChanged":
+    "Bằng chứng mới hơn đã xác minh thay thế ngữ cảnh của đề xuất này.",
+  "homeRepair.withdraw": "Rút đề xuất tự động",
+  "homeRepair.reason.duplicate": "Một đề xuất đang chờ giống hệt vẫn còn.",
+  "homeRepair.tasks": "Công việc",
+  "homeRepair.proposals": "Đề xuất",
+  "homeRepair.kind": "Công việc cần xem xét",
+  "homeRepair.preserved": "Được giữ lại hoặc bỏ qua",
+  "homeRepair.preservedNote":
+    "Bao gồm công việc được giữ lại để xem xét và các bản ghi đã thay đổi sau khi xem trước. Xem trước lần nữa để kiểm tra những gì còn lại.",
+
+  "homeRepair.inspect": "Xem chi tiết",
+  "dataTasks.blocked.review_required":
+    "Xem xét các thay đổi được đề xuất trước khi bắt đầu.",
+  "homeRepair.archive": "Lưu trữ lời nhắc tự động",
+  "homeRepair.keepReview": "Giữ lại để xem xét",
+  "homeRepair.keepCurrent": "Giữ công việc hiện tại",
+  "homeRepair.reason.adopted":
+    "Công việc này có thể đã được người dùng tạo, sửa hoặc ghim.",
+  "homeRepair.reason.unverified":
+    "Bằng chứng hiện có chưa đủ để thay đổi tự động.",
+  "homeRepair.reason.unavailable":
+    "Quyền truy cập hiện tại không cho phép kiểm tra nguồn.",
+  "homeRepair.reason.historical": "Nguồn cũ không có thời hạn hiện tại.",
+  "homeRepair.reason.baseline": "Nguồn có trước mốc lịch sử hộp thư đã chọn.",
+  "homeRepair.reason.cancelled": "Cuộc họp nguồn đã bị hủy.",
+  "homeRepair.reason.requestAge":
+    "Yêu cầu gốc đã quá thời hạn chờ; lưu trữ không đánh dấu yêu cầu là đã trả lời.",
+  "homeRepair.reason.contextUnread": "Các tin nhắn sau đó chưa được đọc.",
+  "homeRepair.reason.contextUnassessed":
+    "Các tin nhắn sau đó chưa được đánh giá về thay đổi đối với cam kết này.",
+  "homeRepair.reason.timeUnknown": "Chưa xác định được ngày của nguồn.",
+  "homeRepair.reason.timeContradicted": "Các ngày của nguồn không khớp nhau.",
+  "homeRepair.reason.meetingPending": "Cuộc họp nguồn chưa diễn ra.",
+  "homeRepair.reason.current":
+    "Công việc này vẫn đáp ứng các quy tắc hiện tại.",
+  "homeRepair.unnamed": "Không có chi tiết",
+  "homeRepair.explain":
+    "Chỉ bao gồm công việc hiện có quyền xem. Xem xét tối đa 25 mục mỗi lần. Có thể lưu trữ lời nhắc tự động đã cũ và rút các đề xuất trùng lặp hoặc đã cũ. Công việc do người dùng xử lý được giữ lại; không mục nào được đánh dấu hoàn thành.",
+  "homeRepair.preview": "Xem trước các mục",
+  "homeRepair.next": "Xem trang tiếp theo",
+  "homeRepair.summary":
+    "Kết quả cần đổi: {reclassify}. Lời nhắc cần lưu trữ: {archive}. Đề xuất cần rút: {withdraw}. Đề xuất deal cần ngừng: {supersede}. Giữ để xem xét: {review}; giữ làm công việc hiện tại: {keep}.",
+  "homeRepair.apply_one": "Áp dụng {count} thay đổi đã xem xét",
+  "homeRepair.apply_other": "Áp dụng {count} thay đổi đã xem xét",
+  "homeRepair.started":
+    "Lượt xử lý đã xem xét đang chờ chạy. Tiến độ hiển thị ở trên.",
 
   "dealSuggestion.linkedUnlinked":
     "Đã liên kết bằng chứng. Một số bằng chứng giữ nguyên vì không có quyền di chuyển.",
@@ -89,28 +164,15 @@ export const vi = {
   "dataTasks.blocked.earlier_step": "Cần hoàn tất bước trước đó.",
   "dataTasks.blocked.missing_prerequisite":
     "Cần hoàn tất các bản cập nhật bắt buộc trước.",
-  "dealSuggestion.linkedUnlinked":
-    "Đã liên kết bằng chứng. Một số bằng chứng giữ nguyên vì không có quyền di chuyển.",
-  "dealSuggestion.searchExisting": "Tìm giao dịch",
-  "dealSuggestion.existingDeal": "Giao dịch hiện có",
-  "dealSuggestion.moreDeals": "Tải thêm giao dịch",
-  "dealSuggestion.noMatchingDeals":
-    "Không có giao dịch phù hợp tại công ty này.",
-  "dealSuggestion.changed":
-    "Đề xuất này không còn khả dụng. Tải lại các mục cần kiểm tra để xem trạng thái hiện tại.",
-  "dealSuggestion.linkExisting": "Liên kết với giao dịch hiện có",
-  "dealSuggestion.linked": "Đã liên kết bằng chứng với giao dịch.",
-  "dealSuggestion.dismissTitle": "Bỏ qua đề xuất giao dịch",
-  "dealSuggestion.linkEffect":
-    "Liên kết bằng chứng được trích dẫn với giao dịch tại {company}; không tạo giao dịch mới.",
-  "dealSuggestion.dismissEffect":
-    "Đóng đề xuất này cho {company} và lưu lý do.",
-  "dealSuggestion.dismissReason": "Lý do",
-  "dealSuggestion.dismissReason.not_a_deal": "Không có ý định mua",
-  "dealSuggestion.dismissReason.already_tracked": "Đã được theo dõi",
-  "dealSuggestion.dismissReason.wrong_company": "Sai công ty",
-  "dealSuggestion.dismissReason.historical": "Hoạt động trong quá khứ",
-  "dealSuggestion.dismissReason.other": "Lý do khác",
+  "approvalPreferences.title": "Ẩn phê duyệt cho riêng bạn",
+  "approvalPreferences.explain":
+    "Loại bị ẩn chỉ rời hàng đợi của bạn. Thành viên khác vẫn thấy đề xuất. Ẩn hoặc khôi phục một loại sẽ tắt thay đổi tự động của bạn cho loại đó. Gửi tin, đặt lịch, hợp nhất và đề xuất có passport vẫn hiển thị.",
+  "approvalPreferences.review": "Xem cả đề xuất đã ẩn",
+  "approvalPreferences.reviewExplain":
+    "Chế độ này gồm đề xuất đã ẩn và hết hạn. Gói trong hàng đợi thường có thể hiển thị ít mục hơn do tùy chọn cá nhân. Xem từng đề xuất trước khi quyết định.",
+  "approvalPreferences.close": "Đóng xem xét",
+  "approvalPreferences.next": "Trang tiếp",
+  "approvalPreferences.first": "Trang đầu",
   "approval.preview.nameUnavailable": "Không có tên",
   "approval.preview.structured": "Giá trị có cấu trúc: {value}",
   "approval.preview.resolveConflict":
