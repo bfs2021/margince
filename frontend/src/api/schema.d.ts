@@ -20735,7 +20735,8 @@ export interface paths {
          * List current FX rates (latest per currency), or one pair's history.
          * @description Admin/ops-only view. Without `from`, returns the latest effective rate per
          *     foreign currency (to = the workspace base currency). With `from=USD`, returns
-         *     that pair's full effective-dated history, newest first.
+         *     that pair's full effective-dated history, newest first. A caller that needs
+         *     only the sheet's currency codes reads `GET /fx-rates/currencies`.
          */
         get: operations["listFxRates"];
         put?: never;
@@ -20791,6 +20792,31 @@ export interface paths {
          *     (x-agent-access: human-only). Audit-only write (no event stream, EVT-NOEVT-3).
          */
         delete: operations["deleteAiModelRate"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fx-rates/currencies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the base currency and the currency codes on the FX rate sheet, without their rates.
+         * @description The workspace base currency, and the foreign currencies of the sheet
+         *     head (the same rows `GET /fx-rates` lists without `from`) as codes in
+         *     code order. Readable by every role that
+         *     may read deals, so a currency picker can offer the workspace's own
+         *     currencies first; the rates themselves stay on the admin/ops-only
+         *     `GET /fx-rates`. An empty sheet answers an empty list.
+         */
+        get: operations["listFxRateCurrencies"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -21219,6 +21245,11 @@ export interface components {
             /** @description The workspace's base currency — every rate in `data` converts TO this (AAD-PARAM-N-1, ADR-0085). Served from the workspace itself rather than inferred from the first rate row, so a workspace that has entered no rates can still state its own base. */
             readonly base_currency?: string;
             data: components["schemas"]["FxRate"][];
+        };
+        FxRateCurrencyListResponse: {
+            /** @description The workspace's base currency, which every code in `data` converts into. Served here as well as on the installation settings, so a role that may read deals but not those settings still learns which currency a picker leads with. */
+            base_currency: string;
+            data: string[];
         };
         SetFxRateRequest: {
             /** @description 3-letter ISO; must not equal the base currency. */
@@ -79688,6 +79719,28 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             422: components["responses"]["ValidationError"];
+        };
+    };
+    listFxRateCurrencies: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The sheet's currency codes. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FxRateCurrencyListResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     proposeFxRateRefresh: {
