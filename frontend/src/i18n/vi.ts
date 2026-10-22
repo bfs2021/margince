@@ -12209,6 +12209,11 @@ export const vi = {
   "captureReading.wall.help":
     "Thời gian tối đa một lần đọc chạy trước khi giữ lại những gì đã tìm được, từ 30 đến 600 giây.",
   "captureReading.wall.refusal": "Nhập số giây là số nguyên từ 30 đến 600.",
+  "captureReview.passCap.label": "Số chuỗi thư đang giữ được rà soát mỗi lượt",
+  "captureReview.passCap.help":
+    "Số chuỗi thư đang bị giữ mà một lượt rà soát quyết định, từ 1 đến 200. Các chuỗi còn lại chờ lượt sau. Hãy tăng khi thư mới bị ẩn với đồng nghiệp lâu hơn lịch chạy, do Tình trạng hệ thống đặt. Mặc định 40.",
+  "captureReview.passCap.refusal":
+    "Nhập số chuỗi thư là số nguyên từ 1 đến 200.",
   "agentConnections.title": "Kết nối agent",
   "agentConnections.sub":
     "Thời gian một agent kết nối qua MCP giữ passport trước khi gia hạn. Thay đổi áp dụng cho passport cấp tiếp theo.",

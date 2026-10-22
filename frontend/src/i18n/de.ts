@@ -12529,6 +12529,12 @@ export const de = {
     "Längste Dauer einer Analyse, bevor sie das Gefundene behält, 30 bis 600 Sekunden.",
   "captureReading.wall.refusal":
     "Gib eine ganze Zahl von 30 bis 600 Sekunden ein.",
+  "captureReview.passCap.label":
+    "Geprüfte zurückgehaltene Threads pro Durchlauf",
+  "captureReview.passCap.help":
+    "Wie viele zurückgehaltene Mail-Threads eine Prüfung der Vertraulichkeit entscheidet, 1 bis 200. Die übrigen warten auf den nächsten Durchlauf. Erhöhe den Wert, wenn neue Mails für das Team länger unsichtbar bleiben als der Rhythmus der Durchläufe. Den Rhythmus legt der Systemzustand fest. Standard 40.",
+  "captureReview.passCap.refusal":
+    "Gib eine ganze Zahl von Threads von 1 bis 200 ein.",
   "agentConnections.title": "Agent-Verbindungen",
   "agentConnections.sub":
     "Wie lange ein Passport für MCP-Verbindungen gültig ist, bevor eine Erneuerung nötig ist. Eine Änderung gilt ab dem nächsten ausgestellten Passport.",
