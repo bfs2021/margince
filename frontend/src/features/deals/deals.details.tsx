@@ -25,6 +25,7 @@ import {
   usePartnerOptions,
 } from "./deals.fields";
 import { dealEditRecord, mapDealUpdate, stringValues } from "./deals.write";
+import { ExtensionPanels } from "./extensionpanels";
 
 export function DealDetails({
   deal,
@@ -214,6 +215,12 @@ export function DealContext({
         archived={Boolean(deal.archived_at)}
       />
       <DealEmailAside dealId={deal.id} live={!deal.archived_at} />
+      {/* Units' panels close the column, grouped under their own label: each is
+          an add-on's card about this deal, fenced off so its failure stays there. */}
+      <ExtensionPanels
+        slot="record_panel.deal"
+        record={{ type: "deal", id: deal.id }}
+      />
     </>
   );
 }
