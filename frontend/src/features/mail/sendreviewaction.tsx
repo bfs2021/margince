@@ -29,7 +29,9 @@ type OverruleRequest = Readonly<{
 type AllowCategory =
   paths["/contacts/{id}/consent/allow"]["post"]["requestBody"]["content"]["application/json"]["category"];
 
-async function recordOverrule({
+// One write for every place a rep records a reason: the refusal after Send
+// and the warning bar before it.
+export async function recordOverrule({
   overrulable,
   reason,
   onRecorded,
