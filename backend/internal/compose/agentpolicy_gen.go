@@ -373,6 +373,7 @@ var agentPolicies = map[string]agentPolicy{
 	"GET /v1/deals/{id}/stage-evidence":                                     {Op: "listStageEvidence", Access: "tool", Tool: "read_view", RecordType: "", Tier: "auto_execute", Scope: "read"},
 	"GET /v1/deals/{id}/stakeholders":                                       {Op: "listDealStakeholders", Access: "tool", Tool: "read_view", RecordType: "", Tier: "auto_execute", Scope: "read"},
 	"GET /v1/deals/{id}/status":                                             {Op: "getDealStatus", Access: "tool", Tool: "read_view", RecordType: "", Tier: "auto_execute", Scope: "read"},
+	"GET /v1/deals/{id}/win-evidence":                                       {Op: "getDealWinEvidence", Access: "human-only", Tool: "", RecordType: "", Tier: "", Scope: ""},
 	"GET /v1/dedupe/candidates":                                             {Op: "listDedupeCandidates", Access: "tool", Tool: "read_view", RecordType: "", Tier: "auto_execute", Scope: "read"},
 	"GET /v1/dedupe/candidates/{id}":                                        {Op: "getDedupeCandidate", Access: "tool", Tool: "read_view", RecordType: "", Tier: "auto_execute", Scope: "read"},
 	"GET /v1/digest":                                                        {Op: "getMorningDigest", Access: "human-only", Tool: "", RecordType: "", Tier: "", Scope: ""},
