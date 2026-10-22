@@ -5633,7 +5633,7 @@ export const vi = {
   "compose.draftContextHint":
     "Mô tả mục đích. Margince dùng ngữ cảnh của hồ sơ.",
   "compose.draftWithAi": "Soạn bằng AI",
-  "compose.quickFollowUp": "Theo dõi",
+  "compose.quickFollowUp": "Liên hệ lại",
   "compose.quickMeeting": "Đề xuất thời gian",
   "compose.quickOffer": "Tóm tắt đề xuất",
   "compose.quickThanks": "Cảm ơn",
@@ -5813,7 +5813,7 @@ export const vi = {
   "compose.send": "Gửi",
   "compose.sendConfirmTitle": "Gửi email",
   "compose.threadHeading": "Chuỗi thư này",
-  "compose.continueHeading": "Tiếp tục chuỗi thư",
+  "compose.continueHeading": "Chuỗi thư hiện có",
   "compose.threadLeave": "Email mới",
   "compose.threadShow": "Hiển thị chuỗi thư này",
   "compose.threadHide": "Ẩn chuỗi thư này",

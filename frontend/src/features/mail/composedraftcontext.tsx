@@ -240,7 +240,7 @@ export function DraftOffer({
             <Button
               className="compose-quick-chip"
               onClick={() => onIntentChange(label)}
-              disabled={draft.disabled || draft.pending}
+              disabled={draft.pending}
             >
               {label}
             </Button>

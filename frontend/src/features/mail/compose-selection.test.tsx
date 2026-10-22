@@ -129,6 +129,13 @@ it("requires a purpose for a new AI email, then sends that purpose to the contac
   const requests = setup();
   const draft = screen.getByRole("button", { name: "Draft with AI" });
   expect(draft.hasAttribute("disabled")).toBe(true);
+  // A quick purpose is how an empty purpose box gets filled, so it stays live.
+  await user.click(screen.getByRole("button", { name: "Say thanks" }));
+  expect(
+    (screen.getByPlaceholderText("Purpose of the email") as HTMLInputElement)
+      .value,
+  ).toBe("Say thanks");
+  await user.clear(screen.getByPlaceholderText("Purpose of the email"));
   await user.type(
     screen.getByPlaceholderText("Purpose of the email"),
     "Offer a discovery call",
