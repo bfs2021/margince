@@ -3,7 +3,8 @@ import { Button, Field } from "../../design-system/atoms";
 import { ErrorLine } from "../../design-system/errorline";
 import { RichText } from "../../design-system/richtext";
 import { Select } from "../../design-system/select";
-import { usePlural, useT } from "../../i18n";
+import { formatNumber } from "../../format/format";
+import { useLocale, usePlural, useT } from "../../i18n";
 import {
   asksWhy,
   type CommunicationContext,
@@ -203,6 +204,7 @@ export function ComposeBody({
 }>) {
   const t = useT();
   const plural = usePlural();
+  const { locale } = useLocale();
   const richTextLabels = useRichTextLabels();
   const frozen = voice.rejectionInFlight;
   const words = fields.body.split(/\s+/).filter(Boolean).length;
@@ -229,7 +231,9 @@ export function ComposeBody({
               disabled={frozen}
             />
             <span className="t-caption compose-wordcount">
-              {plural("compose.wordCount", words, { count: String(words) })}
+              {plural("compose.wordCount", words, {
+                count: formatNumber(words, locale),
+              })}
             </span>
           </>
         }
