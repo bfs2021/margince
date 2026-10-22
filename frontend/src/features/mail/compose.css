@@ -245,12 +245,6 @@
   flex-wrap: nowrap;
   gap: var(--space-3);
 }
-.compose-offer .compose-draftbar .input {
-  border-color: transparent;
-  background: transparent;
-  box-shadow: none;
-  padding-inline: 0;
-}
 /* The name stays for assistive technology; the placeholder is what a sighted
    reader sees, as the banner's own sparkle already says what the row is. */
 .compose-offer-field > label {
@@ -293,22 +287,4 @@
 .compose-savedraft:hover:not(:disabled) {
   color: var(--textPrimary);
   background: var(--bgHover);
-}
-
-/* The message is the page itself: no frame around it, only the hairline over
-   its toolbar, which lights up with the writing surface. */
-.compose-fields > .richtext {
-  border-color: transparent;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-.compose-fields > .richtext > .richtext-foot {
-  border-block-start: 1px solid var(--borderSubtle);
-  padding-block-start: var(
-    --space-2
-  ); /* ds:ignore the toolbar sits a step below the hairline that now opens it */
-}
-.compose-fields > .richtext:focus-within > .richtext-foot {
-  border-block-start-color: var(--accent);
 }
