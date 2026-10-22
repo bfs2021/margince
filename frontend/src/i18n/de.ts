@@ -5817,10 +5817,6 @@ export const de = {
   "compose.copies": "Cc und Bcc",
   "compose.signsOffAs": "Die Nachricht endet mit „{closing}“.",
   "compose.reasonLabel": "Warum du an {address} schreiben darfst",
-  "compose.reasonHint":
-    "Der Grund wird für diese Art von Nachricht unter deinem Namen erfasst. Er ist keine Einwilligung.",
-  "compose.reasonRecord": "Grund erfassen",
-  "compose.reasonRecording": "Wird erfasst…",
   "compose.replyIntent": "Zweck der Antwort",
   "compose.newIntent": "Zweck der E-Mail",
   "compose.draftReply": "Antwort entwerfen",
@@ -5831,6 +5827,7 @@ export const de = {
     "Beschreibe den Zweck. Margince nutzt den Kontext des Datensatzes.",
   "compose.draftEmail": "E-Mail entwerfen",
   "compose.drafting": "Wird entworfen…",
+  "compose.askAgain": "Auftrag ändern",
   "compose.discardDraft": "Entwurf verwerfen",
   "compose.discardDraftHint":
     "Markiert diesen Entwurf für deine Voice DNA als Fehlgriff. Der erzeugte Text wird nie gespeichert.",

@@ -5852,10 +5852,6 @@ export const en = {
   "compose.copies": "Cc and Bcc",
   "compose.signsOffAs": "Signs off as “{closing}”.",
   "compose.reasonLabel": "Why you may write to {address}",
-  "compose.reasonHint":
-    "Recorded under your name for this kind of message. It is not consent.",
-  "compose.reasonRecord": "Record reason",
-  "compose.reasonRecording": "Recording…",
   "compose.replyIntent": "Purpose of the reply",
   "compose.newIntent": "Purpose of the email",
   "compose.draftReply": "Draft reply",
@@ -5866,6 +5862,7 @@ export const en = {
     "Describe the purpose. Margince uses the record context.",
   "compose.draftEmail": "Draft email",
   "compose.drafting": "Drafting…",
+  "compose.askAgain": "Change the ask",
   "compose.discardDraft": "Discard draft",
   "compose.discardDraftHint":
     "Marks this draft as a miss for your Voice DNA. The generated text is never kept.",
