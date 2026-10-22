@@ -294,26 +294,28 @@ export function ComposeHead({
       <ColleagueMailboxNotice seats={colleagueSeats} nameOf={nameOf} />
       {/* Mail asks where it files, in the subject tag. A channel send carries
           no filing field, so it is told what the conversation inherits. */}
-      {dial.isChannelReply ? (
-        <ChannelReplyFiling activityId={activityId} />
-      ) : (
-        <ProjectFiling
-          projects={records.reachableProjects}
-          projectId={records.projectFiling.projectId}
-          onChange={records.projectFiling.setProjectId}
-        />
-      )}
-      {/* The account path's recipient and deal sit with the rows that say
+      <div className="compose-context">
+        {dial.isChannelReply ? (
+          <ChannelReplyFiling activityId={activityId} />
+        ) : (
+          <ProjectFiling
+            projects={records.reachableProjects}
+            projectId={records.projectFiling.projectId}
+            onChange={records.projectFiling.setProjectId}
+          />
+        )}
+        {/* The account path's recipient and deal sit with the rows that say
           what the message is. */}
-      {accountCompanyId !== undefined && (
-        <AccountDraftContext
-          companyId={accountCompanyId}
-          recipientId={account.recipientId}
-          onRecipientChange={account.setRecipientId}
-          dealId={account.dealId}
-          onDealChange={account.setDealId}
-        />
-      )}
+        {accountCompanyId !== undefined && (
+          <AccountDraftContext
+            companyId={accountCompanyId}
+            recipientId={account.recipientId}
+            onRecipientChange={account.setRecipientId}
+            dealId={account.dealId}
+            onDealChange={account.setDealId}
+          />
+        )}
+      </div>
       {/* Drafting and addresses are mail-only: there is no draft-message
           endpoint, and a channel resolves its recipient on the server. */}
       {!dial.isChannelReply && (

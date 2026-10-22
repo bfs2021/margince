@@ -25,3 +25,18 @@
   grid-column: 2;
   min-inline-size: 0;
 }
+
+/* The three scoping choices side by side, wrapping. Each keeps the design
+   system's own field, label above its control. */
+.compose-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--gapActions);
+}
+.compose-context:empty {
+  display: none;
+}
+.compose-context > .field {
+  flex: 1 1 12rem;
+}

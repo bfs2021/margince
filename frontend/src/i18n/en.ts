@@ -5802,6 +5802,12 @@ export const en = {
   "compose.draftContextHint":
     "Describe the purpose. Margince uses the record context.",
   "compose.draftWithAi": "Draft with AI",
+  "compose.quickFollowUp": "Follow up",
+  "compose.quickMeeting": "Suggest a time",
+  "compose.quickOffer": "Summarize the offer",
+  "compose.quickThanks": "Say thanks",
+  "compose.wordCount_one": "{count} word",
+  "compose.wordCount_other": "{count} words",
   "compose.drafting": "Drafting…",
   "compose.discardDraft": "Discard draft",
   "compose.discardDraftHint":
@@ -5978,7 +5984,7 @@ export const en = {
   "compose.send": "Send",
   "compose.sendConfirmTitle": "Send email",
   "compose.threadHeading": "This thread",
-  "compose.continueHeading": "Continue thread?",
+  "compose.continueHeading": "Continue thread",
   "compose.threadLeave": "New email",
   "compose.threadShow": "Show this thread",
   "compose.threadHide": "Hide this thread",

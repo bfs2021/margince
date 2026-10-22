@@ -224,3 +224,91 @@
 .compose-signoff.is-stale .compose-signoff-text {
   opacity: 0.5;
 }
+
+/* The AI offer as a banner: the sparkle, the purpose box and the one verb in a
+   row, with the quick purposes under them. Indigo is the agent's colour and
+   this block is the agent's: nothing else here may borrow it. */
+.compose-offer {
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--aiChip);
+  border-radius: var(--r-md);
+  background: var(--aiLight);
+}
+.compose-offer-mark {
+  flex: none;
+  inline-size: var(--space-4);
+  block-size: var(--space-4);
+  color: var(--aiText);
+}
+.compose-offer .compose-draftbar {
+  flex-wrap: nowrap;
+  gap: var(--space-3);
+}
+.compose-offer .compose-draftbar .input {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  padding-inline: 0;
+}
+/* The name stays for assistive technology; the placeholder is what a sighted
+   reader sees, as the banner's own sparkle already says what the row is. */
+.compose-offer-field > label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.compose-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.compose-quick-chip {
+  min-block-size: var(--controlHeight);
+  border-radius: var(--r-full);
+  corner-shape: round;
+  border-color: var(--aiChip);
+  background: var(--bgElevated);
+  color: var(--aiText);
+}
+
+.compose-wordcount {
+  margin-inline-start: var(--space-3);
+}
+
+/* Save as draft is the quietest verb in the foot: a text action at its far
+   edge, away from the pair that decide the message's fate. */
+.compose-savedraft {
+  border-color: transparent;
+  background: none;
+  box-shadow: none;
+  color: var(--textSecondary);
+}
+.compose-savedraft:hover:not(:disabled) {
+  color: var(--textPrimary);
+  background: var(--bgHover);
+}
+
+/* The message is the page itself: no frame around it, only the hairline over
+   its toolbar, which lights up with the writing surface. */
+.compose-fields > .richtext {
+  border-color: transparent;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.compose-fields > .richtext > .richtext-foot {
+  border-block-start: 1px solid var(--borderSubtle);
+  padding-block-start: var(
+    --space-2
+  ); /* ds:ignore the toolbar sits a step below the hairline that now opens it */
+}
+.compose-fields > .richtext:focus-within > .richtext-foot {
+  border-block-start-color: var(--accent);
+}

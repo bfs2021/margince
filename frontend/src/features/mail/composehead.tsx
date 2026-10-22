@@ -189,7 +189,7 @@ export function AddressBlock({
   return (
     <>
       <Field
-        className="compose-address-field"
+        className="compose-address-field field-line"
         label={t("compose.to")}
         error={invalidTo ? needTo : undefined}
       >
@@ -206,7 +206,7 @@ export function AddressBlock({
         )}
       </Field>
       <Field
-        className="compose-address-field"
+        className="compose-address-field field-line"
         label={t("compose.cc")}
         trailing={
           bccOpen ? undefined : (
@@ -233,7 +233,7 @@ export function AddressBlock({
         // Bcc as "a quieter Cc" has told somebody about a conversation the
         // named recipients believe is between them.
         <Field
-          className="compose-address-field"
+          className="compose-address-field field-line"
           label={t("compose.bcc")}
           hint={t("compose.bccHint")}
         >
@@ -287,7 +287,7 @@ export function SubjectRow({
   const t = useT();
   return (
     <Field
-      className="compose-address-field"
+      className="compose-address-field field-line"
       label={t("compose.subject")}
       error={invalid ? need : undefined}
     >

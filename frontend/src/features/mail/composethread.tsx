@@ -2,11 +2,13 @@
 // SPDX-FileCopyrightText: 2026 Gradion
 
 import { useQuery } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { api } from "../../api/client";
 import type { components } from "../../api/schema";
 import { activityTimeline } from "../../design-system/activitytimeline";
 import { Button, PendingBody } from "../../design-system/atoms";
+import { Avatar } from "../../design-system/avatar";
 import { EmailDetail } from "../../design-system/emaildetail";
 import { EmailEntry } from "../../design-system/emailentry";
 import { EmailText } from "../../design-system/emailtext";
@@ -392,32 +394,56 @@ export function ConversationChoices({
             detail={{ onRetry }}
           >
             <ul className="compose-choices">
+              {/* Nothing is chosen yet, so the new message is the standing
+                  row: the reader sees the threads as ways AWAY from it. */}
+              <li
+                className="compose-choice compose-choice-new"
+                aria-current="true"
+              >
+                <span className="compose-choice-mark" aria-hidden="true">
+                  <Plus size={14} />
+                </span>
+                <span className="compose-choice-subject">
+                  {t("compose.newEmail")}
+                </span>
+              </li>
               {conversations.map((conversation) => (
                 <li key={conversation.anchorId}>
                   <Button
                     className="compose-choice"
                     onClick={() => onChoose(conversation.anchorId)}
                   >
-                    <span className="compose-choice-subject">
-                      {conversation.subject}
-                    </span>
-                    <span className="t-caption">
-                      {[
-                        conversation.counterparts,
-                        formatDate(conversation.atIso, locale, zone),
-                        conversation.count > 1
-                          ? translatePlural(
-                              locale,
-                              "compose.messageCount",
-                              conversation.count,
-                              {
-                                count: formatNumber(conversation.count, locale),
-                              },
-                            )
-                          : undefined,
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
+                    {/* The thread's own id keys the colour: it has no single
+                        record, and one thread must draw one mark. */}
+                    <Avatar
+                      name={conversation.counterparts ?? conversation.subject}
+                      identity={conversation.anchorId}
+                    />
+                    <span className="compose-choice-text">
+                      <span className="compose-choice-subject">
+                        {conversation.subject}
+                      </span>
+                      <span className="t-caption">
+                        {[
+                          conversation.counterparts,
+                          formatDate(conversation.atIso, locale, zone),
+                          conversation.count > 1
+                            ? translatePlural(
+                                locale,
+                                "compose.messageCount",
+                                conversation.count,
+                                {
+                                  count: formatNumber(
+                                    conversation.count,
+                                    locale,
+                                  ),
+                                },
+                              )
+                            : undefined,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
                     </span>
                   </Button>
                 </li>

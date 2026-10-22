@@ -95,7 +95,7 @@ export const FoldedChoices: StoryObj = {
     await userEvent.click(
       await dialog.findByRole("button", { name: "Show earlier threads" }),
     );
-    await dialog.findByRole("heading", { name: "Continue thread?" });
+    await dialog.findByRole("heading", { name: "Continue thread" });
     await dialog.findByRole("button", { name: "Hide earlier threads" });
   },
 };

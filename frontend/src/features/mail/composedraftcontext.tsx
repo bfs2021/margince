@@ -191,19 +191,24 @@ export function DraftOffer({
   unavailable: DraftUnavailable | null;
 }>) {
   const t = useT();
+  const quick = [
+    t("compose.quickFollowUp"),
+    t("compose.quickMeeting"),
+    t("compose.quickOffer"),
+    t("compose.quickThanks"),
+  ];
   return (
     <div className="compose-offer">
-      {!replying && (
-        <p className="t-caption">{t("compose.draftContextHint")}</p>
-      )}
-      {/* A NAME above the box, not only a placeholder: the placeholder is the
-          example and disappears the moment the reader types, so a field named
-          that way had no name at all the instant it held anything. The verb
-          stays on the box's own line — it acts on what was typed there, and a
-          row is how the pair reads as one ask. */}
-      <Field label={t(replying ? "compose.replyIntent" : "compose.newIntent")}>
+      {/* The label stays for assistive tech and sits under the placeholder
+          visually: the banner's own sparkle and verb already say what the
+          row is, and the placeholder is the example. */}
+      <Field
+        className="compose-offer-field"
+        label={t(replying ? "compose.replyIntent" : "compose.newIntent")}
+      >
         {(control) => (
           <div className="compose-draftbar">
+            <Sparkles aria-hidden="true" className="compose-offer-mark" />
             <TextInput
               {...control}
               placeholder={t(
@@ -213,11 +218,7 @@ export function DraftOffer({
               onChange={(event) => onIntentChange(event.target.value)}
             />
             {/* The agent's own verb, so it carries the agent's own colour and
-                its mark. Drawn as an ordinary ghost button it read as the
-                quietest control in the drawer when it is the one thing in here
-                a machine does. Indigo means "Margince does this" everywhere
-                else on the record; a composer that said it in grey is the one
-                surface where the reader has to guess. */}
+                its mark: indigo says "Margince does this" everywhere else. */}
             <Button
               variant="ai"
               onClick={draft.run}
@@ -225,12 +226,27 @@ export function DraftOffer({
               pending={draft.pending}
               busyLabel={t("compose.drafting")}
             >
-              <Sparkles aria-hidden="true" />
               {t(replying ? "compose.draftReply" : "compose.draftWithAi")}
             </Button>
           </div>
         )}
       </Field>
+      {!replying && (
+        <p className="t-caption">{t("compose.draftContextHint")}</p>
+      )}
+      <ul className="compose-quick">
+        {quick.map((label) => (
+          <li key={label}>
+            <Button
+              className="compose-quick-chip"
+              onClick={() => onIntentChange(label)}
+              disabled={draft.disabled || draft.pending}
+            >
+              {label}
+            </Button>
+          </li>
+        ))}
+      </ul>
       {unavailable && (
         <p>
           {unavailable === "no_model"

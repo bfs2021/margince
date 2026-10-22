@@ -1027,6 +1027,44 @@
   gap: var(--fieldGap);
 }
 
+/* A field set as a line of a letter: the label in a quiet column, the value
+ * on a hairline, no frame. The frames of the control inside (`.input`, the
+ * token input, the shell a trailing control makes) are flattened HERE, once,
+ * so a screen asks for the look by class and never repaints a primitive. The
+ * hairline carries focus, so the ring they drew is not lost. */
+.field-line {
+  padding-block: var(--space-1);
+  border-block-end: 1px solid var(--borderSubtle);
+  transition: border-color var(--dur-state) var(--ease-out);
+}
+.field-line:focus-within {
+  border-block-end-color: var(--accent);
+}
+.field-line > label {
+  color: var(--textSecondary);
+}
+.field-line :is(.input, .token-input, .field-shell) {
+  border-color: transparent;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding-inline: 0;
+}
+.field-line :is(.input, .token-input, .field-shell):focus,
+.field-line :is(.token-input, .field-shell):focus-within {
+  border-color: transparent;
+  box-shadow: none;
+}
+/* A verb at the line's end reads as a word, not a button. */
+.field-line .btn {
+  border-color: transparent;
+  background: none;
+  box-shadow: none;
+}
+.field-line .btn:hover:not(:disabled) {
+  background: var(--bgHover);
+}
+
 /* The picker's search field fills the picker: `.input-icon` is an inline-flex, so
  * left alone it sizes to the input's intrinsic width and clips its own
  * placeholder. Scoped to this control rather than declared on `.input-icon`,

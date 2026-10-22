@@ -3,7 +3,7 @@ import { Button, Field } from "../../design-system/atoms";
 import { ErrorLine } from "../../design-system/errorline";
 import { RichText } from "../../design-system/richtext";
 import { Select } from "../../design-system/select";
-import { useT } from "../../i18n";
+import { usePlural, useT } from "../../i18n";
 import {
   asksWhy,
   type CommunicationContext,
@@ -110,6 +110,7 @@ export function ComposeActionsLead({
       )}
       {savedDraft.enabled && (
         <Button
+          className="compose-savedraft"
           onClick={savedDraft.save}
           pending={savedDraft.saving}
           disabled={busy}
@@ -201,8 +202,10 @@ export function ComposeBody({
   voice: VoiceDraft;
 }>) {
   const t = useT();
+  const plural = usePlural();
   const richTextLabels = useRichTextLabels();
   const frozen = voice.rejectionInFlight;
+  const words = fields.body.split(/\s+/).filter(Boolean).length;
   return (
     <>
       {/* Both renderings travel. A text client, a screen reader and a spam
@@ -216,14 +219,19 @@ export function ComposeBody({
         labels={richTextLabels}
         hint={t("compose.bodyHint")}
         actions={
-          <AttachAction
-            key={fileTarget}
-            entityType={entityType}
-            entityId={entityId}
-            chosen={attached.files}
-            onChange={attached.setFiles}
-            disabled={frozen}
-          />
+          <>
+            <AttachAction
+              key={fileTarget}
+              entityType={entityType}
+              entityId={entityId}
+              chosen={attached.files}
+              onChange={attached.setFiles}
+              disabled={frozen}
+            />
+            <span className="t-caption compose-wordcount">
+              {plural("compose.wordCount", words, { count: String(words) })}
+            </span>
+          </>
         }
         rows={10}
         disabled={frozen}
