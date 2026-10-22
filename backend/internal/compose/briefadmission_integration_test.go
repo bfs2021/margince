@@ -21,7 +21,10 @@ import (
 
 func TestStoredBriefRankingNeedsCurrentInterventionBeforeWorklistAdmission(t *testing.T) {
 	e := integration.Setup(t)
-	now := clocktest.Now(t)
+	// Finer than the microsecond a timestamp column keeps: a Linux clock reads
+	// this fine and a macOS one does not, so a run that returns its instant
+	// unrounded differs from the row it stored only on some machines.
+	now := clocktest.Now(t).Truncate(time.Second).Add(123 * time.Nanosecond)
 	clock := func() time.Time { return now }
 	store := e.Deals.WithClock(clock)
 	ctx := e.As(e.Rep1, []ids.UUID{e.Team1}, integration.AdminPerms)

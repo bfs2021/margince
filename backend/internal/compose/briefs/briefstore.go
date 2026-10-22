@@ -137,6 +137,8 @@ func (e *BriefEngine) SnapshotRunForDay(ctx context.Context, now time.Time) (Bri
 		return BriefRun{}, false, err
 	}
 
+	// The columns keep microseconds; the run returned must equal the row read back.
+	now = now.Truncate(time.Microsecond)
 	ranking, err := e.Rank(ctx, now)
 	if err != nil {
 		return BriefRun{}, false, err
