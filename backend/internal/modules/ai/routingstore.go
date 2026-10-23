@@ -152,6 +152,9 @@ func (s *RoutingStore) probeProviderSettings(ctx context.Context, stored Routing
 	if err := s.probeVertexBindings(ctx, stored, candidate); err != nil {
 		return invalidRouting(err)
 	}
+	if err := s.refuseKeylessBindings(ctx, stored, candidate); err != nil {
+		return invalidRouting(err)
+	}
 	return nil
 }
 
@@ -163,6 +166,13 @@ func (s *RoutingStore) probeCandidate(ctx context.Context, stored, next RoutingC
 		return err
 	}
 	if err := s.probeVertexBindings(ctx, stored, candidate); err != nil {
+		return invalidRouting(err)
+	}
+	// After the Vertex probe, which answers for its own provider. Its words are
+	// the ones that provider's admin acts on: a service-account key to add,
+	// not an API key to export. This speaks for the providers it never asks
+	// about.
+	if err := s.refuseKeylessBindings(ctx, stored, candidate); err != nil {
 		return invalidRouting(err)
 	}
 	return nil
