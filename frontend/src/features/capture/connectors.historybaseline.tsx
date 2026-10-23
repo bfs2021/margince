@@ -6,7 +6,11 @@ import { useState } from "react";
 import { api } from "../../api/client";
 import type { components } from "../../api/schema";
 import { Button } from "../../design-system/atoms";
-import { DateInput, isISODate } from "../../design-system/dateinput";
+import {
+  DateInput,
+  isISODate,
+  isoOrBlank,
+} from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
 import { SettingRow } from "../../design-system/settingrow";
 import { formatDate } from "../../format/format";
@@ -50,7 +54,7 @@ export function HistoryBaselineRow({
           <div className="connector-baseline">
             <DateInput
               {...controlProps}
-              value={isISODate(draft) ? draft : ""}
+              value={isoOrBlank(draft)}
               disabled={save.isPending}
               onChange={(event) => setDraft(event.target.value)}
             />

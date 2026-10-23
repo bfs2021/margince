@@ -8,7 +8,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { api } from "../../api/client";
 import { ifMatch, requireVersion } from "../../api/version";
 import { Button, Field, Modal, TextInput } from "../../design-system/atoms";
-import { DateInput, isISODate } from "../../design-system/dateinput";
+import { DateInput, isoOrBlank } from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
 import { Heading } from "../../design-system/heading";
 import {
@@ -173,7 +173,7 @@ export function EditOfferHeaderModal({
           {(control) => (
             <DateInput
               {...control}
-              value={isISODate(values.valid_until) ? values.valid_until : ""}
+              value={isoOrBlank(values.valid_until)}
               onChange={(event) =>
                 setValues((prev) => ({
                   ...prev,

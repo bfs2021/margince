@@ -246,6 +246,9 @@ export function ContractForm({
           noValidate
           onSubmit={(event) => {
             event.preventDefault();
+            if (refuseUnreadableField(event.currentTarget)) {
+              return;
+            }
             if (invalid === null) {
               save.mutate({ draft: pricedIn(draft, baseCurrency), file });
             }
@@ -349,6 +352,18 @@ export function pricedIn(
     return draft;
   }
   return { ...draft, currency: baseCurrency ?? "" };
+}
+
+// A date box whose text cannot be read reports "" and holds its own refusal;
+// saving then would erase the stored day. Only that refusal is read, not the
+// amounts' native step rule, which draftProblem and the server own.
+export function refuseUnreadableField(form: HTMLFormElement): boolean {
+  const unread = Array.from(form.elements).find(
+    (field): field is HTMLInputElement =>
+      field instanceof HTMLInputElement && field.validity.customError,
+  );
+  unread?.reportValidity();
+  return unread !== undefined;
 }
 
 // What the form refuses before the server has to.

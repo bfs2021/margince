@@ -7,7 +7,7 @@ import { Callout } from "../../design-system/callout";
 import {
   DateInput,
   type ISODate,
-  isISODate,
+  isoOrBlank,
 } from "../../design-system/dateinput";
 import { PanelBody } from "../../design-system/panel";
 import {
@@ -62,9 +62,7 @@ export function AddCommitment({ onDone }: Readonly<{ onDone: () => void }>) {
             value={dueOn}
             // The element reports YYYY-MM-DD or "" and nothing else, so this
             // narrows what it said rather than validating it.
-            onChange={(event) =>
-              setDueOn(isISODate(event.target.value) ? event.target.value : "")
-            }
+            onChange={(event) => setDueOn(isoOrBlank(event.target.value))}
           />
         )}
       </Field>

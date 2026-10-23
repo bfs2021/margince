@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { api } from "../../api/client";
 import { Button, Field } from "../../design-system/atoms";
-import { DateInput, isISODate } from "../../design-system/dateinput";
+import { DateInput, isoOrBlank } from "../../design-system/dateinput";
 import { MeetingSlots } from "../../design-system/meetingslots";
 import { QueryGate } from "../../design-system/querystates";
 import { formatDateTime } from "../../format/format";
@@ -57,7 +57,7 @@ export function BookingReschedule({
         {(control) => (
           <DateInput
             {...control}
-            value={isISODate(shownDay) ? shownDay : ""}
+            value={isoOrBlank(shownDay)}
             onChange={(event) => {
               if (event.target.value) {
                 setFrom(startOfDayInZone(event.target.value, zone));

@@ -11,20 +11,12 @@
 // is a fresh negotiation and inherits none of them.
 
 import { Field, TextInput } from "../../design-system/atoms";
-import {
-  DateInput,
-  type ISODate,
-  isISODate,
-} from "../../design-system/dateinput";
+import { DateInput, isoOrBlank } from "../../design-system/dateinput";
 import { MoneyInput } from "../../design-system/moneyinput";
 import { Select } from "../../design-system/select";
 import { useT } from "../../i18n";
 import { ContractArrField } from "./contractarr";
 import type { ContractDraft, ValueBasis } from "./contractform";
-
-function day(draftDay: string): ISODate | "" {
-  return isISODate(draftDay) ? draftDay : "";
-}
 
 export function ContractTermsFields({
   draft,
@@ -120,7 +112,7 @@ export function ContractTermsFields({
         {(props) => (
           <DateInput
             {...props}
-            value={day(draft.startsOn)}
+            value={isoOrBlank(draft.startsOn)}
             onChange={(e) => setDraft({ ...draft, startsOn: e.target.value })}
           />
         )}
@@ -135,7 +127,7 @@ export function ContractTermsFields({
         {(props) => (
           <DateInput
             {...props}
-            value={day(draft.endsOn)}
+            value={isoOrBlank(draft.endsOn)}
             onChange={(e) => setDraft({ ...draft, endsOn: e.target.value })}
           />
         )}
@@ -145,7 +137,7 @@ export function ContractTermsFields({
         {(props) => (
           <DateInput
             {...props}
-            value={day(draft.renewalOn)}
+            value={isoOrBlank(draft.renewalOn)}
             onChange={(e) => setDraft({ ...draft, renewalOn: e.target.value })}
           />
         )}
@@ -192,7 +184,7 @@ export function ContractTermsFields({
         {(props) => (
           <DateInput
             {...props}
-            value={day(draft.signedOn)}
+            value={isoOrBlank(draft.signedOn)}
             onChange={(e) => setDraft({ ...draft, signedOn: e.target.value })}
           />
         )}

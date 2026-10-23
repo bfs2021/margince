@@ -10,7 +10,7 @@ import {
   SectionHeader,
   TextInput,
 } from "../../design-system/atoms";
-import { DateInput, isISODate } from "../../design-system/dateinput";
+import { DateInput, isoOrBlank } from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
 import { Panel, PanelBody } from "../../design-system/panel";
 import { QueryGate } from "../../design-system/querystates";
@@ -232,9 +232,7 @@ function PartnerForm({
         {(control) => (
           <DateInput
             {...control}
-            value={
-              isISODate(values.next_step_due_at) ? values.next_step_due_at : ""
-            }
+            value={isoOrBlank(values.next_step_due_at)}
             onChange={(event) =>
               setValues({ ...values, next_step_due_at: event.target.value })
             }

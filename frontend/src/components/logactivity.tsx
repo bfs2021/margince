@@ -9,7 +9,12 @@ import {
   Modal,
   TextInput,
 } from "../design-system/atoms";
-import { DateInput, type ISODate, isISODate } from "../design-system/dateinput";
+import {
+  DateInput,
+  type ISODate,
+  isISODate,
+  isoOrBlank,
+} from "../design-system/dateinput";
 import {
   DrawerBody,
   DrawerFoot,
@@ -255,7 +260,7 @@ export function LogActivityForm({
           {(control) => (
             <DateInput
               {...control}
-              value={isISODate(draft.day) ? draft.day : ""}
+              value={isoOrBlank(draft.day)}
               // A note or meeting cannot have happened in the future, and the
               // cap makes the picker say so; a due date has no such ceiling.
               // occurredInstant clamps a typed-in future day the same way, and

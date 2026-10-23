@@ -11,7 +11,7 @@
 
 import { type ReactNode, useId, useState } from "react";
 import { Button, Field, Modal, TextInput } from "../design-system/atoms";
-import { DateInput, isISODate } from "../design-system/dateinput";
+import { DateInput, isoOrBlank } from "../design-system/dateinput";
 import { ErrorLine } from "../design-system/errorline";
 import { Heading } from "../design-system/heading";
 import { MoneyInput } from "../design-system/moneyinput";
@@ -382,7 +382,7 @@ export function AcceptSuggestionDialog({
           {(control) => (
             <DateInput
               {...control}
-              value={isISODate(draft.closeDate) ? draft.closeDate : ""}
+              value={isoOrBlank(draft.closeDate)}
               onChange={(event) => set({ closeDate: event.target.value })}
               data-testid="deal-suggestion-close"
             />

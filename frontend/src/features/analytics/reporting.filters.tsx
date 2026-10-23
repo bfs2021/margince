@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Field } from "../../design-system/atoms";
-import { DateInput, isISODate } from "../../design-system/dateinput";
+import {
+  DateInput,
+  isISODate,
+  isoOrBlank,
+} from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
 import { Select } from "../../design-system/select";
 import { dayInZone, startOfDayInZone } from "../../format/timezone";
@@ -114,7 +118,7 @@ export function ReportingFilters({
             {(field) => (
               <DateInput
                 {...field}
-                value={isISODate(from) ? from : ""}
+                value={isoOrBlank(from)}
                 onChange={(event) => setDates(event.target.value, through)}
               />
             )}
@@ -123,7 +127,7 @@ export function ReportingFilters({
             {(field) => (
               <DateInput
                 {...field}
-                value={isISODate(through) ? through : ""}
+                value={isoOrBlank(through)}
                 onChange={(event) => setDates(from, event.target.value)}
               />
             )}

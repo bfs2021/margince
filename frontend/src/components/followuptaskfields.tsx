@@ -1,5 +1,5 @@
 import { Checkbox, Field, TextInput } from "../design-system/atoms";
-import { DateInput, isISODate } from "../design-system/dateinput";
+import { DateInput, isoOrBlank } from "../design-system/dateinput";
 import { useT } from "../i18n";
 import type { TaskDraft } from "../lib/activitybody";
 import { ActivityBodyField } from "./activitybodyfield";
@@ -44,7 +44,7 @@ export function FollowUpTaskFields({
             {(control) => (
               <DateInput
                 {...control}
-                value={isISODate(value.day) ? value.day : ""}
+                value={isoOrBlank(value.day)}
                 onChange={(event) => patch({ day: event.target.value })}
               />
             )}

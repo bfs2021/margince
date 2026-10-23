@@ -7,7 +7,11 @@ import { api } from "../../api/client";
 import type { components } from "../../api/schema";
 import { Button, Field, Modal, TextInput } from "../../design-system/atoms";
 import { ComboBox } from "../../design-system/combobox";
-import { DateInput, isISODate } from "../../design-system/dateinput";
+import {
+  DateInput,
+  isISODate,
+  isoOrBlank,
+} from "../../design-system/dateinput";
 import {
   DrawerBody,
   DrawerFoot,
@@ -218,7 +222,7 @@ export function PriceForm({
             <DateInput
               {...control}
               min={isISODate(floor) ? floor : undefined}
-              value={isISODate(effectiveDate) ? effectiveDate : ""}
+              value={isoOrBlank(effectiveDate)}
               onChange={(e) => setEffectiveDate(e.target.value)}
             />
           )}

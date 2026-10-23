@@ -16,7 +16,7 @@ import {
   OverflowMenu,
 } from "../../design-system/atoms";
 import { ConfirmModal } from "../../design-system/confirmmodal";
-import { DateInput, isISODate } from "../../design-system/dateinput";
+import { DateInput, isoOrBlank } from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
 import { Eyebrow } from "../../design-system/eyebrow";
 import { Heading } from "../../design-system/heading";
@@ -258,7 +258,7 @@ function ExpiryDialog({
         {(control) => (
           <DateInput
             {...control}
-            value={isISODate(date) ? date : ""}
+            value={isoOrBlank(date)}
             onChange={(e) => setDate(e.target.value)}
           />
         )}

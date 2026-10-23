@@ -4,7 +4,7 @@
 import { type ReactNode, useId, useState } from "react";
 import { Button, Field, Modal, TextInput } from "./atoms";
 import { ChoiceList } from "./choicelist";
-import { DateInput, type ISODate, isISODate } from "./dateinput";
+import { DateInput, type ISODate, isoOrBlank } from "./dateinput";
 import { DrawerBody, DrawerFoot, DrawerHead } from "./drawerbands";
 import { ErrorLine } from "./errorline";
 import { Heading } from "./heading";
@@ -168,7 +168,7 @@ export function ResolveSheet({
 // ships the predicate for exactly this — asserting the type instead would claim
 // what a check can establish.
 function asDate(raw: string): ISODate | "" {
-  return isISODate(raw) ? raw : "";
+  return isoOrBlank(raw);
 }
 
 // The two answers that take a finding off every screen. They are the reason

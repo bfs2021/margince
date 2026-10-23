@@ -38,7 +38,11 @@ import { ifMatch, requireVersion } from "../../api/version";
 import { ActivityBodyField } from "../../components/activitybodyfield";
 import { useMeetingOutcome } from "../../components/taskactions";
 import { Button, Field, Modal, TextInput } from "../../design-system/atoms";
-import { DateInput, isISODate } from "../../design-system/dateinput";
+import {
+  DateInput,
+  isISODate,
+  isoOrBlank,
+} from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
 import { Heading } from "../../design-system/heading";
 import { Select } from "../../design-system/select";
@@ -303,7 +307,7 @@ function MeetingOutcomeDialog({
                 {(control) => (
                   <DateInput
                     {...control}
-                    value={isISODate(draft.day) ? draft.day : ""}
+                    value={isoOrBlank(draft.day)}
                     // A meeting cannot have happened in the future, and the cap
                     // makes the box say so rather than leaving the server to.
                     max={isISODate(latestDay) ? latestDay : undefined}

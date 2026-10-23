@@ -2,7 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../../api/client";
 import type { components } from "../../api/schema";
 import { Field, PendingBody } from "../../design-system/atoms";
-import { DateInput, type ISODate } from "../../design-system/dateinput";
+import {
+  DateInput,
+  type ISODate,
+  isoOrBlank,
+} from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
 import { FactList } from "../../design-system/factlist";
 import { formatDate } from "../../format/format";
@@ -127,7 +131,7 @@ export function DsrDeadlineFields({
             {...control}
             value={draft.receivedOn}
             onChange={(event) =>
-              onChange({ receivedOn: asDay(event.target.value) })
+              onChange({ receivedOn: isoOrBlank(event.target.value) })
             }
           />
         )}
@@ -166,20 +170,11 @@ export function DsrDeadlineFields({
             {...control}
             value={draft.earlierDue}
             onChange={(event) =>
-              onChange({ earlierDue: asDay(event.target.value) })
+              onChange({ earlierDue: isoOrBlank(event.target.value) })
             }
           />
         )}
       </Field>
     </>
   );
-}
-
-// A date input reports "" or YYYY-MM-DD, nothing else.
-function isDay(value: string): value is ISODate {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value);
-}
-
-function asDay(value: string): ISODate | "" {
-  return isDay(value) ? value : "";
 }

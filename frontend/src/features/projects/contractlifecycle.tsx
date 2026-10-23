@@ -8,7 +8,7 @@ import type { components } from "../../api/schema";
 import { ifMatch, requireVersion } from "../../api/version";
 import { Button, Field, Modal } from "../../design-system/atoms";
 import { Callout } from "../../design-system/callout";
-import { DateInput, isISODate } from "../../design-system/dateinput";
+import { DateInput, isoOrBlank } from "../../design-system/dateinput";
 import {
   DrawerBody,
   DrawerFoot,
@@ -21,7 +21,12 @@ import { useT } from "../../i18n";
 import type { MessageKey } from "../../i18n/en";
 import { unwrap } from "../../lib/problem";
 import { useInstallationSettings } from "../../lib/uploadlimit";
-import { type ContractDraft, draftProblem, pricedIn } from "./contractform";
+import {
+  type ContractDraft,
+  draftProblem,
+  pricedIn,
+  refuseUnreadableField,
+} from "./contractform";
 import { contractTermsBody, renewDraftOf } from "./contracttermsbody";
 import { ContractTermsFields } from "./contracttermsfields";
 
@@ -199,6 +204,9 @@ export function ContractRenewModal({
           noValidate
           onSubmit={(event) => {
             event.preventDefault();
+            if (refuseUnreadableField(event.currentTarget)) {
+              return;
+            }
             if (invalid === null) {
               renew.mutate({
                 predecessor: contract,
@@ -456,7 +464,7 @@ export function ContractCancelModal({
           {(props) => (
             <DateInput
               {...props}
-              value={isISODate(noticeOn) ? noticeOn : ""}
+              value={isoOrBlank(noticeOn)}
               onChange={(e) => setNoticeOn(e.target.value)}
             />
           )}
@@ -469,7 +477,7 @@ export function ContractCancelModal({
           {(props) => (
             <DateInput
               {...props}
-              value={isISODate(effectiveOn) ? effectiveOn : ""}
+              value={isoOrBlank(effectiveOn)}
               onChange={(e) => setEffectiveOn(e.target.value)}
             />
           )}
