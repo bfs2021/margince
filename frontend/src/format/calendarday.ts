@@ -118,6 +118,13 @@ export function today(): string {
   return calendarDay(new Date(), viewerZone());
 }
 
+// The UTC today, for forms whose server refuses a past day by the UTC
+// calendar (the rate writes). Using the reader's day there offers a default
+// that the server rejects west of UTC in the evening (#8644).
+export function todayUtc(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 // The calendar MONTH an instant falls in, in a named IANA zone, as `yyyy-mm`.
 //
 // Derived from calendarDay rather than assembled again, so the two granularities

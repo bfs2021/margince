@@ -16,7 +16,7 @@ import { ErrorLine } from "../../design-system/errorline";
 import { Heading } from "../../design-system/heading";
 import { WriteRefused } from "../../design-system/querystates";
 import { Select } from "../../design-system/select";
-import { today } from "../../format/calendarday";
+import { todayUtc } from "../../format/calendarday";
 import { useLocale, useT } from "../../i18n";
 import type { MessageKey } from "../../i18n/en";
 import type { ModelLane } from "../../lib/ai-models";
@@ -38,7 +38,9 @@ export type BoundModel = Readonly<{ model: string; lane: ModelLane }>;
 
 // A scheduled price is edited on its own date; an in-force one, from today.
 function startDate(row: SheetRow | undefined): string {
-  return row && row.effective_date > today() ? row.effective_date : today();
+  return row && row.effective_date > todayUtc()
+    ? row.effective_date
+    : todayUtc();
 }
 
 /**
@@ -216,7 +218,7 @@ export function PriceForm({
             <TextInput
               {...control}
               type="date"
-              min={today()}
+              min={todayUtc()}
               value={effectiveDate}
               onChange={(e) => setEffectiveDate(e.target.value)}
             />

@@ -12,6 +12,7 @@ import {
   middayInstant,
   sameCalendarDay,
   today,
+  todayUtc,
 } from "./calendarday";
 import { displayDay } from "./format.dates";
 import { viewerZone } from "./timezone";
@@ -70,6 +71,24 @@ describe("today", () => {
     expect(today()).toBe("2026-07-04");
     vi.mocked(viewerZone).mockReturnValue("Asia/Tokyo");
     expect(today()).toBe("2026-07-05");
+  });
+});
+
+describe("todayUtc", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.mocked(viewerZone).mockReset();
+  });
+
+  // The server's rate_past refusal counts by the UTC day, so the rate form's
+  // floor does too, whatever the reader's zone (#8644).
+  it("is the UTC calendar day whatever the reader's zone", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-05T02:00:00Z"));
+    vi.mocked(viewerZone).mockReturnValue("America/New_York");
+    expect(todayUtc()).toBe("2026-07-05");
+    vi.mocked(viewerZone).mockReturnValue("Asia/Tokyo");
+    expect(todayUtc()).toBe("2026-07-05");
   });
 });
 

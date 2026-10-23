@@ -19,7 +19,7 @@ import {
   QueryStates,
   WriteRefused,
 } from "../../design-system/querystates";
-import { today } from "../../format/calendarday";
+import { todayUtc } from "../../format/calendarday";
 import { forReader } from "../../format/collate";
 import { formatDate, formatUsdPerMTok } from "../../format/format";
 import { viewerZone } from "../../format/timezone";
@@ -195,7 +195,7 @@ function FxRateModal({ onClose }: Readonly<{ onClose: () => void }>) {
   const formId = useId();
   const [from, setFrom] = useState("");
   const [rate, setRate] = useState("");
-  const [effectiveDate, setEffectiveDate] = useState(today());
+  const [effectiveDate, setEffectiveDate] = useState(todayUtc());
   const [error, setError] = useState<string | null>(null);
 
   const save = useMutation({
