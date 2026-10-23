@@ -158,6 +158,7 @@ type Server struct {
 	contactBriefHandlers
 	meetingBriefHandlers
 	dealStatusHandlers
+	roomBriefHandlers
 	contactResearchHandlers
 	contactDraftHandlers
 	leadDraftHandlers

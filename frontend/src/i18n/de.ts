@@ -10140,6 +10140,43 @@ export const de = {
   "buyer.docs.downloadShort": "Herunterladen",
   "buyer.poweredBy": "Betrieben mit",
   "buyer.poweredByMargince": "Betrieben mit Margince",
+  "roomtab.documents": "Dokumente",
+  "roomtab.welcomeEmpty":
+    "Noch keine Begrüßung. Mit ihr beginnt, was die Käuferseite liest.",
+  "roomtab.setup.title": "Raum vorbereiten",
+  "roomtab.setup.text": "Begrüßung schreiben",
+  "roomtab.setup.textHint":
+    "Der erste Absatz, den die Käuferseite beim Öffnen des Raums liest.",
+  "roomtab.setup.editText": "Begrüßung schreiben",
+  "roomtab.setup.invite": "Käuferseite einladen",
+  "roomtab.setup.inviteHint":
+    "Jede eingeladene Adresse bekommt einen eigenen, persönlichen Link.",
+  "roomtab.setup.document": "Dokument hinzufügen",
+  "roomtab.setup.documentHint":
+    "Unter Dokumente eine Datei aus dem Deal wählen.",
+  "roomtab.setup.thread": "Thread beginnen",
+  "roomtab.setup.threadHint":
+    "Stelle unter Unterhaltung eine Frage, die sich in einer Zeile beantworten lässt.",
+  "roomtab.brief.title": "Zusammenfassung des Raums",
+  "roomtab.brief.pending": "Raum wird gelesen",
+  "roomtab.brief.from": "Aus: {sources}",
+  "roomtab.brief.roomThread": "Ein Thread im Raum",
+  "roomtab.manage.liveHint":
+    "Die Käuferseite kann lesen, herunterladen und kommentieren.",
+  "roomtab.manage.save": "Änderungen speichern",
+  "roomtab.manage.openPage": "Seite des Raums öffnen",
+  "roomtab.manage.expiryHint":
+    "Leer lassen für kein Enddatum. Der Tag gilt in UTC.",
+  "roomtab.manage.contactLabel": "Dein Kontakt",
+  "roomtab.manage.contactHint":
+    "Wer im Team für die Käuferseite ansprechbar ist.",
+  "roomtab.manage.contactOwner": "Für den Deal zuständig",
+  "roomtab.manage.textHeading": "Titel und Begrüßung",
+  "roomtab.manage.welcomeHint": "Der erste Absatz, den die Käuferseite liest.",
+  "roomtab.manage.foot":
+    "Die Käuferseite sieht Änderungen beim nächsten Öffnen des Raums.",
+  "threads.conversationTitle": "Unterhaltung",
+  "threads.about": "Zu {title}",
   "threads.roomTitle": "Threads im Raum",
   "threads.aboutThis_other": "{count} Threads zu diesem Dokument",
   "threads.aboutThis_one": "{count} Thread zu diesem Dokument",

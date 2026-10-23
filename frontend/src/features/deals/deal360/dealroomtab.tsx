@@ -7,18 +7,19 @@
 // each drawing its own — a second copy of "who is in the room" is how a tab
 // and a page come to disagree about it.
 //
-// The tab is the narrower of the two: it carries the reading, the editable
-// text and the preview, and links to the room's own page for the room's verbs
-// (pause, close, set an expiry), which stand there beside its identity band.
+// The tab leads with the room's band, what is still missing, and the brief,
+// then sets the documents beside the conversation. The room's settings open
+// in a dialog here; the room's own page keeps them for a mailed link.
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { DoorOpen, ExternalLink } from "lucide-react";
-import { useState } from "react";
+import { DoorOpen, ExternalLink, Settings2 } from "lucide-react";
+import { type ReactNode, useId, useState } from "react";
 import { api } from "../../../api/client";
 import type { components } from "../../../api/schema";
 import { ifMatch, requireVersion } from "../../../api/version";
 import {
   FINISHED_STATES,
+  RoomStateBadge,
   refusalFor,
   useDealRoom,
 } from "../../../components/dealroom";
@@ -29,8 +30,13 @@ import {
   Textarea,
   TextInput,
 } from "../../../design-system/atoms";
+import { AvatarStack } from "../../../design-system/avatarstack";
+import { Callout, type CalloutTone } from "../../../design-system/callout";
+import { Checklist, ChecklistStep } from "../../../design-system/checklist";
 import { ConfirmModal } from "../../../design-system/confirmmodal";
 import { ErrorLine } from "../../../design-system/errorline";
+import { Eyebrow } from "../../../design-system/eyebrow";
+import { Heading } from "../../../design-system/heading";
 import { Panel, PanelBody } from "../../../design-system/panel";
 import { QueryStates } from "../../../design-system/querystates";
 import { formatDateAbbrev, formatNumber } from "../../../format/format";
@@ -38,13 +44,17 @@ import { useLocale, useT } from "../../../i18n";
 import { useCanWrite } from "../../../lib/capability";
 import { problemMessageOf, unwrap } from "../../../lib/problem";
 import { useRecordZone } from "../../../lib/recordzone";
-import { navigate } from "../../../lib/router";
 import {
   buyerLink,
   DealRoomAccess,
+  useParticipants,
   useRoomAttendance,
 } from "../dealroomaccess";
-import { DealRoomConversation } from "../dealroomconversation";
+import { InviteDialog } from "../dealroomaccess.dialogs";
+import { DealRoomConversation, useRoomThreads } from "../dealroomconversation";
+import { useRoomDocuments } from "../dealroomdocuments";
+import { RoomBrief } from "./dealroombrief";
+import { ManageRoomDialog, useSaveRoom } from "./dealroommanage";
 import "./dealroomtab.css";
 
 type DealRoom = components["schemas"]["DealRoom"];
@@ -84,45 +94,241 @@ function RoomReading({
   const t = useT();
   const finished = FINISHED_STATES.has(room.state);
   const refusal = refusalFor(finished, mayWrite, t);
+  const [managing, setManaging] = useState(false);
+  // Each opening remounts the dialog, so it starts from the room as it is.
+  const [opening, setOpening] = useState(0);
+  const manage = () => {
+    setOpening((n) => n + 1);
+    setManaging(true);
+  };
   return (
     <div className="record-stack">
-      {/* Who has been in, the one way to see what they see, and the way to the
-          room's own verbs. They stand with the attendance rather than inside a
-          panel: they are the room's, not its access list's or its text's. */}
-      <div className="roomtab-head">
-        <RoomFacts room={room} />
-        {mayWrite ? (
-          <div className="roomtab-verbs">
-            <ViewAsBuyerButton room={room} />
-            <ManageRoomButton room={room} />
-          </div>
-        ) : null}
-      </div>
-      {/* Who may walk in, and the verbs that change it, ON the tab rather than
-          only in the record's details pane: the pane is shut when a reader
-          arrives, so a room they had just opened offered them no way to let
-          anybody into it. */}
+      <RoomBand
+        room={room}
+        verbs={
+          mayWrite ? (
+            <>
+              <ViewAsBuyerButton room={room} />
+              <Button onClick={manage}>
+                <Settings2 aria-hidden />
+                {t("roompage.manage")}
+              </Button>
+            </>
+          ) : null
+        }
+      />
+      <StateBanner
+        room={room}
+        action={
+          mayWrite ? <StateAction room={room} onManage={manage} /> : undefined
+        }
+      />
+      {mayWrite && !finished ? (
+        <RoomSetup room={room} onEditText={manage} />
+      ) : null}
+      <RoomBrief roomId={room.id} />
+      <DealRoomConversation room={room} refusal={refusal} layout="deck" />
+      {/* Who may walk in, and the verbs that change it, ON the tab: the
+          record's details pane is shut when a reader arrives. */}
       <DealRoomAccess room={room} mayManage={mayWrite && !finished} />
-      <RoomText room={room} refusal={refusal} />
-      <DealRoomConversation room={room} refusal={refusal} />
+      {mayWrite ? (
+        <ManageRoomDialog
+          key={opening}
+          room={room}
+          open={managing}
+          onClose={() => setManaging(false)}
+        />
+      ) : null}
     </div>
   );
 }
 
-// The way to the room's own page, where its lifecycle verbs live — and, once
-// the room is closed, the revoke and new-link verbs this tab stops offering.
-function ManageRoomButton({ room }: Readonly<{ room: DealRoom }>) {
+// The room's band: what it is, how it stands, what a buyer reads first and
+// who is in it, with the verbs that act on the whole room at its end.
+function RoomBand({
+  room,
+  verbs,
+}: Readonly<{ room: DealRoom; verbs: ReactNode }>) {
   const t = useT();
+  const headingId = useId();
+  const people = (useParticipants(room.id).data?.data ?? []).filter(
+    (p) => !p.revoked_at,
+  );
   return (
-    <Button
-      variant="ghost"
-      onClick={() =>
-        navigate({ screen: "deals", id: room.deal_id, id2: "room" })
-      }
-    >
-      <DoorOpen aria-hidden />
-      {t("roompage.manage")}
-    </Button>
+    <section className="roomtab-band" aria-labelledby={headingId}>
+      <div className="roomtab-band-id">
+        <span className="roomtab-band-kind">
+          <DoorOpen aria-hidden />
+          <Eyebrow>{t("room.card.title")}</Eyebrow>
+          <RoomStateBadge state={room.state} />
+        </span>
+        <Heading size="large" id={headingId} className="roomtab-band-title">
+          {room.title}
+        </Heading>
+        {room.welcome_message ? (
+          <p className="roomtab-band-welcome">{room.welcome_message}</p>
+        ) : (
+          <p className="roomtab-band-welcome t-caption">
+            {t("roomtab.welcomeEmpty")}
+          </p>
+        )}
+        <div className="roomtab-band-people">
+          {people.length > 0 ? (
+            <AvatarStack
+              max={4}
+              contacts={people.map((p) => ({
+                name: p.full_name,
+                identity: p.id,
+              }))}
+            />
+          ) : null}
+          <RoomFacts room={room} />
+        </div>
+      </div>
+      {verbs ? <div className="roomtab-verbs">{verbs}</div> : null}
+    </section>
+  );
+}
+
+// The way back from a stopped room, beside the sentence that says it stopped:
+// a paused room resumes in place; anything else is the dialog's.
+function StateAction({
+  room,
+  onManage,
+}: Readonly<{ room: DealRoom; onManage: () => void }>) {
+  const t = useT();
+  const save = useSaveRoom(room.deal_id);
+  if (room.state === "paused") {
+    return (
+      <>
+        <Button
+          pending={save.isPending}
+          onClick={() =>
+            save.mutate({
+              roomId: room.id,
+              version: requireVersion(room.version),
+              verb: "resume",
+            })
+          }
+        >
+          {t("roompage.resume")}
+        </Button>
+        <ErrorLine inline error={save.error} />
+      </>
+    );
+  }
+  return <Button onClick={onManage}>{t("roompage.manage")}</Button>;
+}
+
+/**
+ * One band for every standing state of a room, said in the words a rep needs:
+ * what the buyer sees right now. Shared by the tab and the room's own page,
+ * which passes no action.
+ */
+export function StateBanner({
+  room,
+  action,
+}: Readonly<{ room: DealRoom; action?: ReactNode }>) {
+  const t = useT();
+  const { locale } = useLocale();
+  const recordZone = useRecordZone();
+  const notice = (claim: string, tone?: CalloutTone, withAction = true) => (
+    <Callout
+      tone={tone}
+      kind="standing"
+      title={claim}
+      actions={withAction ? action : undefined}
+    />
+  );
+  switch (room.state) {
+    case "paused":
+      return notice(t("roompage.banner.paused"), "warning");
+    case "closed":
+      return notice(t("roompage.banner.closed"));
+    case "expired":
+      return notice(t("roompage.banner.expired"), "warning");
+    case "archived":
+      return notice(t("roompage.banner.archived"), "danger");
+    default:
+      return room.expires_at
+        ? notice(
+            t("roompage.banner.liveUntil", {
+              when: formatDateAbbrev(room.expires_at, locale, recordZone),
+            }),
+            undefined,
+            false,
+          )
+        : null;
+  }
+}
+
+// What still stands between a live room and one worth opening, read from the
+// room's own records. It goes away once all four are done.
+function RoomSetup({
+  room,
+  onEditText,
+}: Readonly<{ room: DealRoom; onEditText: () => void }>) {
+  const t = useT();
+  const [inviting, setInviting] = useState(false);
+  const participants = useParticipants(room.id);
+  const documents = useRoomDocuments(room.id);
+  const threads = useRoomThreads(room.id);
+  if (!participants.isSuccess || !documents.isSuccess || !threads.isSuccess) {
+    return null;
+  }
+  const done = [
+    Boolean(room.welcome_message),
+    participants.data.data.some((p) => !p.revoked_at),
+    documents.data.data.length > 0,
+    threads.data.data.length > 0,
+  ];
+  const doneCount = done.filter(Boolean).length;
+  if (doneCount === done.length) {
+    return null;
+  }
+  const current = done.indexOf(false);
+  const stateOf = (i: number) =>
+    done[i] ? "done" : i === current ? "current" : "open";
+  const verb = (i: number, label: string, onClick: () => void) =>
+    done[i] ? undefined : (
+      <Button variant={i === current ? "primary" : "ghost"} onClick={onClick}>
+        {label}
+      </Button>
+    );
+  return (
+    <Panel title={t("roomtab.setup.title")}>
+      <PanelBody>
+        <Checklist count={{ done: doneCount, total: done.length }}>
+          <ChecklistStep
+            state={stateOf(0)}
+            title={t("roomtab.setup.text")}
+            caption={t("roomtab.setup.textHint")}
+            action={verb(0, t("roomtab.setup.editText"), onEditText)}
+          />
+          <ChecklistStep
+            state={stateOf(1)}
+            title={t("roomtab.setup.invite")}
+            caption={t("roomtab.setup.inviteHint")}
+            action={verb(1, t("access.invite"), () => setInviting(true))}
+          />
+          <ChecklistStep
+            state={stateOf(2)}
+            title={t("roomtab.setup.document")}
+            caption={t("roomtab.setup.documentHint")}
+          />
+          <ChecklistStep
+            state={stateOf(3)}
+            title={t("roomtab.setup.thread")}
+            caption={t("roomtab.setup.threadHint")}
+          />
+        </Checklist>
+      </PanelBody>
+      <InviteDialog
+        room={room}
+        open={inviting}
+        onClose={() => setInviting(false)}
+      />
+    </Panel>
   );
 }
 
