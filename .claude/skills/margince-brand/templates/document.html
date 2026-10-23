@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Document Title</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700&family=Geist:wght@400;500;700&family=Geist+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  /* Margince brand tokens: the light values from DESIGN.md section 3. */
+  :root {
+    --accent: #0b7a53;
+    --accentText: #0a6f4b;
+    --accentBg: #e8f3ee;
+    --bg: #f1f5f2;
+    --surface: #fbfcfb;
+    --ink: #101a15;
+    --ink2: #33403a;
+    --ink3: #66736c;
+    --line: rgba(16, 26, 21, .12);
+    --warning: #f5a524;
+    --gutter: 20mm;
+  }
+  /* The first page has no top margin so the band runs to the paper's edge. */
+  @page {
+    size: A4;
+    margin: 16mm 0 18mm 0;
+    @bottom-left { content: "Margince"; font: 500 8pt Geist, sans-serif; color: #66736c; padding-left: 20mm; }
+    @bottom-right { content: counter(page) " / " counter(pages); font: 500 8pt Geist, sans-serif; color: #66736c; padding-right: 20mm; }
+  }
+  @page :first { margin-top: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: #fff;
+    font: 400 10.5pt/1.55 Geist, system-ui, sans-serif;
+    color: var(--ink2);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  @media screen {
+    body { background: #dfe6e1; padding: 24px 0; }
+    .page { max-width: 210mm; margin: 0 auto; background: #fff; box-shadow: 0 6px 28px rgba(16, 26, 21, .14); padding-bottom: 18mm; }
+  }
+
+  .band { background: var(--accent); color: #fff; padding: 12mm var(--gutter) 10mm; }
+  .lockup { display: flex; align-items: center; gap: 8px; }
+  .lockup svg { height: 18px; width: auto; color: #fff; }
+  .lockup span { font: 700 18px/1 Outfit, sans-serif; letter-spacing: -0.02em; }
+  .band .kind { margin-top: 14mm; font: 500 8pt/1 "Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; opacity: .85; }
+  .band h1 { font: 700 28pt/1.1 Outfit, sans-serif; letter-spacing: -0.02em; margin: 3mm 0 0; color: #fff; }
+  .band .meta { margin-top: 5mm; font-size: 9.5pt; opacity: .9; }
+
+  main { padding: 10mm var(--gutter) 0; }
+  h2, h3 { font-family: Outfit, Geist, sans-serif; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; break-after: avoid; }
+  h2 { font-size: 16pt; margin: 9mm 0 3mm; padding-top: 3mm; border-top: 2px solid var(--accent); }
+  h3 { font-size: 12pt; margin: 6mm 0 2mm; }
+  p { margin: 0 0 3mm; }
+  a { color: var(--accentText); }
+  .lead { font-size: 12.5pt; color: var(--ink3); margin-bottom: 6mm; }
+  ul, ol { padding-left: 5mm; margin: 0 0 3mm; }
+  li { margin-bottom: 1.5mm; }
+  li::marker { color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; margin: 3mm 0 5mm; font-size: 9.5pt; break-inside: avoid; }
+  th { text-align: left; font-weight: 500; color: var(--accentText); background: var(--accentBg); padding: 2.2mm 3mm; }
+  td { padding: 2.2mm 3mm; border-bottom: 1px solid var(--line); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .callout { background: var(--accentBg); border-left: 3px solid var(--accent); padding: 4mm 5mm; margin: 4mm 0 5mm; border-radius: 0 6px 6px 0; break-inside: avoid; }
+  .callout b { color: var(--accentText); }
+  .callout.warn { background: #fff6e6; border-left-color: var(--warning); }
+  .callout.warn b { color: #8a5300; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="band">
+    <div class="lockup">
+      <svg viewBox="0 0 299 230" fill="none" aria-hidden="true">
+        <path d="M141.688 223.911V212.017C141.688 210.362 142.722 209.259 143.239 208.914L160.821 191.849C166.613 186.47 172.198 193.4 172.198 197.02V223.911C172.198 228.048 168.061 229.427 165.993 229.599H147.376C143.239 229.599 141.86 225.807 141.688 223.911Z" fill="currentColor" fill-opacity=".55"/>
+        <path d="M191.312 223.907V164.954C191.312 163.299 192.347 162.196 192.864 161.852L210.446 144.786C216.238 139.408 221.823 146.338 221.823 149.957V223.907C221.823 228.044 217.686 229.423 215.618 229.595H197.001C192.864 229.595 191.485 225.803 191.312 223.907Z" fill="currentColor" fill-opacity=".8"/>
+        <path d="M241 223.886V112.704C241 111.049 242.034 109.946 242.551 109.602L260.134 92.5361C265.926 87.1579 271.511 94.0875 271.511 97.7074V223.886C271.511 228.023 267.374 229.402 265.305 229.574H246.688C242.551 229.574 241.172 225.782 241 223.886Z" fill="currentColor" fill-opacity=".55"/>
+        <path d="M0 29.4771V213.06C0 232.09 40.8535 237.882 40.8535 212.025V94.636C40.8535 90.9127 44.9906 91.5196 46.0249 92.5675C72.2263 119.114 125.974 173.344 131.352 177.895C136.73 182.445 142.556 179.791 144.797 177.895C187.202 135.49 272.219 50.3694 273.046 49.1283C273.874 47.8872 275.115 48.6112 275.632 49.1283C278.735 52.4035 285.147 59.0573 285.975 59.471C293.732 65.1595 298.386 59.6434 298.386 55.851V9.82615C298.386 0 286.492 0 280.803 0H235.296C228.573 0 228.573 8.27414 230.124 9.82554C233.917 13.9626 241.812 22.4436 243.053 23.271C244.294 24.0984 244.259 24.9948 244.087 25.3395C210.301 58.2637 144.797 116.356 142.729 118.424C140.66 120.493 138.419 119.286 137.557 118.424L31.028 16.0316C15.7209 0.724496 0 20.1688 0 29.4771Z" fill="currentColor"/>
+      </svg>
+      <span>Margince</span>
+    </div>
+    <div class="kind">Document type</div>
+    <h1>Document title</h1>
+    <div class="meta">Author name · 23 October 2026</div>
+  </header>
+
+  <main>
+    <p class="lead">One or two sentences that say what this document decides or reports.</p>
+
+    <h2>First section</h2>
+    <p>Body text in Geist. Keep paragraphs short and lead with the fact.</p>
+    <ul>
+      <li>A point the reader needs.</li>
+      <li>A second point the reader needs.</li>
+    </ul>
+
+    <div class="callout"><b>Key point.</b> The one thing to remember from this section.</div>
+
+    <h2>Second section</h2>
+    <table>
+      <thead><tr><th>Item</th><th>Owner</th><th class="num">Amount</th></tr></thead>
+      <tbody>
+        <tr><td>First row</td><td>Team</td><td class="num">1,200</td></tr>
+        <tr><td>Second row</td><td>Team</td><td class="num">980</td></tr>
+      </tbody>
+    </table>
+
+    <h3>A sub-section</h3>
+    <p>Sub-sections use h3 and sit tight under their section.</p>
+
+    <div class="callout warn"><b>Open question.</b> Something that still needs a decision.</div>
+  </main>
+</div>
+</body>
+</html>
