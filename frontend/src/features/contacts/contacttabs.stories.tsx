@@ -101,6 +101,39 @@ type Story = StoryObj<typeof ContactTimelineTab>;
  */
 export const Chronology: Story = { render: tab(view) };
 
+/** A logged call on a contact with a phone offers Call on its row. */
+export const WithCall: Story = {
+  render: tab({
+    ...view,
+    contact: {
+      ...view.contact,
+      phones: [
+        {
+          id: "ph-1",
+          phone: "+49 151 7654321",
+          phone_type: "mobile",
+          is_primary: true,
+          position: 0,
+          ...CAPTURED,
+        },
+      ],
+    },
+    activities: {
+      data: [
+        activity({
+          id: "a-3",
+          kind: "call",
+          subject: "Asked whether the retrofit slot can move to October",
+          direction: "inbound",
+          occurred_at: "2026-08-12T15:30:00Z",
+        }),
+        ...(view.activities?.data ?? []),
+      ],
+      page: { has_more: false },
+    },
+  }),
+};
+
 /**
  * The Conversations cut: the same chronicle, narrowed to the exchanges
  * somebody can answer, with the kind dial under it offering only the kinds
