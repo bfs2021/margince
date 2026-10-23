@@ -170,8 +170,17 @@ export function RoomSetup({
     threads.data.data.length > 0,
   ];
   const doneCount = done.filter(Boolean).length;
+  // The invite dialog stays mounted once the last step is done. Inviting can
+  // be that step, and the dialog is still showing the one-time link then.
+  const invite = (
+    <InviteDialog
+      room={room}
+      open={inviting}
+      onClose={() => setInviting(false)}
+    />
+  );
   if (doneCount === done.length) {
-    return null;
+    return invite;
   }
   const current = done.indexOf(false);
   const stateOf = (i: number) =>
@@ -210,11 +219,7 @@ export function RoomSetup({
           />
         </Checklist>
       </PanelBody>
-      <InviteDialog
-        room={room}
-        open={inviting}
-        onClose={() => setInviting(false)}
-      />
+      {invite}
     </Panel>
   );
 }

@@ -99,9 +99,15 @@ export function DocumentBoard({
         (thread) => !thread.document_id || !shown.has(thread.document_id),
       );
   const titles = new Map(documents.map((doc) => [doc.id, doc.title]));
+  // A thread about a document the board no longer lists still names that it
+  // was about a document, so it does not read as room-wide.
+  const aboutLabel = (title: string | undefined) =>
+    title ? t("threads.about", { title }) : t("threads.aboutRemoved");
   const aboutOf = deck
     ? (thread: DealRoomThread) =>
-        thread.document_id ? titles.get(thread.document_id) : undefined
+        thread.document_id
+          ? aboutLabel(titles.get(thread.document_id))
+          : undefined
     : undefined;
   return (
     <div className={deck ? "board-deck" : "board-stacked"}>

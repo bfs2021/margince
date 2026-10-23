@@ -59565,6 +59565,7 @@ components:
         generated_by: { $ref: '#/components/schemas/WrittenBy' }
         sentences:
           type: array
+          maxItems: 4
           items: { $ref: '#/components/schemas/DealRoomBriefSentence' }
 
     DealRoomBriefSentence:

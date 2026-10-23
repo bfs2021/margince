@@ -48,7 +48,7 @@ To pause or close a Deal Room in Margince, open the deal's **Deal Room** tab and
    - **Closed**: "Buyers can still read. Nothing new can be added."
 2. Set **Access ends on**: "Leave empty for no end date. The day is read in UTC."
 3. Click **Save changes**.
-A paused room also shows **Resume** in the notice on the tab. A closed or expired room cannot be changed here: "This room has ended. Its shared content is kept as a record."
+A paused room also shows **Resume** in the notice on the tab. A closed, expired or archived room cannot be changed here: "This room has ended. Its shared content is kept as a record."
 Without permission to change Deal Rooms, **Manage room** is not shown.
 Also called: stop sharing, lock the room, expire the room.
 
@@ -67,7 +67,7 @@ The **Deal Room** tab leads with the room's title, its state, its welcome and wh
 - **Documents** stand beside the **Conversation**, which holds every thread and names the document each one is about.
 - **Who may enter** lists each buyer as **Invited**, **Signed in**, **Link requested** or **Revoked**, with the actions for their link.
 
-**Get the room ready** is not shown on a closed or expired room, or without permission to change it. **Room brief** is not shown when there is nothing to report.
+**Get the room ready** is not shown on a closed, expired or archived room, or without permission to change it. **Room brief** is not shown when there is nothing to report, or when it could not be read.
 Also called: room overview, deal room summary.
 
 ### How do I remove a buyer from a deal room?
@@ -75,7 +75,7 @@ To remove a buyer from a Deal Room in Margince, open the deal's **Deal Room** ta
 "Their session ends and their link stops working. Their comments stay visible and attributed. Requesting a new link does not restore access."
 
 The same menu has **Issue new link** (their current link stops working) and **Change permissions**.
-Once the room is closed or expired, the tab hides this menu. Click **Manage room**, then **Open the room’s page**, to reach it there.
+Once the room is closed, expired or archived, the tab hides this menu. Click **Manage room**, then **Open the room’s page**, to reach it there.
 Also called: revoke access, kick out, remove a participant.
 
 ### How do I see which deal rooms a contact is in?

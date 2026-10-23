@@ -56,7 +56,7 @@ export function ThreadList({
 }: Readonly<{
   threads: readonly DealRoomThread[];
   verbs: ThreadVerbs;
-  /** The document a thread is about, for a list that mixes documents. */
+  /** What a thread is about, as a label, for a list that mixes documents. */
   aboutOf?: (thread: DealRoomThread) => string | undefined;
 }>) {
   return (
@@ -138,7 +138,7 @@ function ThreadRow({
       {about ? (
         <span className="t-caption thread-about">
           <FileText size={12} aria-hidden />
-          {t("threads.about", { title: about })}
+          {about}
         </span>
       ) : null}
       {thread.required_change || resolved ? (

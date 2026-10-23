@@ -10235,7 +10235,7 @@ export const en = {
   "roomtab.setup.threadHint":
     "Under Conversation, ask one thing a buyer can answer in a line.",
   "roomtab.brief.title": "Room brief",
-  "roomtab.brief.pending": "Reading the room",
+  "roomtab.brief.pending": "Reading the room…",
   "roomtab.brief.from": "From: {sources}",
   "roomtab.brief.roomThread": "A room thread",
   "roomtab.manage.liveHint": "Buyers can read, download and comment.",
@@ -10252,6 +10252,8 @@ export const en = {
     "Changes reach buyers the next time they open the room.",
   "threads.conversationTitle": "Conversation",
   "threads.about": "About {title}",
+  "threads.aboutRemoved": "About a document no longer in the room",
+  "roomtab.brief.unknownSource": "A record in this room",
   "threads.roomTitle": "Room threads",
   "threads.aboutThis_other": "{count} threads about this document",
   "threads.aboutThis_one": "{count} thread about this document",

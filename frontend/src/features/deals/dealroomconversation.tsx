@@ -7,6 +7,7 @@ import { ErrorLine } from "../../design-system/errorline";
 import { QueryStates } from "../../design-system/querystates";
 import { useT } from "../../i18n";
 import { unwrap } from "../../lib/problem";
+import { roomBriefKey } from "./dealroombrief.key";
 import {
   AddDocument,
   DOCUMENT_GROUPS,
@@ -75,7 +76,12 @@ export function DealRoomConversation({
   const threads = useRoomThreads(room.id);
   const docs = useRoomDocuments(room.id);
   const refresh = () =>
-    queryClient.invalidateQueries({ queryKey: ["deal-room-threads", room.id] });
+    Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: ["deal-room-threads", room.id],
+      }),
+      queryClient.invalidateQueries({ queryKey: roomBriefKey(room.id) }),
+    ]);
   const open = useMutation({
     mutationKey: ["deal-room-thread-open"],
     mutationFn: async (input: {

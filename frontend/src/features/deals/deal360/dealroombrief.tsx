@@ -15,6 +15,7 @@ import { Panel, PanelBody } from "../../../design-system/panel";
 import { useT } from "../../../i18n";
 import { unwrap } from "../../../lib/problem";
 import { useParticipants } from "../dealroomaccess";
+import { ROOM_BRIEF_PREFIX } from "../dealroombrief.key";
 import { useRoomThreads } from "../dealroomconversation";
 import { useRoomDocuments } from "../dealroomdocuments";
 import "./dealroomtab.css";
@@ -29,7 +30,7 @@ const BRIEF_STALE_MS = 60_000;
 export function useRoomBrief(roomId: string) {
   const t = useT();
   return useQuery({
-    queryKey: ["deal-room-brief", roomId],
+    queryKey: [...ROOM_BRIEF_PREFIX, roomId],
     staleTime: BRIEF_STALE_MS,
     refetchOnWindowFocus: false,
     queryFn: async () => {
@@ -78,23 +79,26 @@ function BriefSentences({
   brief,
 }: Readonly<{ roomId: string; brief: DealRoomBrief }>) {
   const t = useT();
-  const nameOf = useEvidenceNames(roomId);
+  const { settled, nameOf } = useEvidenceNames(roomId);
+  // A sentence never shows without the line that says where it came from, so
+  // the brief waits for the reads that name its sources.
+  if (!settled) {
+    return <AiPending label={t("roomtab.brief.pending")} lines={2} />;
+  }
   return (
     <ul className="roombrief">
       {brief.sentences.map((sentence) => {
-        const sources = sentence.evidence
-          .map(nameOf)
-          .filter((name): name is string => name !== undefined);
+        const sources = sentence.evidence.map(
+          (evidence) => nameOf(evidence) ?? t("roomtab.brief.unknownSource"),
+        );
         return (
           <li key={sentence.text}>
             <p>{sentence.text}</p>
-            {sources.length > 0 ? (
-              <p className="t-caption">
-                {t("roomtab.brief.from", {
-                  sources: [...new Set(sources)].join(", "),
-                })}
-              </p>
-            ) : null}
+            <p className="t-caption">
+              {t("roomtab.brief.from", {
+                sources: [...new Set(sources)].join(", "),
+              })}
+            </p>
           </li>
         );
       })}
@@ -106,9 +110,12 @@ function BriefSentences({
 // brief costs no request of its own to say where it came from.
 function useEvidenceNames(roomId: string) {
   const t = useT();
-  const participants = useParticipants(roomId).data?.data ?? [];
-  const documents = useRoomDocuments(roomId).data?.data ?? [];
-  const threads = useRoomThreads(roomId).data?.data ?? [];
+  const participantsRead = useParticipants(roomId);
+  const documentsRead = useRoomDocuments(roomId);
+  const threadsRead = useRoomThreads(roomId);
+  const participants = participantsRead.data?.data ?? [];
+  const documents = documentsRead.data?.data ?? [];
+  const threads = threadsRead.data?.data ?? [];
   const names = new Map<string, string>();
   for (const p of participants) {
     names.set(`participant:${p.id}`, p.full_name);
@@ -128,6 +135,13 @@ function useEvidenceNames(roomId: string) {
         : t("roomtab.brief.roomThread"),
     );
   }
-  return (evidence: Evidence) =>
-    names.get(`${evidence.entity_type}:${evidence.entity_id}`);
+  return {
+    // Settled once each read answered or failed; a failed read leaves its
+    // citations to the generic source label rather than holding the brief.
+    settled: [participantsRead, documentsRead, threadsRead].every(
+      (read) => !read.isPending,
+    ),
+    nameOf: (evidence: Evidence) =>
+      names.get(`${evidence.entity_type}:${evidence.entity_id}`),
+  };
 }
