@@ -116,6 +116,10 @@ list of next steps.
 **Snooze 1 day** adds a day to the task's own due date, so a task with no date does not show it. If
 it fails: "Task was not completed. Retry." Also called: tick off, mark done, close a task.
 
+### What can I do from a task?
+A task linked to one contact offers **Email** and **Open contact**. It offers **Call** only when a logged call made the task and the contact has a phone number. A task you typed never gets **Call**; a done task offers the same. **Email** is refused with a reason when the contact has no email address or is archived. An archived contact gets no **Call**, and **Open contact** stays.
+The **First** card on **Home** offers **Call** and **Email** the same way, with no **Open contact**.
+
 ### How do I plan my week?
 To plan your week in Margince, open **Home**, switch the view to **Weekly** and add items under
 **This week’s commitments**.
@@ -213,12 +217,9 @@ by who made it.
 
 When Margince reads old mail, it checks newer messages before it creates work. Work already done and offers to help create no new task. Neither does work that depends on something which has not happened yet.
 A request alone does not mean someone agreed to do it. **Commitment review** on the source shows why no task was made.
-Words such as "next week" stay in the source without setting a due day.
 
-An old promise without a current deadline stays in the source, rather than becoming a new overdue task.
 A future deadline can keep an old promise current. If later context has not been read, Margince does not create the task.
 
-Open the source and open **Commitment review** to see why a reading created no task.
 Check the quoted words and any later replies before adding a follow-up from the linked record.
 A reply alone does not show that a promise was kept. Tasks you edited, reopened or pinned remain yours.
 
@@ -275,7 +276,6 @@ Being copied alone does not assign a reply. Team shows shared work under the acc
 Old automatic findings without a current check stay with their source for review.
 On a contact, **Review conversation findings** shows their words, source and date without calling them overdue.
 Tasks you typed, changed or reopened keep their own state. An import does not count as such a change.
-An email on another subject does not mean a promise was kept.
 
 ### Why an item needs attention
 Each item shows its record, the current facts that call for action, and the action it offers.
