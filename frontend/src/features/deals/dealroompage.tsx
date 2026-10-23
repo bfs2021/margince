@@ -25,12 +25,8 @@ import { useT } from "../../i18n";
 import { useCanWrite } from "../../lib/capability";
 import { problemMessageOf, unwrap } from "../../lib/problem";
 import { navigate } from "../../lib/router";
-import {
-  RoomFacts,
-  RoomText,
-  StateBanner,
-  ViewAsBuyerButton,
-} from "./deal360/dealroomtab";
+import { RoomFacts, StateBanner } from "./deal360/dealroomdeck";
+import { RoomText, ViewAsBuyerButton } from "./deal360/dealroomtab";
 import { DealRoomAccess } from "./dealroomaccess";
 import { DealRoomConversation } from "./dealroomconversation";
 import "./dealroompage.css";
