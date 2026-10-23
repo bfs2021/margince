@@ -13,64 +13,94 @@
     --accent: #0b7a53;
     --accentText: #0a6f4b;
     --accentBg: #e8f3ee;
-    --bg: #f1f5f2;
-    --surface: #fbfcfb;
+    --mint: #2bb673;
     --ink: #101a15;
     --ink2: #33403a;
     --ink3: #66736c;
-    --line: rgba(16, 26, 21, .12);
+    --line: rgba(16, 26, 21, .09);
     --warning: #f5a524;
     --gutter: 20mm;
+    --mesh:
+      radial-gradient(55% 80% at 100% 0%, rgba(91, 97, 214, .30), transparent 60%),
+      radial-gradient(70% 90% at 85% 10%, rgba(43, 182, 115, .55), transparent 60%),
+      radial-gradient(80% 120% at 0% 100%, #0b7a53, transparent 70%),
+      linear-gradient(135deg, #075a3c 0%, #06311f 100%);
   }
-  /* The first page has no top margin so the band runs to the paper's edge. */
   @page {
     size: A4;
-    margin: 16mm 0 18mm 0;
+    margin: 18mm 0 18mm 0;
     @bottom-left { content: "Margince"; font: 500 8pt Geist, sans-serif; color: #66736c; padding-left: 20mm; }
-    @bottom-right { content: counter(page) " / " counter(pages); font: 500 8pt Geist, sans-serif; color: #66736c; padding-right: 20mm; }
+    @bottom-right { content: counter(page) " / " counter(pages); font: 500 8pt "Geist Mono", monospace; color: #66736c; padding-right: 20mm; }
   }
   @page :first { margin-top: 0; }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   body {
     background: #fff;
-    font: 400 10.5pt/1.55 Geist, system-ui, sans-serif;
+    font: 400 10.5pt/1.6 Geist, system-ui, sans-serif;
     color: var(--ink2);
+    -webkit-font-smoothing: antialiased;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
   @media screen {
-    body { background: #dfe6e1; padding: 24px 0; }
-    .page { max-width: 210mm; margin: 0 auto; background: #fff; box-shadow: 0 6px 28px rgba(16, 26, 21, .14); padding-bottom: 18mm; }
+    body { background: #d9e1dc; padding: 24px 0; }
+    .page { max-width: 210mm; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 40px rgba(16, 26, 21, .16); padding-bottom: 18mm; }
   }
 
-  .band { background: var(--accent); color: #fff; padding: 12mm var(--gutter) 10mm; }
+  /* The band is a rounded mesh card inset from the paper edge. */
+  .band {
+    position: relative; overflow: hidden;
+    margin: 8mm 8mm 0; border-radius: 5mm;
+    background: var(--mesh); color: #fff;
+    padding: 10mm 12mm 11mm;
+  }
+  .band::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+    background-size: 7mm 7mm;
+    -webkit-mask-image: radial-gradient(70% 100% at 90% 10%, #000, transparent 75%);
+    mask-image: radial-gradient(70% 100% at 90% 10%, #000, transparent 75%);
+  }
+  .band > * { position: relative; }
   .lockup { display: flex; align-items: center; gap: 8px; }
-  .lockup svg { height: 18px; width: auto; color: #fff; }
-  .lockup span { font: 700 18px/1 Outfit, sans-serif; letter-spacing: -0.02em; }
-  .band .kind { margin-top: 14mm; font: 500 8pt/1 "Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; opacity: .85; }
-  .band h1 { font: 700 28pt/1.1 Outfit, sans-serif; letter-spacing: -0.02em; margin: 3mm 0 0; color: #fff; }
-  .band .meta { margin-top: 5mm; font-size: 9.5pt; opacity: .9; }
+  .lockup svg { height: 17px; width: auto; color: #fff; }
+  .lockup span { font: 700 17px/1 Outfit, sans-serif; letter-spacing: -0.02em; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 16mm; padding: 1.4mm 3mm; border-radius: 999px;
+    font: 500 8pt/1 Geist, sans-serif;
+    background: rgba(255, 255, 255, .12); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22);
+  }
+  .chip::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 8px var(--mint); }
+  .band h1 { font: 700 30pt/1.04 Outfit, sans-serif; letter-spacing: -0.025em; margin: 4mm 0 0; color: #fff; }
+  .band .meta { margin-top: 4mm; font-size: 9.5pt; color: rgba(255, 255, 255, .75); }
 
-  main { padding: 10mm var(--gutter) 0; }
-  h2, h3 { font-family: Outfit, Geist, sans-serif; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; break-after: avoid; }
-  h2 { font-size: 16pt; margin: 9mm 0 3mm; padding-top: 3mm; border-top: 2px solid var(--accent); }
-  h3 { font-size: 12pt; margin: 6mm 0 2mm; }
+  main { padding: 11mm var(--gutter) 0; }
+  h2, h3 { font-family: Outfit, Geist, sans-serif; font-weight: 700; color: var(--ink); break-after: avoid; }
+  h2 { font-size: 17pt; line-height: 1.15; letter-spacing: -0.02em; margin: 10mm 0 3mm; }
+  h2 .n { font: 500 9pt "Geist Mono", monospace; color: var(--accent); letter-spacing: 0; margin-right: 3mm; vertical-align: 3pt; }
+  h3 { font-size: 12pt; letter-spacing: -0.01em; margin: 6mm 0 1.5mm; }
   p { margin: 0 0 3mm; }
   a { color: var(--accentText); }
-  .lead { font-size: 12.5pt; color: var(--ink3); margin-bottom: 6mm; }
+  .lead { font-size: 13pt; line-height: 1.5; color: var(--ink3); margin-bottom: 4mm; }
   ul, ol { padding-left: 5mm; margin: 0 0 3mm; }
-  li { margin-bottom: 1.5mm; }
+  li { margin-bottom: 1.5mm; padding-left: 1mm; }
   li::marker { color: var(--accent); }
 
-  table { width: 100%; border-collapse: collapse; margin: 3mm 0 5mm; font-size: 9.5pt; break-inside: avoid; }
-  th { text-align: left; font-weight: 500; color: var(--accentText); background: var(--accentBg); padding: 2.2mm 3mm; }
-  td { padding: 2.2mm 3mm; border-bottom: 1px solid var(--line); }
+  .table { border: 1px solid var(--line); border-radius: 3mm; overflow: hidden; margin: 3mm 0 5mm; break-inside: avoid; }
+  table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+  th { text-align: left; font-weight: 500; color: var(--ink3); background: #f6f8f7; padding: 2.4mm 3.5mm; font-size: 8.5pt; }
+  td { padding: 2.4mm 3.5mm; border-top: 1px solid var(--line); }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 
-  .callout { background: var(--accentBg); border-left: 3px solid var(--accent); padding: 4mm 5mm; margin: 4mm 0 5mm; border-radius: 0 6px 6px 0; break-inside: avoid; }
-  .callout b { color: var(--accentText); }
-  .callout.warn { background: #fff6e6; border-left-color: var(--warning); }
+  .callout { background: var(--accentBg); border-radius: 3mm; padding: 4mm 5mm; margin: 4mm 0 5mm; break-inside: avoid; display: flex; gap: 3mm; align-items: baseline; }
+  .callout::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); transform: translateY(-1px); }
+  .callout b { color: var(--accentText); font-weight: 500; }
+  .callout.warn { background: #fff6e6; }
+  .callout.warn::before { background: var(--warning); }
   .callout.warn b { color: #8a5300; }
 </style>
 </head>
@@ -86,7 +116,7 @@
       </svg>
       <span>Margince</span>
     </div>
-    <div class="kind">Document type</div>
+    <div class="chip">Document type</div>
     <h1>Document title</h1>
     <div class="meta">Author name · 23 October 2026</div>
   </header>
@@ -94,28 +124,30 @@
   <main>
     <p class="lead">One or two sentences that say what this document decides or reports.</p>
 
-    <h2>First section</h2>
+    <h2><span class="n">01</span>First section</h2>
     <p>Body text in Geist. Keep paragraphs short and lead with the fact.</p>
     <ul>
       <li>A point the reader needs.</li>
       <li>A second point the reader needs.</li>
     </ul>
 
-    <div class="callout"><b>Key point.</b> The one thing to remember from this section.</div>
+    <div class="callout"><div><b>Key point.</b> The one thing to remember from this section.</div></div>
 
-    <h2>Second section</h2>
-    <table>
-      <thead><tr><th>Item</th><th>Owner</th><th class="num">Amount</th></tr></thead>
-      <tbody>
-        <tr><td>First row</td><td>Team</td><td class="num">1,200</td></tr>
-        <tr><td>Second row</td><td>Team</td><td class="num">980</td></tr>
-      </tbody>
-    </table>
+    <h2><span class="n">02</span>Second section</h2>
+    <div class="table">
+      <table>
+        <thead><tr><th>Item</th><th>Owner</th><th class="num">Amount</th></tr></thead>
+        <tbody>
+          <tr><td>First row</td><td>Team</td><td class="num">1,200</td></tr>
+          <tr><td>Second row</td><td>Team</td><td class="num">980</td></tr>
+        </tbody>
+      </table>
+    </div>
 
     <h3>A sub-section</h3>
     <p>Sub-sections use h3 and sit tight under their section.</p>
 
-    <div class="callout warn"><b>Open question.</b> Something that still needs a decision.</div>
+    <div class="callout warn"><div><b>Open question.</b> Something that still needs a decision.</div></div>
   </main>
 </div>
 </body>

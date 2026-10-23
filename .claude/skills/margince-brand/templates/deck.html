@@ -13,122 +13,171 @@
     --accent: #0b7a53;
     --accentText: #0a6f4b;
     --accentBg: #e8f3ee;
-    --accentDeep: #075c3e;
+    --accentLift: #16a06c;
+      --mint: #2bb673;
+    --ai: #5b61d6;
     --bg: #f1f5f2;
-    --surface: #fbfcfb;
+    --pane: rgba(255, 255, 255, .72);
+    --paneEdge: rgba(16, 26, 21, .08);
     --ink: #101a15;
     --ink2: #33403a;
     --ink3: #66736c;
-    --line: rgba(16, 26, 21, .10);
-    --ai: #5b61d6;
-    --warning: #f5a524;
-    --danger: #ff383c;
-    --slideW: 1280px;
-    --slideH: 720px;
-    --band: 76px;
+    --line: rgba(16, 26, 21, .08);
+    --glowA: rgba(24, 190, 120, .10);
+    --glowB: rgba(91, 97, 214, .10);
+    --shadow: 0 1px 2px rgba(16, 26, 21, .04), 0 18px 40px -18px rgba(16, 26, 21, .18);
+    --mesh:
+      radial-gradient(55% 80% at 100% 0%, rgba(91, 97, 214, .30), transparent 60%),
+      radial-gradient(70% 90% at 85% 10%, rgba(43, 182, 115, .55), transparent 60%),
+      radial-gradient(80% 120% at 0% 100%, #0b7a53, transparent 70%),
+      linear-gradient(135deg, #075a3c 0%, #06311f 100%);
+    --bandFill:
+      radial-gradient(60% 220% at 92% 0%, rgba(255, 255, 255, .22), transparent 60%),
+      radial-gradient(40% 200% at 100% 100%, rgba(91, 97, 214, .35), transparent 70%),
+      linear-gradient(100deg, #0a6f4b 0%, #0b7a53 45%, #16a06c 100%);
   }
   @page { size: 1280px 720px; margin: 0; }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   body {
-    background: #dfe6e1;
-    font: 400 22px/1.45 Geist, system-ui, sans-serif;
+    background: #d9e1dc;
+    font: 400 21px/1.5 Geist, system-ui, sans-serif;
     color: var(--ink2);
+    -webkit-font-smoothing: antialiased;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  h1, h2, h3 { font-family: Outfit, Geist, sans-serif; font-weight: 700; color: var(--ink); margin: 0; letter-spacing: -0.02em; }
+  h1, h2, h3 { font-family: Outfit, Geist, sans-serif; font-weight: 700; color: var(--ink); margin: 0; }
   .num { font-variant-numeric: tabular-nums; }
 
   .slide {
     position: relative;
-    width: var(--slideW);
-    height: var(--slideH);
+    width: 1280px;
+    height: 720px;
     margin: 32px auto;
     overflow: hidden;
-    background: var(--bg);
-    box-shadow: 0 6px 28px rgba(16, 26, 21, .14);
+    border-radius: 20px;
+    background:
+      radial-gradient(900px 620px at -8% -20%, var(--glowA), transparent 70%),
+      radial-gradient(900px 620px at 108% -20%, var(--glowB), transparent 70%),
+      var(--bg);
+    box-shadow: 0 10px 40px rgba(16, 26, 21, .16);
   }
   .slide + .slide { break-before: page; }
   @media print {
     body { background: none; }
-    .slide { margin: 0; box-shadow: none; }
+    .slide { margin: 0; box-shadow: none; border-radius: 0; }
   }
   @media screen and (max-width: 1320px) {
     .slide { transform: scale(calc(100vw / 1340px)); transform-origin: top left; margin: 16px; }
   }
 
-  /* The green band with the logo: on every slide but the title and section slides. */
+  /* The band floats inside the slide edge as a rounded gradient bar. */
   .band {
-    position: absolute; inset: 0 0 auto 0; height: var(--band);
-    background: var(--accent);
+    position: absolute; top: 20px; left: 20px; right: 20px; height: 64px;
+    border-radius: 18px;
+    background: var(--bandFill);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 10px 30px -12px rgba(11, 122, 83, .55);
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0 56px;
+    padding: 0 22px 0 26px;
     color: #fff;
   }
-  .lockup { display: flex; align-items: center; gap: 12px; color: #fff; }
-  .lockup svg { height: 26px; width: auto; }
-  .lockup span { font: 700 26px/1 Outfit, sans-serif; letter-spacing: -0.02em; }
-  .band .meta { font: 500 13px/1 "Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; opacity: .85; }
-
-  .body { position: absolute; inset: var(--band) 0 56px 0; padding: 48px 72px 0; }
-  .eyebrow { font: 500 14px/1 "Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--accentText); margin-bottom: 14px; }
-  .body h2 { font-size: 44px; line-height: 1.12; max-width: 980px; }
-  .body .lead { font-size: 24px; color: var(--ink3); margin: 16px 0 0; max-width: 900px; }
-
-  .foot {
-    position: absolute; inset: auto 72px 22px 72px;
-    display: flex; justify-content: space-between;
-    font-size: 13px; color: var(--ink3);
-    border-top: 1px solid var(--line); padding-top: 10px;
+  .lockup { display: flex; align-items: center; gap: 10px; color: #fff; }
+  .lockup svg { height: 24px; width: auto; }
+  .lockup span { font: 700 24px/1 Outfit, sans-serif; letter-spacing: -0.02em; }
+  .band .meta { display: flex; align-items: center; gap: 14px; font: 500 14px/1 Geist, sans-serif; opacity: .92; }
+  .band .page {
+    font: 500 12px/1 "Geist Mono", monospace; letter-spacing: .04em;
+    padding: 7px 11px; border-radius: 999px;
+    background: rgba(255, 255, 255, .16); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22);
   }
 
-  ul.points { margin: 32px 0 0; padding: 0; list-style: none; max-width: 980px; }
-  ul.points li { position: relative; padding-left: 30px; margin: 0 0 16px; }
-  ul.points li::before { content: ""; position: absolute; left: 0; top: .55em; width: 12px; height: 12px; border-radius: 3px; background: var(--accent); }
-  ul.points b { color: var(--ink); font-weight: 500; }
+  .body { position: absolute; inset: 84px 0 0 0; padding: 60px 84px 56px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    font: 500 14px/1 Geist, sans-serif; color: var(--accentText);
+    background: var(--accentBg); box-shadow: inset 0 0 0 1px rgba(11, 122, 83, .14);
+    padding: 8px 13px; border-radius: 999px; margin-bottom: 22px;
+  }
+  .chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+  .body h2 { font-size: 54px; line-height: 1.06; letter-spacing: -0.025em; max-width: 960px; }
+  .body .lead { font-size: 22px; color: var(--ink3); margin: 18px 0 0; max-width: 760px; }
 
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 32px; }
-  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 26px 28px; }
-  .card h3 { font-size: 26px; margin-bottom: 10px; }
-  .card p { margin: 0; font-size: 20px; }
+  /* Points: numbered rows on hairlines. */
+  ol.points { list-style: none; margin: 36px 0 0; padding: 0; max-width: 1000px; counter-reset: point; }
+  ol.points li {
+    counter-increment: point;
+    display: grid; grid-template-columns: 64px 1fr; align-items: baseline;
+    padding: 16px 0; border-top: 1px solid var(--line);
+  }
+  ol.points li::before { content: counter(point, decimal-leading-zero); font: 500 15px/1 "Geist Mono", monospace; color: var(--accent); }
+  ol.points b { color: var(--ink); font-weight: 500; }
 
-  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 44px; }
-  .stat { border-top: 3px solid var(--accent); padding-top: 18px; }
-  .stat .value { font: 700 64px/1 Outfit, sans-serif; color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
-  .stat .label { margin-top: 10px; font-size: 19px; color: var(--ink3); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 44px; }
+  .card {
+    background: var(--pane); border: 1px solid var(--paneEdge); border-radius: 22px;
+    box-shadow: var(--shadow); padding: 28px 30px;
+    backdrop-filter: blur(12px);
+  }
+  .card .tile {
+    width: 40px; height: 40px; border-radius: 12px; margin-bottom: 22px;
+    background: linear-gradient(135deg, var(--accentLift), var(--accent));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25);
+  }
+  .card h3 { font-size: 26px; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .card p { margin: 0; font-size: 19px; color: var(--ink3); }
 
-  /* Title slide: a deep emerald field with the lockup at large size. */
-  .title-slide { background: var(--accent); color: #fff; }
-  .title-slide .inner { position: absolute; inset: 0; padding: 64px 88px; display: flex; flex-direction: column; }
-  .title-slide .lockup svg { height: 44px; }
-  .title-slide .lockup span { font-size: 44px; }
-  .title-slide h1 { color: #fff; font-size: 72px; line-height: 1.05; margin-top: auto; max-width: 1000px; }
-  .title-slide .subtitle { font-size: 28px; margin: 20px 0 0; opacity: .88; max-width: 900px; }
-  .title-slide .byline { margin-top: 48px; font: 500 15px/1 "Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; opacity: .8; }
-  .title-slide .glow { position: absolute; right: -180px; top: -220px; width: 760px; height: 760px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 65%); }
+  .stat .value {
+    font: 700 76px/1 Outfit, sans-serif; letter-spacing: -0.03em; font-variant-numeric: tabular-nums;
+    color: var(--accent);
+  }
+  .stat .label { margin-top: 14px; font-size: 18px; color: var(--ink3); }
 
-  /* Section divider: paper ground with a wide green band on the left. */
-  .section-slide .strip { position: absolute; inset: 0 auto 0 0; width: 34%; background: var(--accent); display: flex; align-items: flex-start; padding: 56px; }
-  .section-slide .text { position: absolute; inset: 0 0 0 34%; padding: 0 88px; display: flex; flex-direction: column; justify-content: center; }
-  .section-slide .strip svg { height: 56px; width: auto; color: #fff; }
-  .section-slide .numeral { font: 700 120px/1 Outfit, sans-serif; color: var(--accent); margin-bottom: 12px; }
-  .section-slide h2 { font-size: 56px; line-height: 1.08; }
+  /* Title and closing: a dark emerald mesh with a faint grid that fades out. */
+  .hero { background: var(--mesh); color: #fff; }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(80% 90% at 85% 15%, #000, transparent 75%);
+    mask-image: radial-gradient(80% 90% at 85% 15%, #000, transparent 75%);
+  }
+  .hero .inner { position: absolute; inset: 0; padding: 64px 88px 72px; display: flex; flex-direction: column; }
+  .hero .lockup svg { height: 34px; }
+  .hero .lockup span { font-size: 34px; }
+  .hero .chip { color: #fff; background: rgba(255, 255, 255, .12); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22); margin: auto 0 26px; align-self: flex-start; }
+  .hero .chip::before { background: var(--mint); box-shadow: 0 0 12px var(--mint); }
+  .hero h1 { color: #fff; font-size: 88px; line-height: 1; letter-spacing: -0.03em; max-width: 1000px; }
+  .hero .subtitle { font-size: 24px; margin: 24px 0 0; color: rgba(255, 255, 255, .78); max-width: 760px; }
+  .hero .byline { margin-top: 44px; font: 500 15px/1 Geist, sans-serif; color: rgba(255, 255, 255, .7); }
 
-  .closing { text-align: left; }
-  .closing h2 { font-size: 56px; }
+  /* Section divider: a rounded mesh panel on the left, the title on paper. */
+  .section .panel {
+    position: absolute; top: 20px; bottom: 20px; left: 20px; width: 400px;
+    border-radius: 24px; background: var(--mesh); padding: 40px;
+    color: #fff;
+  }
+  .section .panel svg { height: 44px; width: auto; }
+  .section .text { position: absolute; inset: 0 0 0 420px; padding: 0 96px; display: flex; flex-direction: column; justify-content: center; }
+  .section .numeral {
+    font: 700 140px/1 Outfit, sans-serif; letter-spacing: -0.04em;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  .section h2 { font-size: 60px; line-height: 1.04; letter-spacing: -0.025em; }
+  .section p { font-size: 22px; color: var(--ink3); margin: 18px 0 0; max-width: 560px; }
 </style>
 </head>
 <body>
 
 <!-- Title slide -->
-<section class="slide title-slide">
-  <div class="glow"></div>
+<section class="slide hero">
   <div class="inner">
-    <div class="lockup">
-      <svg viewBox="0 0 299 230" fill="none" aria-hidden="true"><use href="#mark"/></svg>
-      <span>Margince</span>
-    </div>
+    <div class="lockup"><svg viewBox="0 0 299 230" fill="none" aria-hidden="true"><use href="#mark"/></svg><span>Margince</span></div>
+    <div class="chip">Eyebrow · topic</div>
     <h1>Deck title in one line</h1>
     <p class="subtitle">One sentence that says what the reader gets from this deck.</p>
     <div class="byline">Author name · 23 October 2026</div>
@@ -136,79 +185,73 @@
 </section>
 
 <!-- Section divider -->
-<section class="slide section-slide">
-  <div class="strip">
-    <div class="lockup">
-      <svg viewBox="0 0 299 230" fill="none" aria-hidden="true"><use href="#mark"/></svg>
-    </div>
-  </div>
+<section class="slide section">
+  <div class="panel"><svg viewBox="0 0 299 230" fill="none" aria-hidden="true"><use href="#mark"/></svg></div>
   <div class="text">
     <div class="numeral">01</div>
     <h2>Section title</h2>
+    <p>One line on what this section covers.</p>
   </div>
 </section>
 
-<!-- Content slide: heading and points -->
+<!-- Content slide: heading and numbered points -->
 <section class="slide">
   <header class="band">
     <div class="lockup"><svg viewBox="0 0 299 230" fill="none" aria-hidden="true"><use href="#mark"/></svg><span>Margince</span></div>
-    <div class="meta">Deck title</div>
+    <div class="meta">Deck title <span class="page num">03 / 06</span></div>
   </header>
   <div class="body">
-    <div class="eyebrow">Eyebrow label</div>
+    <div class="chip">Eyebrow label</div>
     <h2>A heading that states one idea.</h2>
     <p class="lead">A lead sentence that frames the points below.</p>
-    <ul class="points">
-      <li><b>First point.</b> One sentence of detail.</li>
-      <li><b>Second point.</b> One sentence of detail.</li>
-      <li><b>Third point.</b> One sentence of detail.</li>
-    </ul>
+    <ol class="points">
+      <li><span><b>First point.</b> One sentence of detail.</span></li>
+      <li><span><b>Second point.</b> One sentence of detail.</span></li>
+      <li><span><b>Third point.</b> One sentence of detail.</span></li>
+    </ol>
   </div>
-  <footer class="foot"><span>Margince</span><span class="num">3</span></footer>
 </section>
 
-<!-- Two columns -->
+<!-- Two cards -->
 <section class="slide">
   <header class="band">
     <div class="lockup"><svg viewBox="0 0 299 230" fill="none" aria-hidden="true"><use href="#mark"/></svg><span>Margince</span></div>
-    <div class="meta">Deck title</div>
+    <div class="meta">Deck title <span class="page num">04 / 06</span></div>
   </header>
   <div class="body">
-    <div class="eyebrow">Comparison</div>
+    <div class="chip">Comparison</div>
     <h2>Two options, side by side.</h2>
-    <div class="cols">
-      <div class="card"><h3>Option A</h3><p>What it is, what it costs, what it gives.</p></div>
-      <div class="card"><h3>Option B</h3><p>What it is, what it costs, what it gives.</p></div>
+    <div class="grid2">
+      <div class="card"><div class="tile"></div><h3>Option A</h3><p>What it is, what it costs, what it gives.</p></div>
+      <div class="card"><div class="tile"></div><h3>Option B</h3><p>What it is, what it costs, what it gives.</p></div>
     </div>
   </div>
-  <footer class="foot"><span>Margince</span><span class="num">4</span></footer>
 </section>
 
 <!-- Figures -->
 <section class="slide">
   <header class="band">
     <div class="lockup"><svg viewBox="0 0 299 230" fill="none" aria-hidden="true"><use href="#mark"/></svg><span>Margince</span></div>
-    <div class="meta">Deck title</div>
+    <div class="meta">Deck title <span class="page num">05 / 06</span></div>
   </header>
   <div class="body">
-    <div class="eyebrow">In figures</div>
+    <div class="chip">In figures</div>
     <h2>Three numbers the reader should keep.</h2>
-    <div class="stats">
-      <div class="stat"><div class="value">42</div><div class="label">What this figure counts</div></div>
-      <div class="stat"><div class="value">3.5×</div><div class="label">What this figure counts</div></div>
-      <div class="stat"><div class="value">98%</div><div class="label">What this figure counts</div></div>
+    <div class="grid3">
+      <div class="card stat"><div class="value">42</div><div class="label">What this figure counts</div></div>
+      <div class="card stat"><div class="value">3.5×</div><div class="label">What this figure counts</div></div>
+      <div class="card stat"><div class="value">98%</div><div class="label">What this figure counts</div></div>
     </div>
   </div>
-  <footer class="foot"><span>Margince</span><span class="num">5</span></footer>
 </section>
 
 <!-- Closing -->
-<section class="slide title-slide closing">
-  <div class="glow"></div>
+<section class="slide hero">
   <div class="inner">
     <div class="lockup"><svg viewBox="0 0 299 230" fill="none" aria-hidden="true"><use href="#mark"/></svg><span>Margince</span></div>
+    <div class="chip">Next step</div>
     <h1>Request a conversation</h1>
-    <p class="subtitle">contact line or next step</p>
+    <p class="subtitle">Contact line or next step</p>
   </div>
 </section>
 
