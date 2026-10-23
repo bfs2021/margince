@@ -68,20 +68,37 @@ export const UTC_ZONE = "UTC";
 
 export const FALLBACK_RECORD_ZONE = "Europe/Berlin";
 
+// IANA zone names only (AC-DS-TZ4). Fixed offsets ("+01:00", "Etc/GMT-1")
+// freeze DST rules without a sign, so they throw at the edge.
+export function assertIanaZone(zone: string): void {
+  if (/^[+-]\d{2}:?\d{2}$/.test(zone) || /^(Etc\/)?GMT[+-]?\d*$/i.test(zone)) {
+    throw new Error(
+      `timezone must be an IANA name, got fixed offset "${zone}"`,
+    );
+  }
+  // Intl rejects unknown names: constructing with the zone throws a RangeError
+  // that propagates. format() forces the value to be consumed.
+  new Intl.DateTimeFormat("en-US", { timeZone: zone }).format();
+}
+
 /**
- * The zone the reader's own browser is in, or `UTC` when it will not say.
+ * Whether the formatters will accept this zone, asked without throwing.
  *
- * A function, not a constant, on purpose. A module-level constant is evaluated
- * once at import time, which is before the app has rendered anything — so it
- * would freeze the answer for the whole session, outlive a reader who changed
- * their machine's zone or crossed one, and be captured before a test that
- * pretends to be elsewhere had installed its own answer. Constructing an
- * `Intl.DateTimeFormat` per call is cheap next to the render it feeds.
- *
- * A runtime with no zone to report leaves `timeZone` empty, and an empty string
- * is not a zone Intl accepts — it throws. `UTC` is the honest fallback: it
- * names a real zone, and it is the one every wire instant is already stored in.
+ * A page rendering a list of moments cannot let one row's zone take it down,
+ * so it asks before it formats. A probe with Intl alone learns only that the
+ * name resolves. `Etc/GMT-1`, `GMT` and `+01:00` resolve, then throw inside
+ * `formatDate`. So this derives from the assertion, the one reading of
+ * "a zone this renders".
  */
+export function isRenderableZone(zone: string): boolean {
+  try {
+    assertIanaZone(zone);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * The reader's own zone, named and offset — "Indochina Time · UTC+7".
  *
@@ -101,21 +118,31 @@ export function zoneNameAndOffset(
   at: Date,
   zone?: string,
 ): string {
+  // A zone the formatters refuse is shown as stored, not dropped.
+  if (zone !== undefined && !isRenderableZone(zone)) return zone;
   const named = (style: "long" | "shortOffset") =>
     new Intl.DateTimeFormat(locale, { timeZone: zone, timeZoneName: style })
       .formatToParts(at)
       .find((piece) => piece.type === "timeZoneName")?.value ?? "";
-  try {
-    return [named("long"), named("shortOffset").replace("GMT", "UTC")]
-      .filter(Boolean)
-      .join(" · ");
-  } catch (error) {
-    // A zone the browser's database predates is shown as stored, not dropped.
-    if (!(error instanceof RangeError) || !zone) throw error;
-    return zone;
-  }
+  return [named("long"), named("shortOffset").replace("GMT", "UTC")]
+    .filter(Boolean)
+    .join(" · ");
 }
 
+/**
+ * The zone the reader's own browser is in, or `UTC` when it will not say.
+ *
+ * A function, not a constant, on purpose. A module-level constant is evaluated
+ * once at import time, which is before the app has rendered anything — so it
+ * would freeze the answer for the whole session, outlive a reader who changed
+ * their machine's zone or crossed one, and be captured before a test that
+ * pretends to be elsewhere had installed its own answer. Constructing an
+ * `Intl.DateTimeFormat` per call is cheap next to the render it feeds.
+ *
+ * A runtime with no zone to report leaves `timeZone` empty, and an empty string
+ * is not a zone Intl accepts — it throws. `UTC` is the honest fallback: it
+ * names a real zone, and it is the one every wire instant is already stored in.
+ */
 export function viewerZone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || UTC_ZONE;
 }

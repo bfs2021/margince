@@ -67,6 +67,15 @@ import { join, relative, resolve } from "node:path";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import {
+  deriveDateHosts,
+  literalsOf,
+  namesHost,
+  publishedFrom,
+  renderedName,
+  typeInObject,
+  typeValues,
+} from "../../scripts/lib/input-type";
+import {
   extensionFrontendFiles,
   extensionPackageLayers,
   filesUnder,
@@ -106,69 +115,32 @@ const nativeControls = new Set(["select", "option", "optgroup"]);
 // with its reason instead.
 const prefilter = new RegExp(`${[...nativeControls].join("|")}|\\\\`);
 
-// The tags whose `type` reaches a native input as written. `InlineText` and
-// `DateInput` are not hosts: a date there renders `DateInput`'s text box.
-const dateHosts = new Set(["input", "TextInput"]);
+// The tags whose `type` reaches a native input as written, derived from the
+// design system and every module the extension surface publishes from.
+const designSystemDir = join(srcDir, "design-system");
+// A date takes InlineTextControl's InlineDate branch, which renders DateInput.
+const notHosts = new Set(["InlineTextControl"]);
+// Each spreads FieldControl or SettingControlProps: an id and aria wiring, no type.
+const clearedSpreads = ["NameDialog", "NumberSetting", "ResolveSheet"];
+const dateHosts = deriveDateHosts(
+  [
+    ...filesUnder(designSystemDir).filter(
+      (file) => !/\.(test|stories)\.tsx?$/.test(file),
+    ),
+    ...publishedFrom(join(srcDir, "surface", "design-system.ts")),
+  ],
+  notHosts,
+);
 const nativeDate = "date";
+const isDate = (values: string[]) =>
+  values.some((value) => value.toLowerCase() === nativeDate);
+const elementFactories = new Set(["createElement", "jsx", "jsxs", "jsxDEV"]);
 
 // Sound for the same reason as `prefilter`: a hit spells `type`, and its value
 // opens with a quote, backtick, `=` or space, or goes through a backslash escape.
 const dateValueStart = new RegExp(`[\\s"'\`=]${nativeDate}`, "i");
 const worthParsing = (text: string) =>
   prefilter.test(text) || (text.includes("type") && dateValueStart.test(text));
-
-const fallbacks = new Set([
-  ts.SyntaxKind.QuestionQuestionToken,
-  ts.SyntaxKind.BarBarToken,
-  ts.SyntaxKind.AmpersandAmpersandToken,
-]);
-
-// The literals an attribute expression can evaluate to, through the shapes that
-// pass a literal along. A name is not followed: `type={kind}` is not judged.
-function literalsOf(node: ts.Expression): string[] {
-  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
-    return [node.text];
-  }
-  if (ts.isConditionalExpression(node)) {
-    return [...literalsOf(node.whenTrue), ...literalsOf(node.whenFalse)];
-  }
-  if (ts.isBinaryExpression(node) && fallbacks.has(node.operatorToken.kind)) {
-    return [...literalsOf(node.left), ...literalsOf(node.right)];
-  }
-  if (
-    ts.isParenthesizedExpression(node) ||
-    ts.isAsExpression(node) ||
-    ts.isSatisfiesExpression(node) ||
-    ts.isNonNullExpression(node)
-  ) {
-    return literalsOf(node.expression);
-  }
-  return [];
-}
-
-// The values one JSX attribute list gives `type`, spread object literals included.
-function typeValues(attributes: ts.JsxAttributes): string[] {
-  return attributes.properties.flatMap((attribute) => {
-    if (ts.isJsxAttribute(attribute)) {
-      const init = attribute.initializer;
-      if (!ts.isIdentifier(attribute.name) || attribute.name.text !== "type") {
-        return [];
-      }
-      if (init && ts.isStringLiteral(init)) return [init.text];
-      return init && ts.isJsxExpression(init) && init.expression
-        ? literalsOf(init.expression)
-        : [];
-    }
-    if (!ts.isObjectLiteralExpression(attribute.expression)) return [];
-    return attribute.expression.properties.flatMap((property) =>
-      ts.isPropertyAssignment(property) &&
-      (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)) &&
-      property.name.text === "type"
-        ? literalsOf(property.initializer)
-        : [],
-    );
-  });
-}
 
 // `<input … type="date">` built in a string; `type="datetime-local"` is not one.
 const dateMarkup =
@@ -254,13 +226,30 @@ function findNativeControls(path: string, text: string): string[] {
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
       const tag = intrinsic(node.tagName);
       if (tag) found.push(`${at(node)}: <${tag}>`);
-      const host = node.tagName;
       if (
-        ts.isIdentifier(host) &&
-        dateHosts.has(host.text) &&
-        typeValues(node.attributes).some((v) => v.toLowerCase() === nativeDate)
+        isDate(typeValues(node.attributes)) &&
+        namesHost(dateHosts, node.tagName)
       ) {
-        found.push(`${at(node)}: <${host.text} type="date">`);
+        found.push(`${at(node)}: <${renderedName(node.tagName)} type="date">`);
+      }
+    }
+    // The same elements built without JSX: `createElement("input", props)`.
+    if (
+      ts.isCallExpression(node) &&
+      elementFactories.has(renderedName(node.expression) ?? "")
+    ) {
+      const [tag, props] = node.arguments;
+      const names = tag ? literalsOf(tag) : [];
+      for (const name of names.filter((name) => nativeControls.has(name))) {
+        found.push(`${at(node)}: <${name}>`);
+      }
+      const host = names.includes("input")
+        ? "input"
+        : tag && namesHost(dateHosts, tag)
+          ? renderedName(tag)
+          : undefined;
+      if (host && props && isDate(typeInObject(props))) {
+        found.push(`${at(node)}: <${host} type="date">`);
       }
     }
     // A string's CONTENT is scanned, for the reason in the header: markup built
@@ -358,7 +347,7 @@ describe("no product surface renders a browser-drawn dropdown or date field", ()
       violations,
       "Use Select from src/design-system/select.tsx; see src/design-system/README.md. " +
         "In tests, drive it with pickOption from src/design-system/select-testing.ts. " +
-        "A date field is DateInput from src/design-system/dateinput.tsx.",
+        "A date field is DateInput from src/design-system/dateinput.tsx, which a unit imports from @margince/frontend/design-system.",
     ).toEqual([]);
   });
 
@@ -627,6 +616,76 @@ describe("the native-control detector sees what it claims to", () => {
       expect: ['1: <TextInput type="date">'],
     },
     {
+      name: "a SearchField of type date, which passes its type on",
+      fires: true,
+      src: 'const a = <SearchField type="date" />;',
+      expect: ['1: <SearchField type="date">'],
+    },
+    {
+      name: "a TextInput reached through a namespace",
+      fires: true,
+      src: 'const a = <ds.TextInput type="date" />;',
+    },
+    {
+      name: "a renamed import of TextInput",
+      fires: true,
+      src: 'import { TextInput as Box } from "@margince/frontend/design-system";\nconst a = <Box type="date" />;',
+      expect: ['2: <Box type="date">'],
+    },
+    {
+      name: "a date type held in a const",
+      fires: true,
+      src: 'const DAY = "date";\nconst a = <input type={DAY} />;',
+      expect: ['2: <input type="date">'],
+    },
+    {
+      name: "a date type spread from a const object",
+      fires: true,
+      src: 'const day = { type: "date" } as const;\nconst a = <input {...day} />;',
+    },
+    {
+      name: "a date input built with createElement",
+      fires: true,
+      src: 'const a = createElement("input", { type: "date" });',
+      expect: ['1: <input type="date">'],
+    },
+    {
+      name: "a TextInput built with React.createElement",
+      fires: true,
+      src: 'const a = React.createElement(TextInput, { type: DAY });\nconst DAY = "date";',
+    },
+    {
+      name: "a date input built by the JSX runtime",
+      fires: true,
+      src: 'const a = jsxs("input", { ...{ type: "date" } });',
+    },
+    {
+      name: "a native select built with createElement",
+      fires: true,
+      src: 'const a = createElement("select", null);',
+      expect: ["1: <select>"],
+    },
+    {
+      name: "a spread the gate cannot resolve, which it does not judge",
+      fires: false,
+      src: "const field = useField();\nconst a = <input {...field} />;",
+    },
+    {
+      name: "a const holding another type",
+      fires: false,
+      src: 'const KIND = "text";\nconst a = <input type={KIND} />;',
+    },
+    {
+      name: "an input of another type built with createElement",
+      fires: false,
+      src: 'const a = createElement("input", { type: "text" });',
+    },
+    {
+      name: "DateInput of type date, which renders a text box",
+      fires: false,
+      src: 'const a = <DateInput type="date" />;',
+    },
+    {
       name: "a date type in braces",
       fires: true,
       src: 'const a = <input type={"date"} />;',
@@ -754,7 +813,7 @@ describe("the native-control detector sees what it claims to", () => {
         `<${tag}> is in the rule, but the census would never parse a file that only mentions it`,
       ).not.toEqual([]);
     }
-    for (const host of dateHosts) {
+    for (const host of ["input", ...dateHosts.names]) {
       for (const spelling of ['"date"', '{"date"}', "{`date`}"]) {
         expect(
           findNativeControls(
@@ -765,6 +824,31 @@ describe("the native-control detector sees what it claims to", () => {
         ).not.toEqual([]);
       }
     }
+  });
+
+  // One host per path a `type` prop takes: whole props, a rest spread, a
+  // forwarded `props.type`, a host inside a host, a private host inside one.
+  it("derives its date hosts from the design system", () => {
+    for (const host of [
+      "TextInput",
+      "SearchField",
+      "ComboBox",
+      "MoneyInput",
+      "Checkbox",
+    ]) {
+      expect(dateHosts.names, `${host} passes its type on`).toContain(host);
+    }
+    // A literal `type` after the spread wins, so DateInput is a text box.
+    expect(dateHosts.names).not.toContain("DateInput");
+    expect(dateHosts.names).not.toContain("InlineText");
+    expect(
+      [...dateHosts.exempted],
+      "a name in notHosts that the derivation no longer finds as a host",
+    ).toEqual([...notHosts]);
+    expect(
+      [...dateHosts.opaque].sort(),
+      "a component spreads a value of unknown shape onto an input: make the spread resolvable, or clear it in clearedSpreads with its reason",
+    ).toEqual(clearedSpreads);
   });
 
   // The line between what is derived and what is hand-written, which is the

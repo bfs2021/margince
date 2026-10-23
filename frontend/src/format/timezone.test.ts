@@ -302,7 +302,18 @@ describe("zoneNameAndOffset", () => {
     );
   });
 
-  it("shows a zone the runtime cannot resolve as it was stored", () => {
+  it("shows a zone the formatters refuse as it was stored", () => {
     expect(zoneNameAndOffset("en-GB", at, "Mars/Olympus")).toBe("Mars/Olympus");
+    // Intl names this one, as "GMT+01:00"; the formatters refuse it.
+    expect(zoneNameAndOffset("en-GB", at, "Etc/GMT-1")).toBe("Etc/GMT-1");
+  });
+
+  it("throws on a bad locale tag or instant instead of hiding it", () => {
+    expect(() => zoneNameAndOffset("en_GB!", at, "Asia/Bangkok")).toThrow(
+      RangeError,
+    );
+    expect(() =>
+      zoneNameAndOffset("en-GB", new Date(Number.NaN), "Asia/Bangkok"),
+    ).toThrow(RangeError);
   });
 });
