@@ -113,7 +113,7 @@ export const Day: Story = {
       await canvas.findByRole("button", { name: "Change Expected close" }),
     );
     await userEvent.click(
-      await canvas.findByRole("button", { name: "Choose date" }),
+      await canvas.findByRole("button", { name: /^Choose date/ }),
     );
     const page = within(canvasElement.ownerDocument.body);
     await userEvent.click(

@@ -102,7 +102,7 @@ describe("AuditLogCard", () => {
     expect(bar).not.toContainElement(screen.getByText("Updated"));
     expect(screen.getByRole("textbox", { name: "From" })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "To" })).toBeInTheDocument();
-    const calendars = screen.getAllByRole("button", { name: "Choose date" });
+    const calendars = screen.getAllByRole("button", { name: /^Choose date/ });
     expect(calendars).toHaveLength(2);
     for (const calendar of calendars) {
       expect(bar).toContainElement(calendar);

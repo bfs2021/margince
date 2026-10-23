@@ -57,7 +57,7 @@ it("asks for the times from the start of the day picked on the calendar", async 
   const user = userEvent.setup();
   renderReschedule();
 
-  await user.click(screen.getByRole("button", { name: "Choose date" }));
+  await user.click(screen.getByRole("button", { name: /^Choose date/ }));
   await user.click(
     await screen.findByRole("button", { name: "Thursday, 8 October 2026" }),
   );
@@ -77,7 +77,7 @@ it("keeps the day it shows when the box is cleared", async () => {
   await waitFor(() => expect(asked).toHaveLength(1));
   const shown = startingDate().value;
 
-  await user.click(screen.getByRole("button", { name: "Choose date" }));
+  await user.click(screen.getByRole("button", { name: /^Choose date/ }));
   await user.click(await screen.findByRole("button", { name: "Clear" }));
 
   expect(startingDate().value).toBe(shown);

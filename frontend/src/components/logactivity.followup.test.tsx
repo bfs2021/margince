@@ -99,7 +99,7 @@ it("dates the next step on the day picked from its calendar", async () => {
   const dueField = dueBox.parentElement;
   if (!dueField) throw new Error("expected the due date box inside its field");
   await user.click(
-    within(dueField).getByRole("button", { name: "Choose date" }),
+    within(dueField).getByRole("button", { name: /^Choose date/ }),
   );
   await user.click(
     await screen.findByRole("button", { name: "Friday, 10 July 2026" }),

@@ -382,7 +382,7 @@ describe("log activity from a 360", () => {
     render(<LogActivity entityType="company" entityId="o1" />);
     expect(dayBox("Date").value).toBe("22/08/2026");
     // The ceiling moves with the offer, so the offered day is not refused.
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    await user.click(screen.getByRole("button", { name: /^Choose date/ }));
     await screen.findByRole("button", { name: "Saturday, 22 August 2026" });
     await user.keyboard("{Escape}");
     await user.type(screen.getByLabelText("Subject *"), "Called back");
@@ -572,7 +572,7 @@ describe("log activity from a 360", () => {
       "Pacific/Pago_Pago",
     );
     await typeDay(user, dayBox("Date"), "2026-10-20");
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    await user.click(screen.getByRole("button", { name: /^Choose date/ }));
     const today = await screen.findByRole("button", { name: "Today" });
     expect(today).toHaveProperty("disabled", false);
     await user.click(today);
@@ -609,7 +609,7 @@ describe("log activity from a 360", () => {
     stubApi({ "POST /activities": createdActivity }, captured);
     render(<LogActivity entityType="company" entityId="o1" />);
     await pickOption(user, screen.getByLabelText("Type"), "Task");
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    await user.click(screen.getByRole("button", { name: /^Choose date/ }));
     await user.click(
       await screen.findByRole("button", { name: "Friday, 10 July 2026" }),
     );

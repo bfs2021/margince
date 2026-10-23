@@ -73,7 +73,8 @@ export function patternPlaceholder(
 
 /**
  * A typed day as `YYYY-MM-DD`, or null. A four-digit first part is read year
- * first whatever the pattern, so a pasted ISO date keeps its meaning.
+ * first whatever the pattern, so a pasted ISO date keeps its meaning. A year
+ * below 1000 is a typo the instant writers cannot carry, so it reads as none.
  */
 export function parseTypedDate(
   text: string,
@@ -92,6 +93,7 @@ export function parseTypedDate(
   const day = value.get("day");
   if (
     year?.length !== 4 ||
+    Number(year) < 1000 ||
     !month ||
     month.length > 2 ||
     !day ||

@@ -5818,6 +5818,7 @@ export const vi = {
   "calendar.previousMonth": "Tháng trước",
   "calendar.nextMonth": "Tháng sau",
   "calendar.chooseDate": "Chọn ngày",
+  "calendar.chooseDateFor": "Chọn ngày: {field}",
   "calendar.today": "Hôm nay",
   "calendar.clear": "Xóa",
   "calendar.patternDay": "dd",

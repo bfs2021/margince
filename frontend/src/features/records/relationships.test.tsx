@@ -213,7 +213,7 @@ describe("adding a relationship", () => {
       vi.advanceTimersByTime(250);
     });
     await user.click(await dialog.findByRole("button", { name: "Acme Corp" }));
-    await user.click(dialog.getByRole("button", { name: "Choose date" }));
+    await user.click(dialog.getByRole("button", { name: /^Choose date/ }));
     await user.click(
       await screen.findByRole("button", { name: "Monday, 2 March 2026" }),
     );

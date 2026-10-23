@@ -372,6 +372,7 @@ describe("a provider's sheet", () => {
     const save = within(sheet).getByRole("button", { name: "Save" });
     expect(save).toHaveProperty("disabled", false);
     await user.clear(within(sheet).getByLabelText("Effective"));
+    await user.tab();
     expect(save).toHaveProperty("disabled", true);
     expect(posts).toHaveLength(0);
   });

@@ -322,7 +322,7 @@ describe("the start a meeting outcome saves", () => {
   };
 
   const picked = (dayName: string) => async (user: User) => {
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    await user.click(screen.getByRole("button", { name: /^Choose date/ }));
     await user.click(await screen.findByRole("button", { name: dayName }));
   };
 
@@ -394,7 +394,7 @@ describe("the start a meeting outcome saves", () => {
     renderUnderAToastRegion("Pacific/Pago_Pago");
     await user.click(await screen.findByRole("button", { name: /update/i }));
     await user.click(
-      await screen.findByRole("button", { name: "Choose date" }),
+      await screen.findByRole("button", { name: /^Choose date/ }),
     );
     const today = await screen.findByRole("button", { name: "Today" });
     expect(today).toHaveProperty("disabled", false);

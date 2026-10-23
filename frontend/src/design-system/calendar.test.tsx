@@ -1,11 +1,11 @@
 /** @vitest-environment happy-dom */
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { afterEach, expect, it, vi } from "vitest";
 import { weekdayInitial } from "../format/format";
 import { LocaleProvider } from "../i18n";
-import { Calendar, isoDay, monthGrid } from "./calendar";
+import { Calendar, dateOf, isoDay, monthGrid } from "./calendar";
 
 afterEach(cleanup);
 
@@ -42,11 +42,13 @@ it.each(["en", "de", "vi"] as const)(
         />
       </LocaleProvider>,
     );
-    const cells = container.querySelectorAll(".calendar-grid > *");
-    expect(cells[0]?.textContent).toBe(
-      weekdayInitial(new Date(2026, 6, 27), locale),
-    );
-    expect(cells[7]?.getAttribute("data-day")).toBe("2026-07-27");
+    expect(
+      container.querySelector('.calendar-week[aria-hidden="true"] > span')
+        ?.textContent,
+    ).toBe(weekdayInitial(new Date(2026, 6, 27), locale));
+    expect(
+      container.querySelector("[data-day]")?.getAttribute("data-day"),
+    ).toBe("2026-07-27");
   },
 );
 
@@ -90,7 +92,7 @@ it("steps a month at a time from a date no shorter month holds", async () => {
   expect(isoDay(paged.mock.calls[0][0])).toBe("2026-06-01");
 });
 
-it("marks the chosen day and nothing else", () => {
+it("marks the chosen day and nothing else, and today as the current date", () => {
   render(
     <Calendar
       month={AUGUST_2026}
@@ -102,11 +104,77 @@ it("marks the chosen day and nothing else", () => {
     />,
   );
 
-  const pressed = screen
+  const chosen = screen
+    .getAllByRole("gridcell")
+    .filter((cell) => cell.getAttribute("aria-selected") === "true");
+  expect(chosen).toHaveLength(1);
+  expect(chosen[0].textContent).toBe("25");
+  const current = screen
     .getAllByRole("button")
-    .filter((button) => button.getAttribute("aria-pressed") === "true");
-  expect(pressed).toHaveLength(1);
-  expect(pressed[0].textContent).toBe("25");
+    .filter((day) => day.getAttribute("aria-current") === "date");
+  expect(current.map((day) => day.textContent)).toEqual(["24"]);
+  expect(screen.queryAllByRole("button", { pressed: true })).toHaveLength(0);
+});
+
+it("is a grid of six weeks named by the month it shows", () => {
+  render(
+    <Calendar
+      month={AUGUST_2026}
+      onMonthChange={() => {}}
+      selected=""
+      onSelect={() => {}}
+      today={TODAY}
+      locale="en"
+    />,
+  );
+
+  const grid = screen.getByRole("grid", { name: "August 2026" });
+  const weeks = within(grid).getAllByRole("row");
+  expect(weeks).toHaveLength(6);
+  for (const week of weeks) {
+    expect(within(week).getAllByRole("gridcell")).toHaveLength(7);
+  }
+});
+
+it("opens a Vietnamese month's heading with a capital", () => {
+  render(
+    <LocaleProvider initial="vi">
+      <Calendar
+        month={AUGUST_2026}
+        onMonthChange={() => {}}
+        selected=""
+        onSelect={() => {}}
+        today={TODAY}
+        locale="vi"
+      />
+    </LocaleProvider>,
+  );
+
+  expect(screen.getByRole("grid", { name: "Tháng 8 năm 2026" })).toBeTruthy();
+});
+
+// `new Date(99, 8, 1)` is 1 September 1999; the grid must stay in year 99.
+it("draws a month of a year below 100 in that year", () => {
+  const month = dateOf("0099-09-01");
+  render(
+    <Calendar
+      month={month}
+      onMonthChange={() => {}}
+      selected="0099-09-09"
+      onSelect={() => {}}
+      today={TODAY}
+      locale="en"
+    />,
+  );
+
+  expect(month.getFullYear()).toBe(99);
+  expect(monthGrid(month, MONDAY).map(isoDay)).toContain("0099-09-30");
+  const chosen = screen
+    .getAllByRole("gridcell")
+    .find((cell) => cell.getAttribute("aria-selected") === "true");
+  expect(chosen?.querySelector("[data-day]")?.getAttribute("data-day")).toBe(
+    "0099-09-09",
+  );
 });
 
 // The grid is six weeks whatever the month, so up to eleven of its forty-two

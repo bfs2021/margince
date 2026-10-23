@@ -83,6 +83,9 @@ export const InvalidTyped: Story = {
     await userEvent.type(box, "31/02/2026");
     await userEvent.tab();
     await expect(box.getAttribute("aria-invalid")).toBe("true");
+    await expect(
+      await within(canvasElement).findByRole("alert"),
+    ).toHaveTextContent("Enter a date as DD/MM/YYYY.");
   },
 };
 
@@ -104,11 +107,11 @@ export const MinMaxRefusal: Story = {
   ),
   play: async ({ canvasElement }) => {
     const opener = await within(canvasElement).findByRole("button", {
-      name: "Choose date",
+      name: "Choose date: Due date",
     });
     await userEvent.click(opener);
     await expect(
-      await screen.findByRole("dialog", { name: "Choose date" }),
+      await screen.findByRole("dialog", { name: "Choose date: Due date" }),
     ).toBeTruthy();
   },
 };
@@ -121,11 +124,11 @@ export const OpenInVietnamese: Story = {
   ),
   play: async ({ canvasElement }) => {
     const opener = await within(canvasElement).findByRole("button", {
-      name: "Chọn ngày",
+      name: "Chọn ngày: Ngày đến hạn",
     });
     await userEvent.click(opener);
     await expect(
-      await screen.findByRole("dialog", { name: "Chọn ngày" }),
+      await screen.findByRole("dialog", { name: "Chọn ngày: Ngày đến hạn" }),
     ).toBeTruthy();
   },
 };
@@ -138,11 +141,11 @@ export const OpenInGerman: Story = {
   ),
   play: async ({ canvasElement }) => {
     const opener = await within(canvasElement).findByRole("button", {
-      name: "Datum wählen",
+      name: "Datum wählen: Fällig am",
     });
     await userEvent.click(opener);
     await expect(
-      await screen.findByRole("dialog", { name: "Datum wählen" }),
+      await screen.findByRole("dialog", { name: "Datum wählen: Fällig am" }),
     ).toBeTruthy();
   },
 };
@@ -157,11 +160,11 @@ export const AtPhoneWidth: Story = {
   tags: ["uat-phone"],
   play: async ({ canvasElement }) => {
     const opener = await within(canvasElement).findByRole("button", {
-      name: "Choose date",
+      name: "Choose date: Due date",
     });
     await userEvent.click(opener);
     await expect(
-      await screen.findByRole("dialog", { name: "Choose date" }),
+      await screen.findByRole("dialog", { name: "Choose date: Due date" }),
     ).toBeTruthy();
   },
 };
@@ -184,14 +187,14 @@ export const AtPhoneEndEdge: Story = {
   globals: { viewport: { value: "phone" } },
   tags: ["uat-phone"],
   play: async ({ canvasElement }) => {
-    const openers = await within(canvasElement).findAllByRole("button", {
-      name: "Choose date",
+    await userEvent.click(
+      await within(canvasElement).findByRole("button", {
+        name: "Choose date: Due date",
+      }),
+    );
+    const dialog = await screen.findByRole("dialog", {
+      name: "Choose date: Due date",
     });
-    const opener = openers.at(-1);
-    if (opener) {
-      await userEvent.click(opener);
-    }
-    const dialog = await screen.findByRole("dialog", { name: "Choose date" });
     await waitFor(() => {
       const box = dialog.getBoundingClientRect();
       expect(box.left).toBeGreaterThanOrEqual(16);

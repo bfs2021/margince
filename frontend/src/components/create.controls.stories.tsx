@@ -59,9 +59,9 @@ export const TextAndDate: Story = {
     const canvas = within(canvasElement);
     const date = await canvas.findByRole("textbox", { name: /Due date/ });
     await expect(date).toBeTruthy();
-    await userEvent.click(canvas.getByRole("button", { name: "Choose date" }));
+    await userEvent.click(canvas.getByRole("button", { name: /^Choose date/ }));
     const dialog = await within(document.body).findByRole("dialog", {
-      name: "Choose date",
+      name: /^Choose date/,
     });
     await expect(dialog).toBeTruthy();
   },

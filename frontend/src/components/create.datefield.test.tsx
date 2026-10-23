@@ -55,7 +55,7 @@ describe("a date field in a create form", () => {
     await user.click(screen.getByText("New deal"));
     await user.type(screen.getByLabelText(/Deal name/i), "Probe");
 
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    await user.click(screen.getByRole("button", { name: /^Choose date/ }));
     await user.click(
       await screen.findByRole("button", { name: "Friday, 22 May 2026" }),
     );

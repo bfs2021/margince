@@ -5,7 +5,8 @@
 // in view while the rest of a choice is read. Month and chosen day are the caller's.
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { type KeyboardEvent, useEffect, useId, useRef, useState } from "react";
+import { isoDay } from "../format/calendarday";
 import type { ISODate } from "../format/datepattern";
 import {
   formatNumber,
@@ -13,6 +14,7 @@ import {
   monthAndYear,
   weekdayInitial,
 } from "../format/format";
+import { INTL_LOCALE } from "../format/intllocale";
 import { type Weekday, weekStart } from "../format/weekstart";
 import type { Locale } from "../i18n";
 import { useT } from "../i18n";
@@ -21,16 +23,19 @@ import "./calendar.css";
 
 export type ISODay = ISODate;
 
-/** isoDay is a `Date` as the day it falls on in the reader's own zone. */
-export function isoDay(at: Date): ISODay {
-  const pad = (value: number) => String(value).padStart(2, "0");
-  return `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}` as ISODay;
-}
+export { isoDay };
 
 /** The local midnight a calendar day starts at. */
 export function dateOf(day: ISODay): Date {
   const [year, month, date] = day.split("-").map(Number);
-  return new Date(year ?? 0, (month ?? 1) - 1, date ?? 1);
+  return localDate(year ?? 0, (month ?? 1) - 1, date ?? 1);
+}
+
+// Not `new Date(year, month, date)`: it reads a year below 100 as 1900 onward.
+function localDate(year: number, month: number, date: number): Date {
+  const at = new Date(2000, 0, 1);
+  at.setFullYear(year, month, date);
+  return at;
 }
 
 // Always six weeks, so the controls under the grid stay put while the reader pages.
@@ -38,12 +43,10 @@ const WEEKS = 6;
 
 /** The days the grid draws, from the week start before the 1st. */
 export function monthGrid(month: Date, start: Weekday): Date[] {
-  const first = new Date(month.getFullYear(), month.getMonth(), 1);
+  const first = localDate(month.getFullYear(), month.getMonth(), 1);
   const lead = (first.getDay() - start + 7) % 7;
-  return Array.from(
-    { length: WEEKS * 7 },
-    (_, index) =>
-      new Date(first.getFullYear(), first.getMonth(), 1 - lead + index),
+  return Array.from({ length: WEEKS * 7 }, (_, index) =>
+    localDate(first.getFullYear(), first.getMonth(), 1 - lead + index),
   );
 }
 
@@ -67,6 +70,7 @@ export function Calendar({
   refusal?: (day: ISODay) => string | undefined;
 }>) {
   const t = useT();
+  const monthId = useId();
   const start = weekStart(locale);
   const days = monthGrid(month, start);
   const [cursor, setCursor] = useState<ISODay | null>(null);
@@ -96,15 +100,15 @@ export function Calendar({
     wantsFocus.current = true;
     setCursor(isoDay(next));
     if (!sameMonth(next, month)) {
-      onMonthChange(new Date(next.getFullYear(), next.getMonth(), 1));
+      onMonthChange(localDate(next.getFullYear(), next.getMonth(), 1));
     }
   };
 
   return (
     <div className="calendar">
       <div className="calendar-head">
-        <span className="calendar-month t-body" aria-live="polite">
-          {monthAndYear(month, locale)}
+        <span id={monthId} className="calendar-month t-body" aria-live="polite">
+          {headingCase(monthAndYear(month, locale), locale)}
         </span>
         <Button
           iconOnly
@@ -121,26 +125,45 @@ export function Calendar({
           <ChevronRight aria-hidden="true" />
         </Button>
       </div>
-      <div className="calendar-grid" ref={grid}>
-        {days.slice(0, 7).map((day) => (
-          <span key={`weekday-${day.getDay()}`} aria-hidden="true">
-            {weekdayInitial(day, locale)}
-          </span>
-        ))}
-        {days.map((day) => (
-          <CalendarDay
-            key={isoDay(day)}
-            day={day}
-            inMonth={sameMonth(day, month)}
-            isToday={isoDay(day) === isoDay(today)}
-            isSelected={isoDay(day) === selected}
-            isTabStop={isoDay(day) === tabStop}
-            refusal={refusal?.(isoDay(day))}
-            onSelect={onSelect}
-            onMove={move}
-            locale={locale}
-          />
-        ))}
+      <div className="calendar-days">
+        <div className="calendar-week" aria-hidden="true">
+          {days.slice(0, 7).map((day) => (
+            <span key={`weekday-${day.getDay()}`}>
+              {weekdayInitial(day, locale)}
+            </span>
+          ))}
+        </div>
+        {/* biome-ignore lint/a11y/useSemanticElements: not a table, so the weeks keep the legend's grid columns instead of sizing their own */}
+        <div
+          role="grid"
+          aria-labelledby={monthId}
+          className="calendar-grid"
+          ref={grid}
+        >
+          {weeksOf(days).map((week) => (
+            // biome-ignore lint/a11y/useSemanticElements lint/a11y/useFocusableInteractive: a week's day buttons take the focus, as in the date grid pattern
+            <div
+              role="row"
+              key={isoDay(week[0] ?? month)}
+              className="calendar-week"
+            >
+              {week.map((day) => (
+                <CalendarDay
+                  key={isoDay(day)}
+                  day={day}
+                  inMonth={sameMonth(day, month)}
+                  isToday={isoDay(day) === isoDay(today)}
+                  isSelected={isoDay(day) === selected}
+                  isTabStop={isoDay(day) === tabStop}
+                  refusal={refusal?.(isoDay(day))}
+                  onSelect={onSelect}
+                  onMove={move}
+                  locale={locale}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -175,28 +198,31 @@ function CalendarDay({
     .filter(Boolean)
     .join(" ");
   return (
-    <button
-      type="button"
-      className={classes}
-      data-day={isoDay(day)}
-      tabIndex={isTabStop ? 0 : -1}
-      aria-pressed={isSelected}
-      aria-label={
-        refusal
-          ? `${fullDayName(day, locale)}, ${refusal}`
-          : fullDayName(day, locale)
-      }
-      // Not `disabled`: a disabled day takes no focus, so the arrows would skip it.
-      aria-disabled={refusal === undefined ? undefined : true}
-      onKeyDown={(event) => onMove(event, day)}
-      onClick={() => {
-        if (refusal === undefined) {
-          onSelect(isoDay(day));
+    // biome-ignore lint/a11y/useSemanticElements lint/a11y/useFocusableInteractive: the day button inside takes the focus, as in the date grid pattern
+    <div role="gridcell" aria-selected={isSelected}>
+      <button
+        type="button"
+        className={classes}
+        data-day={isoDay(day)}
+        tabIndex={isTabStop ? 0 : -1}
+        aria-current={isToday ? "date" : undefined}
+        aria-label={
+          refusal
+            ? `${fullDayName(day, locale)}, ${refusal}`
+            : fullDayName(day, locale)
         }
-      }}
-    >
-      {formatNumber(day.getDate(), locale)}
-    </button>
+        // Not `disabled`: a disabled day takes no focus, so the arrows would skip it.
+        aria-disabled={refusal === undefined ? undefined : true}
+        onKeyDown={(event) => onMove(event, day)}
+        onClick={() => {
+          if (refusal === undefined) {
+            onSelect(isoDay(day));
+          }
+        }}
+      >
+        {formatNumber(day.getDate(), locale)}
+      </button>
+    </div>
   );
 }
 
@@ -207,7 +233,7 @@ function tabStopOf(
   const inMonth = candidates.find(
     (day): day is ISODay => !!day && sameMonth(dateOf(day), month),
   );
-  return inMonth ?? isoDay(new Date(month.getFullYear(), month.getMonth(), 1));
+  return inMonth ?? isoDay(localDate(month.getFullYear(), month.getMonth(), 1));
 }
 
 function stepFrom(
@@ -217,7 +243,7 @@ function stepFrom(
   start: Weekday,
 ): Date | null {
   const by = (days: number) =>
-    new Date(from.getFullYear(), from.getMonth(), from.getDate() + days);
+    localDate(from.getFullYear(), from.getMonth(), from.getDate() + days);
   const intoWeek = (from.getDay() - start + 7) % 7;
   switch (key) {
     case "ArrowLeft":
@@ -243,13 +269,13 @@ function stepFrom(
 
 // The 31st a month away lands on that month's last day, not in the month after.
 function sameDayMonthsAway(from: Date, by: number): Date {
-  const target = new Date(from.getFullYear(), from.getMonth() + by, 1);
-  const last = new Date(
+  const target = localDate(from.getFullYear(), from.getMonth() + by, 1);
+  const last = localDate(
     target.getFullYear(),
     target.getMonth() + 1,
     0,
   ).getDate();
-  return new Date(
+  return localDate(
     target.getFullYear(),
     target.getMonth(),
     Math.min(from.getDate(), last),
@@ -261,5 +287,17 @@ function sameMonth(a: Date, b: Date): boolean {
 }
 
 function shiftMonth(month: Date, by: number): Date {
-  return new Date(month.getFullYear(), month.getMonth() + by, 1);
+  return localDate(month.getFullYear(), month.getMonth() + by, 1);
+}
+
+function weeksOf(days: readonly Date[]): Date[][] {
+  return Array.from({ length: WEEKS }, (_, week) =>
+    days.slice(week * 7, week * 7 + 7),
+  );
+}
+
+// Vietnamese writes a month name in lower case; a heading opens with a capital.
+function headingCase(text: string, locale: Locale): string {
+  const [first = "", ...rest] = [...text];
+  return first.toLocaleUpperCase(INTL_LOCALE[locale]) + rest.join("");
 }

@@ -41,8 +41,8 @@ describe("editing a day where it is read", () => {
     await user.click(trigger());
     expect(dayBox().value).toBe("01/03/2026");
 
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
-    await screen.findByRole("dialog", { name: "Choose date" });
+    await user.click(screen.getByRole("button", { name: /^Choose date/ }));
+    await screen.findByRole("dialog", { name: /^Choose date/ });
     expect(onSave).not.toHaveBeenCalled();
     await user.click(
       screen.getByRole("button", { name: "Tuesday, 10 March 2026" }),
@@ -57,8 +57,8 @@ describe("editing a day where it is read", () => {
     const user = userEvent.setup();
     const { onSave } = renderCloseDate();
     await user.click(trigger());
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
-    await screen.findByRole("dialog", { name: "Choose date" });
+    await user.click(screen.getByRole("button", { name: /^Choose date/ }));
+    await screen.findByRole("dialog", { name: /^Choose date/ });
     await user.keyboard("{ArrowRight}");
 
     await user.keyboard("{Escape}");
@@ -72,8 +72,8 @@ describe("editing a day where it is read", () => {
     const user = userEvent.setup();
     const { onSave } = renderCloseDate();
     await user.click(trigger());
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
-    await screen.findByRole("dialog", { name: "Choose date" });
+    await user.click(screen.getByRole("button", { name: /^Choose date/ }));
+    await screen.findByRole("dialog", { name: /^Choose date/ });
     await user.keyboard("{Escape}");
 
     await user.click(document.body);

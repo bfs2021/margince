@@ -64,7 +64,7 @@ export const PickingValidUntil: Story = {
   ...Open,
   play: async () => {
     await screen.findByRole("textbox", { name: "Valid until" });
-    await userEvent.click(screen.getByRole("button", { name: "Choose date" }));
-    await screen.findByRole("dialog", { name: "Choose date" });
+    await userEvent.click(screen.getByRole("button", { name: /^Choose date/ }));
+    await screen.findByRole("dialog", { name: /^Choose date/ });
   },
 };

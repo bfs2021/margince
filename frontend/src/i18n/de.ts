@@ -5953,6 +5953,7 @@ export const de = {
   "calendar.previousMonth": "Voriger Monat",
   "calendar.nextMonth": "Nächster Monat",
   "calendar.chooseDate": "Datum wählen",
+  "calendar.chooseDateFor": "Datum wählen: {field}",
   "calendar.today": "Heute",
   "calendar.clear": "Leeren",
   "calendar.patternDay": "TT",

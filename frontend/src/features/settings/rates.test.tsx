@@ -352,7 +352,7 @@ describe("the rate sheets", () => {
     const dialog = within(await screen.findByRole("dialog"));
     await user.type(dialog.getByLabelText("From"), "GBP");
     await user.type(dialog.getByLabelText("Rate (to base currency)"), "1.17");
-    await user.click(dialog.getByRole("button", { name: "Choose date" }));
+    await user.click(dialog.getByRole("button", { name: /^Choose date/ }));
     await user.click(
       await screen.findByRole("button", { name: "Friday, 24 July 2026" }),
     );
@@ -378,7 +378,7 @@ describe("the rate sheets", () => {
       }),
     );
     const dialog = within(await screen.findByRole("dialog"));
-    await user.click(dialog.getByRole("button", { name: "Choose date" }));
+    await user.click(dialog.getByRole("button", { name: /^Choose date/ }));
     const lastWeek = await screen.findByRole("button", {
       name: /^Wednesday, 15 July 2026, Earliest date: /,
     });
@@ -402,7 +402,7 @@ describe("the rate sheets", () => {
     });
     await user.tripleClick(effective);
     await user.keyboard("{Backspace}");
-    await user.click(dialog.getByRole("button", { name: "Choose date" }));
+    await user.click(dialog.getByRole("button", { name: /^Choose date/ }));
     const pickToday = await screen.findByRole("button", { name: "Today" });
     expect(pickToday).toHaveProperty("disabled", false);
     await user.click(pickToday);

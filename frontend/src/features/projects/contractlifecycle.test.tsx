@@ -57,7 +57,7 @@ async function pickOnCalendar(
 ) {
   const field = screen.getByLabelText(label).parentElement;
   if (!field) throw new Error("expected the date box inside its field");
-  await user.click(within(field).getByRole("button", { name: "Choose date" }));
+  await user.click(within(field).getByRole("button", { name: /^Choose date/ }));
   await user.click(await screen.findByRole("button", { name: day }));
 }
 

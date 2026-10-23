@@ -6015,6 +6015,7 @@ export const en = {
   "calendar.previousMonth": "Previous month",
   "calendar.nextMonth": "Next month",
   "calendar.chooseDate": "Choose date",
+  "calendar.chooseDateFor": "Choose date: {field}",
   "calendar.today": "Today",
   "calendar.clear": "Clear",
   "calendar.patternDay": "DD",

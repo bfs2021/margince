@@ -10,7 +10,13 @@
 
 /** @vitest-environment happy-dom */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TaskQuickActions, useTaskUpdate } from "../../components/taskactions";
@@ -122,7 +128,7 @@ describe("moving a task to a named day", () => {
   it("sends the day picked on the calendar as the task's due date", async () => {
     const user = userEvent.setup();
     renderVerbs(DUE_AT);
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    await user.click(screen.getByRole("button", { name: /^Choose date/ }));
     await user.click(
       await screen.findByRole("button", { name: "Tuesday, 15 September 2026" }),
     );
@@ -141,6 +147,8 @@ describe("moving a task to a named day", () => {
     renderVerbs(DUE_AT);
     await user.tripleClick(picker());
     await user.keyboard("15/09/2026");
+    expect(sent).toHaveLength(0);
+    await user.keyboard("{Enter}");
 
     await waitFor(() => expect(sent).toHaveLength(1));
     const body = sent[0] as { due_at: string };
@@ -154,12 +162,10 @@ describe("moving a task to a named day", () => {
     renderVerbs(DUE_AT);
     expect(picker().value).toBe("01/09/2026");
 
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    await user.click(screen.getByRole("button", { name: /^Choose date/ }));
+    const chosen = await screen.findByRole("gridcell", { selected: true });
     expect(
-      await screen.findByRole("button", {
-        name: "Tuesday, 1 September 2026",
-        pressed: true,
-      }),
+      within(chosen).getByRole("button", { name: "Tuesday, 1 September 2026" }),
     ).toBeTruthy();
   });
 

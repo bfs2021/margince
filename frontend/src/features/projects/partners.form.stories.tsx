@@ -41,7 +41,7 @@ export const PickingTheNextStepDay: Story = {
   ...Setup,
   play: async () => {
     await screen.findByRole("textbox", { name: "Next step due" });
-    await userEvent.click(screen.getByRole("button", { name: "Choose date" }));
-    await screen.findByRole("dialog", { name: "Choose date" });
+    await userEvent.click(screen.getByRole("button", { name: /^Choose date/ }));
+    await screen.findByRole("dialog", { name: /^Choose date/ });
   },
 };

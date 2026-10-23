@@ -54,6 +54,7 @@ describe("a typed day", () => {
     [" 6-5-2026 ", "2026-05-06"],
     ["2026-05-06", "2026-05-06"],
     ["29.2.2028", "2028-02-29"],
+    ["1.1.1000", "1000-01-01"],
   ])("reads %s day first as %s", (typed, expected) => {
     expect(parseTypedDate(typed, dayFirst)).toBe(expected);
   });
@@ -71,6 +72,9 @@ describe("a typed day", () => {
     "006.5.2026",
     "6 May 2026",
     "2026-5",
+    "6.5.0026",
+    "0099-09-09",
+    "1.1.0999",
   ])("names no day in %j", (typed) => {
     expect(parseTypedDate(typed, dayFirst)).toBeNull();
   });

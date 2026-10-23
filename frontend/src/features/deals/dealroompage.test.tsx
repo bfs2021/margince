@@ -190,7 +190,7 @@ it("ends access on the day picked from the calendar", async () => {
   );
   const box = await screen.findByRole("textbox", { name: "Access ends on" });
   expect(box).toHaveValue("30/09/2026");
-  await user.click(screen.getByRole("button", { name: "Choose date" }));
+  await user.click(screen.getByRole("button", { name: /^Choose date/ }));
   await user.click(
     await screen.findByRole("button", { name: "Monday, 28 September 2026" }),
   );

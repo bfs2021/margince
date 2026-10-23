@@ -4,9 +4,11 @@
 import { CalendarDays } from "lucide-react";
 import {
   type ComponentPropsWithRef,
+  type Dispatch,
   type RefObject,
-  useEffect,
+  type SetStateAction,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -25,7 +27,9 @@ import { useAnchoredToTrigger } from "./anchored";
 import { useDismissOnOutsidePress } from "./anchoredpopup";
 import { Button } from "./button";
 import { Calendar, dateOf, isoDay } from "./calendar";
+import { describedByIds } from "./describedby";
 import { useDialogFocus } from "./dialogfocus";
+import { ErrorLine } from "./errorline";
 import { IconAction } from "./iconaction";
 import "./dateinput.css";
 
@@ -57,18 +61,17 @@ export type DateInputProps = Omit<
     today?: ISODate;
   }>;
 
-// `base` is the value before the reader began typing, `reported` what the text
-// last told the caller; the text stays while the value is either one.
+// `holds` is the caller's value the text sits over: a move to any other value
+// drops the text. `refused` is why a settle could not read it.
 type Draft = Readonly<{
   text: string;
-  base: ISODate | "";
-  reported: ISODate | "";
-  problem?: string;
+  holds: ISODate | "";
+  refused?: string;
 }>;
 
 /**
- * The one date field. The caller always holds the box's day, or `""` while the
- * text reads as none; then the box fails `checkValidity()`, and on blur shows `aria-invalid`.
+ * The one date field. Typed text reaches the caller only when the reader
+ * settles it: Enter, leaving the text box, or a pick in the calendar.
  */
 export function DateInput({
   value,
@@ -86,6 +89,7 @@ export function DateInput({
   onKeyDown,
   ref,
   "aria-invalid": ariaInvalid,
+  "aria-describedby": ariaDescribedBy,
   ...box
 }: DateInputProps) {
   const t = useT();
@@ -94,23 +98,22 @@ export function DateInput({
   const pattern = datePattern(locale, dateFormat);
   const [own, setOwn] = useState<ISODate | "">(defaultValue ?? "");
   const current = value ?? own;
-  const [draft, setDraft] = useState<Draft | null>(null);
-  const live =
-    draft && (current === draft.base || current === draft.reported)
-      ? draft
-      : null;
+  const [draft, setDraft] = useDraft(current);
+  const [labelText, setLabelText] = useState("");
   const [openedOn, setOpenedOn] = useState<ISODate | null>(null);
   const shell = useRef<HTMLSpanElement | null>(null);
   const input = useRef<HTMLInputElement | null>(null);
   const popupId = useId();
+  const refusedId = useId();
   const refusal = (day: ISODate) => outsideRange(day, min, max, pattern, t);
+  const chooseName = calendarName(box["aria-label"] ?? labelText, t);
 
-  const unread = live
-    ? readTyped(live.text, pattern, refusal, t).problem
+  const problem = draft
+    ? readTyped(draft.text, pattern, refusal, t).problem
     : undefined;
-  useEffect(() => {
-    input.current?.setCustomValidity(unread ?? "");
-  }, [unread]);
+  useLayoutEffect(() => {
+    input.current?.setCustomValidity(problem ?? "");
+  }, [problem]);
 
   const report = (next: ISODate | "") => {
     if (value === undefined) {
@@ -120,104 +123,131 @@ export function DateInput({
       onChange?.({ target: { value: next } });
     }
   };
+  // Cleared here, not by the effect above: the caller hears the day in this handler.
   const settle = (next: ISODate | "") => {
+    input.current?.setCustomValidity("");
     setDraft(null);
     report(next);
   };
-  const commit = () => {
-    if (!live) {
+  const settleTyped = () => {
+    if (!draft) {
       return;
     }
-    const read = readTyped(live.text, pattern, refusal, t);
+    const read = readTyped(draft.text, pattern, refusal, t);
     if (read.problem === undefined) {
       settle(read.day);
-    } else {
-      setDraft({ ...live, reported: "", problem: read.problem });
-      report("");
+      return;
     }
+    setDraft({ text: draft.text, holds: "", refused: read.problem });
+    report("");
   };
-  const type = (text: string) => {
-    const read = readTyped(text, pattern, refusal, t);
-    const meaning = read.problem === undefined ? read.day : "";
-    setDraft({ text, base: live ? live.base : current, reported: meaning });
-    report(meaning);
-  };
+  const type = (text: string) =>
+    setDraft({ text, holds: draft ? draft.holds : current });
 
   return (
-    <span
-      ref={shell}
-      className={["field-shell", "date-input", className]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      <input
-        {...box}
-        ref={(node) => {
-          input.current = node;
-          if (typeof ref === "function") {
-            ref(node);
-          } else if (ref) {
-            ref.current = node;
-          }
-        }}
-        type="text"
-        className="input"
-        autoComplete="off"
-        disabled={disabled}
-        readOnly={readOnly}
-        placeholder={placeholder ?? placeholderOf(pattern, t)}
-        aria-invalid={live?.problem === undefined ? ariaInvalid : true}
-        value={live ? live.text : shown(current, pattern)}
-        onChange={(event) => type(event.target.value)}
-        onBlur={(event) => {
-          commit();
-          onBlur?.(event);
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            commit();
-          }
-          onKeyDown?.(event);
-        }}
-      />
-      <IconAction
-        label={t("calendar.chooseDate")}
-        icon={<CalendarDays aria-hidden="true" />}
-        disabled={disabled || readOnly}
-        opensDialog
-        disclosure={{ expanded: openedOn !== null, controls: popupId }}
-        onClick={() =>
-          setOpenedOn((opened) =>
-            opened ? null : (today ?? isoDay(new Date())),
-          )
-        }
-      />
-      {name !== undefined && (
-        <input type="hidden" name={name} value={current} disabled={disabled} />
-      )}
-      {openedOn && (
-        <DatePopup
-          id={popupId}
-          anchor={shell}
-          selected={current}
-          today={openedOn}
-          locale={locale}
-          refusal={refusal}
-          onPick={(next) => {
-            settle(next);
-            setOpenedOn(null);
+    <>
+      <span
+        ref={shell}
+        className={["field-shell", "date-input", className]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        <input
+          {...box}
+          ref={(node) => {
+            input.current = node;
+            if (node) {
+              setLabelText(spokenLabel(node));
+            }
+            handOn(ref, node);
           }}
-          onClose={() => setOpenedOn(null)}
+          type="text"
+          className="input"
+          autoComplete="off"
+          disabled={disabled}
+          readOnly={readOnly}
+          placeholder={placeholder ?? placeholderOf(pattern, t)}
+          aria-invalid={draft?.refused === undefined ? ariaInvalid : true}
+          aria-describedby={describedByIds(
+            draft?.refused !== undefined && refusedId,
+            ariaDescribedBy,
+          )}
+          value={draft ? draft.text : shown(current, pattern)}
+          onChange={(event) => type(event.target.value)}
+          onBlur={(event) => {
+            settleTyped();
+            onBlur?.(event);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              settleTyped();
+            }
+            onKeyDown?.(event);
+          }}
         />
+        <IconAction
+          label={chooseName}
+          icon={<CalendarDays aria-hidden="true" />}
+          disabled={disabled || readOnly}
+          opensDialog
+          disclosure={{ expanded: openedOn !== null, controls: popupId }}
+          onClick={() =>
+            setOpenedOn((opened) =>
+              opened ? null : (today ?? isoDay(new Date())),
+            )
+          }
+        />
+        {name !== undefined && (
+          <input
+            type="hidden"
+            name={name}
+            value={current}
+            disabled={disabled}
+          />
+        )}
+        {openedOn && (
+          <DatePopup
+            id={popupId}
+            name={chooseName}
+            anchor={shell}
+            selected={current}
+            today={openedOn}
+            locale={locale}
+            refusal={refusal}
+            onPick={(next) => {
+              settle(next);
+              setOpenedOn(null);
+            }}
+            onClose={() => setOpenedOn(null)}
+          />
+        )}
+      </span>
+      {draft?.refused !== undefined && (
+        <ErrorLine id={refusedId}>{draft.refused}</ErrorLine>
       )}
-    </span>
+    </>
   );
 }
 
 type Translate = ReturnType<typeof useT>;
 
+function useDraft(
+  current: ISODate | "",
+): [Draft | null, Dispatch<SetStateAction<Draft | null>>] {
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const [heard, setHeard] = useState(current);
+  if (heard !== current) {
+    setHeard(current);
+    if (draft && draft.holds !== current) {
+      setDraft(null);
+    }
+  }
+  return [draft, setDraft];
+}
+
 function DatePopup({
   id,
+  name,
   anchor,
   selected,
   today,
@@ -227,6 +257,7 @@ function DatePopup({
   onClose,
 }: Readonly<{
   id: string;
+  name: string;
   anchor: RefObject<HTMLSpanElement | null>;
   selected: ISODate | "";
   today: ISODate;
@@ -258,7 +289,7 @@ function DatePopup({
       id={id}
       role="dialog"
       aria-modal="true"
-      aria-label={t("calendar.chooseDate")}
+      aria-label={name}
       className="date-popup"
       style={{
         top: `${at.top}px`,
@@ -284,6 +315,37 @@ function DatePopup({
     </div>,
     document.body,
   );
+}
+
+function handOn(ref: DateInputProps["ref"], node: HTMLInputElement | null) {
+  if (typeof ref === "function") {
+    ref(node);
+  } else if (ref) {
+    ref.current = node;
+  }
+}
+
+function calendarName(field: string, t: Translate): string {
+  return field
+    ? t("calendar.chooseDateFor", { field })
+    : t("calendar.chooseDate");
+}
+
+// The words a screen reader takes from the field's label; a required mark is
+// `aria-hidden`, so it stays out.
+function spokenLabel(box: HTMLInputElement): string {
+  const label = box.labels?.[0];
+  return label ? spokenText(label).trim() : "";
+}
+
+function spokenText(node: Node): string {
+  if (node instanceof Element && node.getAttribute("aria-hidden") === "true") {
+    return "";
+  }
+  if (node.nodeType === Node.TEXT_NODE) {
+    return node.textContent ?? "";
+  }
+  return Array.from(node.childNodes, spokenText).join("");
 }
 
 function shown(day: ISODate | "", pattern: DatePattern): string {

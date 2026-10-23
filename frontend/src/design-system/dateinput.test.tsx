@@ -6,7 +6,7 @@ import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { type ReactNode, useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { monthAndYear, weekdayInitial } from "../format/format";
+import { weekdayInitial } from "../format/format";
 import { setDateTimePreferences } from "../format/preferences";
 import { type Locale, LocaleProvider } from "../i18n";
 import { Button } from "./button";
@@ -27,15 +27,16 @@ function Due(
     Omit<DateInputProps, "value" | "onChange"> & {
       locale?: Locale;
       initial?: ISODate | "";
+      hint?: string;
       onReport?: (day: string) => void;
     }
   >,
 ) {
-  const { locale = "en", initial = "", onReport, ...rest } = props;
+  const { locale = "en", initial = "", hint, onReport, ...rest } = props;
   const [day, setDay] = useState<ISODate | "">(initial);
   return (
     <LocaleProvider initial={locale}>
-      <Field label="Due">
+      <Field label="Due" hint={hint}>
         {(control) => (
           <DateInput
             {...control}
@@ -55,6 +56,7 @@ function Due(
 
 const box = () =>
   screen.getByRole<HTMLInputElement>("textbox", { name: "Due" });
+const CHOOSE = "Choose date: Due";
 
 describe("the face", () => {
   it("writes the day the Vietnamese way and opens a Vietnamese month that starts on Monday", async () => {
@@ -64,13 +66,15 @@ describe("the face", () => {
     expect(box().value).toBe("06/05/2026");
     expect(box().placeholder).toBe("dd/mm/yyyy");
 
-    await user.click(screen.getByRole("button", { name: "Chọn ngày" }));
+    await user.click(screen.getByRole("button", { name: "Chọn ngày: Due" }));
 
-    const dialog = await screen.findByRole("dialog", { name: "Chọn ngày" });
-    const heading = monthAndYear(new Date(2026, 4, 1), "vi");
-    expect(heading).toMatch(/tháng/i);
-    expect(within(dialog).getByText(heading)).toBeTruthy();
-    const legend = dialog.querySelector(".calendar-grid > span");
+    const dialog = await screen.findByRole("dialog", {
+      name: "Chọn ngày: Due",
+    });
+    expect(within(dialog).getByText("Tháng 5 năm 2026")).toBeTruthy();
+    const legend = dialog.querySelector(
+      '.calendar-week[aria-hidden="true"] > span',
+    );
     expect(legend?.textContent).toBe(
       weekdayInitial(new Date(2026, 4, 4), "vi"),
     );
@@ -97,19 +101,18 @@ describe("the face", () => {
 });
 
 describe("typing", () => {
-  it("reports a German day.month.year once typed, and writes it in the pattern on blur", async () => {
+  it("reports a German day.month.year once the reader leaves the box, written in the pattern", async () => {
     const user = userEvent.setup();
     const report = vi.fn();
     render(<Due locale="de" onReport={report} />);
 
-    await user.type(box(), "6.5.202");
+    await user.type(box(), "6.5.2026");
     expect(report).not.toHaveBeenCalled();
-    await user.type(box(), "6");
-    expect(report).toHaveBeenCalledWith("2026-05-06");
-    expect(box().value).toBe("6.5.2026");
+    expect(box().checkValidity()).toBe(true);
     await user.tab();
 
     expect(report).toHaveBeenCalledTimes(1);
+    expect(report).toHaveBeenCalledWith("2026-05-06");
     expect(box().value).toBe("06.05.2026");
   });
 
@@ -136,6 +139,29 @@ describe("typing", () => {
     expect(report).toHaveBeenLastCalledWith("");
     expect(report).not.toHaveBeenCalledWith("2026-05-06");
     expect(box().value).toBe("31/02/2026");
+    expect(box().getAttribute("aria-invalid")).toBe("true");
+    expect(box().validationMessage).toBe("Enter a date as DD/MM/YYYY.");
+  });
+
+  it("is invalid from the key press that makes the text unreadable, with nothing reported", async () => {
+    const user = userEvent.setup();
+    const report = vi.fn();
+    render(<Due initial="2026-05-06" onReport={report} />);
+
+    await user.click(box());
+    await user.keyboard("{End}{Backspace}");
+
+    expect(box().checkValidity()).toBe(false);
+    expect(box().validationMessage).toBe("Enter a date as DD/MM/YYYY.");
+    expect(report).not.toHaveBeenCalled();
+  });
+
+  it("reads a year below 1000 as no day", async () => {
+    const user = userEvent.setup();
+    render(<Due />);
+
+    await user.type(box(), "09/09/0099{Enter}");
+
     expect(box().getAttribute("aria-invalid")).toBe("true");
     expect(box().validationMessage).toBe("Enter a date as DD/MM/YYYY.");
   });
@@ -199,8 +225,10 @@ describe("a caller that refuses an empty box", () => {
     await user.keyboard("{End}{Backspace>10/}");
     expect(box().value).toBe("");
     await user.keyboard("07/05/2026");
+    await user.tab();
 
-    expect(report).toHaveBeenLastCalledWith("2026-05-07");
+    expect(report).toHaveBeenCalledTimes(1);
+    expect(report).toHaveBeenCalledWith("2026-05-07");
     expect(box().value).toBe("07/05/2026");
   });
 
@@ -212,6 +240,20 @@ describe("a caller that refuses an empty box", () => {
     await user.tab();
 
     expect(box().value).toBe("06/05/2026");
+  });
+
+  it("keeps a refused day on show, with its reason, while the caller keeps its own", async () => {
+    const user = userEvent.setup();
+    render(<KeepsItsDay onReport={() => {}} />);
+
+    await user.tripleClick(box());
+    await user.keyboard("31/02/2026");
+    await user.tab();
+
+    expect(box().value).toBe("31/02/2026");
+    expect(screen.getByRole("alert").textContent).toBe(
+      "Enter a date as DD/MM/YYYY.",
+    );
   });
 });
 
@@ -287,6 +329,206 @@ describe("a form around a day it cannot read", () => {
   });
 });
 
+// A form that saves on submit and logs each report, so the order is visible.
+function SavesTheDay(
+  props: Readonly<{
+    initial?: ISODate | "";
+    onReport: (day: string) => void;
+    onSave: (day: string) => void;
+  }>,
+) {
+  const [day, setDay] = useState<ISODate | "">(props.initial ?? "2026-05-06");
+  return (
+    <LocaleProvider initial="en">
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          props.onSave(day);
+        }}
+      >
+        <Field label="Due">
+          {(control) => (
+            <DateInput
+              {...control}
+              today={TODAY}
+              value={day}
+              onChange={(event) => {
+                props.onReport(event.target.value);
+                setDay(event.target.value);
+              }}
+            />
+          )}
+        </Field>
+        <Button type="submit">Save</Button>
+      </form>
+    </LocaleProvider>
+  );
+}
+
+describe("a typed day reaches the caller once the reader settles it", () => {
+  it("is what the form submits when the reader presses Enter", async () => {
+    const user = userEvent.setup();
+    const save = vi.fn();
+    render(<SavesTheDay onReport={() => {}} onSave={save} />);
+
+    await user.tripleClick(box());
+    await user.keyboard("25/09/2026{Enter}");
+
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(save).toHaveBeenCalledWith("2026-09-25");
+  });
+
+  it("is reported as the pointer presses Save, before the click submits it", async () => {
+    const user = userEvent.setup();
+    const report = vi.fn();
+    const save = vi.fn();
+    render(<SavesTheDay onReport={report} onSave={save} />);
+    const saveButton = screen.getByRole("button", { name: "Save" });
+
+    await user.tripleClick(box());
+    await user.keyboard("25/09/2026");
+    expect(report).not.toHaveBeenCalled();
+    await user.pointer({ keys: "[MouseLeft>]", target: saveButton });
+
+    expect(report).toHaveBeenCalledWith("2026-09-25");
+    expect(save).not.toHaveBeenCalled();
+    await user.pointer({ keys: "[/MouseLeft]", target: saveButton });
+    expect(save).toHaveBeenCalledWith("2026-09-25");
+  });
+
+  it("asks a caller that saves on change for one write per settle", async () => {
+    const user = userEvent.setup();
+    const patch = vi.fn();
+    render(
+      <SavesTheDay initial="2026-09-15" onReport={patch} onSave={() => {}} />,
+    );
+
+    await user.click(box());
+    await user.keyboard(
+      "{Home}{ArrowRight}{ArrowRight}{Backspace}{Backspace}25",
+    );
+    expect(box().value).toBe("25/09/2026");
+    expect(patch).not.toHaveBeenCalled();
+    await user.keyboard("{Enter}");
+    await user.tab();
+
+    expect(patch).toHaveBeenCalledTimes(1);
+    expect(patch).toHaveBeenCalledWith("2026-09-25");
+  });
+
+  it("is refused at submit when the reader presses Enter on text it cannot read", async () => {
+    const user = userEvent.setup();
+    const save = vi.fn();
+    render(<SavesTheDay onReport={() => {}} onSave={save} />);
+
+    await user.tripleClick(box());
+    await user.keyboard("31/02/2026{Enter}");
+
+    expect(save).not.toHaveBeenCalled();
+    expect(box().checkValidity()).toBe(false);
+  });
+});
+
+describe("a day picked after a typed one it could not read", () => {
+  it("leaves the box valid by the time the caller hears the pick", async () => {
+    const user = userEvent.setup();
+    const heard: Array<[string, boolean]> = [];
+    render(
+      <Due
+        initial="2026-05-06"
+        onReport={(day) => heard.push([day, box().checkValidity()])}
+      />,
+    );
+
+    await user.tripleClick(box());
+    await user.keyboard("31/02/2026");
+    await user.click(screen.getByRole("button", { name: CHOOSE }));
+    await user.click(
+      await screen.findByRole("button", { name: "Thursday, 7 May 2026" }),
+    );
+
+    expect(heard.at(-1)).toEqual(["2026-05-07", true]);
+    expect(box().getAttribute("aria-invalid")).toBeNull();
+  });
+});
+
+// The caller's value moves from outside the field: a reset, a reload.
+function Resettable() {
+  const [day, setDay] = useState<ISODate | "">("2026-05-06");
+  return (
+    <LocaleProvider initial="en">
+      <Field label="Due">
+        {(control) => (
+          <DateInput
+            {...control}
+            today={TODAY}
+            value={day}
+            onChange={(event) => setDay(event.target.value)}
+          />
+        )}
+      </Field>
+      <Button onClick={() => setDay("2026-05-06")}>Reset</Button>
+    </LocaleProvider>
+  );
+}
+
+describe("a value the caller sets", () => {
+  it("replaces a refused day the reader left", async () => {
+    const user = userEvent.setup();
+    render(<Resettable />);
+
+    await user.tripleClick(box());
+    await user.keyboard("31/02/2026");
+    await user.tab();
+    expect(box().getAttribute("aria-invalid")).toBe("true");
+    await user.click(screen.getByRole("button", { name: "Reset" }));
+
+    expect(box().value).toBe("06/05/2026");
+    expect(box().getAttribute("aria-invalid")).toBeNull();
+    expect(box().checkValidity()).toBe(true);
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("replaces text the reader is still typing", async () => {
+    const user = userEvent.setup();
+    const held = (day: ISODate | "") => (
+      <LocaleProvider initial="en">
+        <Field label="Due">
+          {(control) => <DateInput {...control} today={TODAY} value={day} />}
+        </Field>
+      </LocaleProvider>
+    );
+    const { rerender } = render(held("2026-05-06"));
+
+    await user.tripleClick(box());
+    await user.keyboard("abc");
+    rerender(held(""));
+
+    expect(box().value).toBe("");
+    expect(box().checkValidity()).toBe(true);
+    expect(document.activeElement).toBe(box());
+    rerender(held("2026-05-06"));
+    expect(box().value).toBe("06/05/2026");
+  });
+});
+
+describe("a refusal the reader can see", () => {
+  it("is written under the box and describes it, beside the field's own hint", async () => {
+    const user = userEvent.setup();
+    render(<Due min="2026-05-10" hint="Any working day" />);
+
+    await user.type(box(), "09/05/2026");
+    expect(screen.queryByRole("alert")).toBeNull();
+    await user.tab();
+
+    const refusal = screen.getByRole("alert");
+    expect(refusal.textContent).toBe("Earliest date: 10/05/2026");
+    const describedBy = box().getAttribute("aria-describedby")?.split(" ");
+    expect(describedBy).toContain(refusal.id);
+    expect(describedBy).toContain(screen.getByText("Any working day").id);
+  });
+});
+
 // The boxes a real layout gives: a field ending at the page gutter of a phone,
 // and the calendar's own width. Happy-dom lays nothing out.
 function laidOut(field: Readonly<{ left: number; right: number }>) {
@@ -316,8 +558,8 @@ describe("where the calendar opens", () => {
     const user = userEvent.setup();
     render(<Due />);
 
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
-    const dialog = await screen.findByRole("dialog", { name: "Choose date" });
+    await user.click(screen.getByRole("button", { name: CHOOSE }));
+    const dialog = await screen.findByRole("dialog", { name: CHOOSE });
 
     expect(dialog.style.left).toBe("100px");
   });
@@ -327,8 +569,8 @@ describe("where the calendar opens", () => {
     const user = userEvent.setup();
     render(<Due />);
 
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
-    const dialog = await screen.findByRole("dialog", { name: "Choose date" });
+    await user.click(screen.getByRole("button", { name: CHOOSE }));
+    const dialog = await screen.findByRole("dialog", { name: CHOOSE });
 
     expect(dialog.style.left).toBe("4px");
   });
@@ -339,12 +581,12 @@ describe("the calendar", () => {
     const user = userEvent.setup();
     const report = vi.fn();
     render(<Due initial="2026-05-06" onReport={report} />);
-    const opener = screen.getByRole("button", { name: "Choose date" });
+    const opener = screen.getByRole("button", { name: CHOOSE });
     expect(opener.getAttribute("aria-haspopup")).toBe("dialog");
     expect(opener.getAttribute("aria-expanded")).toBe("false");
 
     await user.click(opener);
-    const dialog = await screen.findByRole("dialog", { name: "Choose date" });
+    const dialog = await screen.findByRole("dialog", { name: CHOOSE });
     expect(opener.getAttribute("aria-expanded")).toBe("true");
     expect(document.activeElement?.getAttribute("data-day")).toBe("2026-05-06");
 
@@ -360,10 +602,10 @@ describe("the calendar", () => {
     const user = userEvent.setup();
     const report = vi.fn();
     render(<Due onReport={report} />);
-    const opener = screen.getByRole("button", { name: "Choose date" });
+    const opener = screen.getByRole("button", { name: CHOOSE });
 
     await user.click(opener);
-    await screen.findByRole("dialog", { name: "Choose date" });
+    await screen.findByRole("dialog", { name: CHOOSE });
     expect(document.activeElement?.getAttribute("data-day")).toBe("2026-05-20");
 
     await user.keyboard("{Escape}");
@@ -377,7 +619,7 @@ describe("the calendar", () => {
     const user = userEvent.setup();
     render(<Due initial="2026-05-06" />);
 
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    await user.click(screen.getByRole("button", { name: CHOOSE }));
     const dialog = await screen.findByRole("dialog");
     await user.tab();
     expect(document.activeElement?.textContent).toBe("Today");
@@ -395,7 +637,7 @@ describe("the calendar", () => {
     const report = vi.fn();
     render(<Due min="2026-05-10" max="2026-05-30" onReport={report} />);
 
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    await user.click(screen.getByRole("button", { name: CHOOSE }));
     const early = await screen.findByRole("button", {
       name: "Saturday, 9 May 2026, Earliest date: 10/05/2026",
     });
@@ -413,7 +655,7 @@ describe("the calendar", () => {
     const user = userEvent.setup();
     const report = vi.fn();
     render(<Due initial="2026-05-06" onReport={report} />);
-    const opener = screen.getByRole("button", { name: "Choose date" });
+    const opener = screen.getByRole("button", { name: CHOOSE });
 
     await user.click(opener);
     await user.click(await screen.findByRole("button", { name: "Clear" }));
@@ -434,13 +676,33 @@ describe("the calendar", () => {
       </InDialog>,
     );
 
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
-    await screen.findByRole("dialog", { name: "Choose date" });
+    await user.click(screen.getByRole("button", { name: CHOOSE }));
+    await screen.findByRole("dialog", { name: CHOOSE });
     await user.keyboard("{Escape}");
 
-    expect(screen.queryByRole("dialog", { name: "Choose date" })).toBeNull();
+    expect(screen.queryByRole("dialog", { name: CHOOSE })).toBeNull();
     expect(closeDialog).not.toHaveBeenCalled();
     expect(screen.getByRole("dialog", { name: "Log activity" })).toBeTruthy();
+  });
+
+  it("names its button and its calendar after the field, and plainly without a label", async () => {
+    const user = userEvent.setup();
+    render(
+      <LocaleProvider initial="en">
+        <Field label="Starts" required>
+          {(control) => <DateInput {...control} today={TODAY} />}
+        </Field>
+        <DateInput today={TODAY} />
+      </LocaleProvider>,
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Choose date: Starts" }),
+    );
+    expect(
+      await screen.findByRole("dialog", { name: "Choose date: Starts" }),
+    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Choose date" })).toBeTruthy();
   });
 
   it("does not open while the field is disabled or read-only", () => {
@@ -451,9 +713,7 @@ describe("the calendar", () => {
       </>,
     );
 
-    for (const opener of screen.getAllByRole("button", {
-      name: "Choose date",
-    })) {
+    for (const opener of screen.getAllByRole("button", { name: CHOOSE })) {
       expect(opener).toHaveProperty("disabled", true);
     }
   });

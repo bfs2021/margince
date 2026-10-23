@@ -203,7 +203,7 @@ describe("opening a DSR (G-2)", () => {
     );
     await screen.findByText(/GDPR, one calendar month/);
     await userEvent.type(
-      screen.getByLabelText(/earlier deadline/i),
+      screen.getByRole("textbox", { name: /earlier deadline/i }),
       "15/07/2026",
     );
     await userEvent.click(

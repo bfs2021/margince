@@ -930,7 +930,7 @@ describe("the value control follows the operator, then the type", () => {
     expect(
       screen.getByRole<HTMLInputElement>("textbox", { name: "Value" }).value,
     ).toBe("18/07/2026");
-    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    await user.click(screen.getByRole("button", { name: /^Choose date/ }));
     await user.click(
       await screen.findByRole("button", { name: "Monday, 20 July 2026" }),
     );

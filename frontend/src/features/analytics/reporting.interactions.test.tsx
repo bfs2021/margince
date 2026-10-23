@@ -274,8 +274,10 @@ it("uses local inclusive custom dates without querying an incomplete range", asy
   );
   const before = fetch.mock.calls.length;
   await user.type(screen.getByLabelText("From"), "28/03/2026");
+  await user.tab();
   expect(fetch.mock.calls).toHaveLength(before);
   await user.type(screen.getByLabelText("Through"), "29/03/2026");
+  await user.tab();
   await waitFor(() => {
     const requests = fetch.mock.calls.map(
       ([input]) =>
