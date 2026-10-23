@@ -299,3 +299,93 @@ describe("the room brief", () => {
     );
   });
 });
+
+describe("a room buyers cannot simply walk into says so", () => {
+  it.each([
+    ["closed", "roompage.banner.closed"],
+    ["expired", "roompage.banner.expired"],
+    ["archived", "roompage.banner.archived"],
+  ] as const)(
+    "names a %s room's state, with the way to its settings",
+    async (state, key) => {
+      stubWithSession(roomRoutes(state), { deal_room: ["read", "update"] });
+      withProviders(<DealRoomTab dealId="deal-1" dealName="Acme Expansion" />);
+
+      expect(await screen.findByText(translate("en", key))).toBeInTheDocument();
+      expect(
+        screen.getAllByRole("button", { name: "Manage room" }).length,
+      ).toBeGreaterThan(1);
+    },
+  );
+});
+
+describe("the settings dialog's access changes", () => {
+  it("sets the end date before it closes the room", async () => {
+    const calls: string[] = [];
+    stubWithSession(
+      {
+        ...roomRoutes(),
+        "PUT /deal-rooms/room-1/expiry": (body) => {
+          calls.push(`PUT ${JSON.stringify(body)}`);
+          return jsonResponse(room({ version: 2 }));
+        },
+        "POST /deal-rooms/room-1/close": () => {
+          calls.push("POST close");
+          return jsonResponse(room({ state: "closed", version: 3 }));
+        },
+      },
+      { deal_room: ["read", "update"] },
+    );
+    const user = userEvent.setup();
+    withProviders(<DealRoomTab dealId="deal-1" dealName="Acme Expansion" />);
+
+    await user.click(
+      await screen.findByRole("button", { name: "Manage room" }),
+    );
+    await user.type(
+      await screen.findByLabelText(/Access ends on/),
+      "2026-12-31",
+    );
+    await user.click(screen.getByRole("radio", { name: /Closed/ }));
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+
+    await waitFor(() =>
+      expect(calls).toEqual([
+        'PUT {"expires_at":"2026-12-31T23:59:59.000Z"}',
+        "POST close",
+      ]),
+    );
+  });
+});
+
+describe("the brief follows the room", () => {
+  it("is written again after a thread is posted", async () => {
+    const briefReads = vi.fn(() =>
+      jsonResponse({
+        room_id: "room-1",
+        generated_at: "2026-10-22T09:00:00Z",
+        generated_by: "deterministic",
+        sentences: [],
+      }),
+    );
+    stubWithSession(
+      {
+        ...roomRoutes(),
+        "GET /deal-rooms/room-1/brief": briefReads,
+        "POST /deal-rooms/room-1/threads": () =>
+          jsonResponse({ id: "th-1", room_id: "room-1", comments: [] }),
+      },
+      { deal_room: ["read", "update"] },
+    );
+    const user = userEvent.setup();
+    withProviders(<DealRoomTab dealId="deal-1" dealName="Acme Expansion" />);
+
+    await user.type(
+      await screen.findByLabelText("New thread"),
+      "Is the go-live date fixed?",
+    );
+    await user.click(screen.getByRole("button", { name: "Post" }));
+
+    await waitFor(() => expect(briefReads).toHaveBeenCalledTimes(2));
+  });
+});
