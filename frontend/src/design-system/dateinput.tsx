@@ -33,7 +33,11 @@ import { useDialogFocus } from "./dialogfocus";
 import { IconAction } from "./iconaction";
 import "./dateinput.css";
 
-export { type ISODate, isISODate } from "../format/datepattern";
+export {
+  type ISODate,
+  isISODate,
+  isoOrBlank,
+} from "../format/datepattern";
 
 /** What `onChange` hears: the day as `YYYY-MM-DD`, or `""` once cleared. */
 export type DateInputChange = Readonly<{
@@ -57,15 +61,18 @@ export type DateInputProps = Omit<
     today?: Date;
   }>;
 
+// `base` is the value before the reader began typing, `reported` what the text
+// last told the caller; the text stays while the value is either one.
 type Draft = Readonly<{
   text: string;
-  against: ISODate | "";
+  base: ISODate | "";
+  reported: ISODate | "";
   problem?: string;
 }>;
 
 /**
- * The one date field. A typed day reports once it reads as one; on blur or Enter
- * a day it cannot read keeps its text, sets `aria-invalid` and `validationMessage`.
+ * The one date field. The caller always holds the box's day, or `""` while the
+ * text reads as none; then the box fails `checkValidity()`, and on blur shows `aria-invalid`.
  */
 export function DateInput({
   value,
@@ -92,20 +99,24 @@ export function DateInput({
   const [own, setOwn] = useState<ISODate | "">(defaultValue ?? "");
   const current = value ?? own;
   const [draft, setDraft] = useState<Draft | null>(null);
-  const live = draft?.against === current ? draft : null;
+  const live =
+    draft && (current === draft.base || current === draft.reported)
+      ? draft
+      : null;
   const [openedOn, setOpenedOn] = useState<Date | null>(null);
   const shell = useRef<HTMLSpanElement | null>(null);
   const input = useRef<HTMLInputElement | null>(null);
   const popupId = useId();
   const refusal = (day: ISODate) => outsideRange(day, min, max, pattern, t);
 
+  const unread = live
+    ? readTyped(live.text, pattern, refusal, t).problem
+    : undefined;
   useEffect(() => {
-    input.current?.setCustomValidity(live?.problem ?? "");
-  }, [live?.problem]);
+    input.current?.setCustomValidity(unread ?? "");
+  }, [unread]);
 
-  // `typed` keeps the reader's own text in the box until blur, so the caret stays put.
-  const report = (next: ISODate | "", typed?: string) => {
-    setDraft(typed === undefined ? null : { text: typed, against: next });
+  const report = (next: ISODate | "") => {
     if (value === undefined) {
       setOwn(next);
     }
@@ -113,24 +124,27 @@ export function DateInput({
       onChange?.({ target: { value: next } });
     }
   };
+  const settle = (next: ISODate | "") => {
+    setDraft(null);
+    report(next);
+  };
   const commit = () => {
     if (!live) {
       return;
     }
     const read = readTyped(live.text, pattern, refusal, t);
     if (read.problem === undefined) {
-      report(read.day);
+      settle(read.day);
     } else {
-      setDraft({ ...live, problem: read.problem });
+      setDraft({ ...live, reported: "", problem: read.problem });
+      report("");
     }
   };
   const type = (text: string) => {
     const read = readTyped(text, pattern, refusal, t);
-    if (read.problem === undefined && read.day !== current) {
-      report(read.day, text);
-    } else {
-      setDraft({ text, against: current });
-    }
+    const meaning = read.problem === undefined ? read.day : "";
+    setDraft({ text, base: live ? live.base : current, reported: meaning });
+    report(meaning);
   };
 
   return (
@@ -192,7 +206,7 @@ export function DateInput({
           locale={locale}
           refusal={refusal}
           onPick={(next) => {
-            report(next);
+            settle(next);
             setOpenedOn(null);
           }}
           onClose={() => setOpenedOn(null)}

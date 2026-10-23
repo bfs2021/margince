@@ -124,15 +124,17 @@ describe("typing", () => {
     expect(report).toHaveBeenCalledWith("2026-05-06");
   });
 
-  it("keeps a day it cannot read, marks it invalid and reports nothing", async () => {
+  it("keeps a day it cannot read, marks it invalid, and leaves the caller no day", async () => {
     const user = userEvent.setup();
     const report = vi.fn();
-    render(<Due onReport={report} />);
+    render(<Due initial="2026-05-06" onReport={report} />);
 
-    await user.type(box(), "31/02/2026");
+    await user.tripleClick(box());
+    await user.keyboard("31/02/2026");
     await user.tab();
 
-    expect(report).not.toHaveBeenCalled();
+    expect(report).toHaveBeenLastCalledWith("");
+    expect(report).not.toHaveBeenCalledWith("2026-05-06");
     expect(box().value).toBe("31/02/2026");
     expect(box().getAttribute("aria-invalid")).toBe("true");
     expect(box().validationMessage).toBe("Enter a date as DD/MM/YYYY.");
@@ -160,6 +162,128 @@ describe("typing", () => {
     expect(report).not.toHaveBeenCalled();
     expect(box().getAttribute("aria-invalid")).toBe("true");
     expect(box().validationMessage).toBe("Earliest date: 10/05/2026");
+  });
+});
+
+// As callers that act on a day write it: an emptied box asks for nothing.
+function KeepsItsDay(props: Readonly<{ onReport: (day: string) => void }>) {
+  const [day, setDay] = useState<ISODate | "">("2026-05-06");
+  return (
+    <LocaleProvider initial="en">
+      <Field label="Due">
+        {(control) => (
+          <DateInput
+            {...control}
+            today={TODAY}
+            value={day}
+            onChange={(event) => {
+              props.onReport(event.target.value);
+              if (event.target.value) {
+                setDay(event.target.value);
+              }
+            }}
+          />
+        )}
+      </Field>
+    </LocaleProvider>
+  );
+}
+
+describe("a caller that refuses an empty box", () => {
+  it("lets the reader empty the box and type a new day", async () => {
+    const user = userEvent.setup();
+    const report = vi.fn();
+    render(<KeepsItsDay onReport={report} />);
+
+    await user.click(box());
+    await user.keyboard("{End}{Backspace>10/}");
+    expect(box().value).toBe("");
+    await user.keyboard("07/05/2026");
+
+    expect(report).toHaveBeenLastCalledWith("2026-05-07");
+    expect(box().value).toBe("07/05/2026");
+  });
+
+  it("shows its day again when the box is left empty", async () => {
+    const user = userEvent.setup();
+    render(<KeepsItsDay onReport={() => {}} />);
+
+    await user.clear(box());
+    await user.tab();
+
+    expect(box().value).toBe("06/05/2026");
+  });
+});
+
+// The shape the app's own forms take: state in the screen, posted on submit.
+function PostsOnSubmit(
+  props: Readonly<{ noValidate?: boolean; onPost: (day: string) => void }>,
+) {
+  const [day, setDay] = useState<ISODate | "">("2026-05-06");
+  return (
+    <LocaleProvider initial="en">
+      <form
+        noValidate={props.noValidate}
+        onSubmit={(event) => {
+          event.preventDefault();
+          props.onPost(day);
+        }}
+      >
+        <Field label="Due">
+          {(control) => (
+            <DateInput
+              {...control}
+              today={TODAY}
+              value={day}
+              onChange={(event) => setDay(event.target.value)}
+            />
+          )}
+        </Field>
+        <Button type="submit">Save</Button>
+      </form>
+    </LocaleProvider>
+  );
+}
+
+describe("a form around a day it cannot read", () => {
+  it("is invalid by the time the caller's own blur reads it", async () => {
+    const user = userEvent.setup();
+    const seen = vi.fn();
+    render(
+      <Due
+        initial="2026-05-06"
+        onBlur={(event) => seen(event.currentTarget.checkValidity())}
+      />,
+    );
+
+    await user.tripleClick(box());
+    await user.keyboard("31/02/2026");
+    await user.tab();
+
+    expect(seen).toHaveBeenCalledWith(false);
+  });
+
+  it("is refused by the browser's own check", async () => {
+    const user = userEvent.setup();
+    const post = vi.fn();
+    render(<PostsOnSubmit onPost={post} />);
+
+    await user.tripleClick(box());
+    await user.keyboard("31/02/2026");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(post).not.toHaveBeenCalled();
+  });
+
+  it("posts no day, never the earlier one, when the form skips that check", async () => {
+    const user = userEvent.setup();
+    const post = vi.fn();
+    render(<PostsOnSubmit noValidate onPost={post} />);
+
+    await user.tripleClick(box());
+    await user.keyboard("31/02/2026{Enter}");
+
+    expect(post).toHaveBeenCalledWith("");
   });
 });
 

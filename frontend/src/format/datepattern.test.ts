@@ -6,6 +6,7 @@ import { LOCALES } from "../i18n/locale";
 import {
   datePattern,
   formatISODate,
+  isoOrBlank,
   parseTypedDate,
   patternPlaceholder,
 } from "./datepattern";
@@ -98,4 +99,15 @@ describe("the field and the page", () => {
       }
     },
   );
+});
+
+it.each([
+  ["2026-05-06", "2026-05-06"],
+  ["", ""],
+  [null, ""],
+  [undefined, ""],
+  ["2026-05-06T09:00:00Z", ""],
+  ["06/05/2026", ""],
+])("takes %j into the date field as %j", (raw, expected) => {
+  expect(isoOrBlank(raw)).toBe(expected);
 });

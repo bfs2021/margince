@@ -21,6 +21,11 @@ export function isISODate(raw: string): raw is ISODate {
   return /^\d{4}-\d{2}-\d{2}$/.test(raw);
 }
 
+/** A stored or wire value as the date field's `value`: the day, or `""`. */
+export function isoOrBlank(raw: string | null | undefined): ISODate | "" {
+  return raw && isISODate(raw) ? raw : "";
+}
+
 /** The installation's date format, or the UI language's own when it names none. */
 export function datePattern(locale: Locale, format: DateFormat): DatePattern {
   return format === "locale"
