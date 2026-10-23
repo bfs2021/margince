@@ -1,14 +1,4 @@
-/** @vitest-environment jsdom */
-// jsdom, alone in this suite, and for one case: "refuses a future day for a
-// note" asserts that a date past the input's `max` does not submit, which is
-// the BROWSER's range validation and not the app's. happy-dom implements
-// neither half of it — `checkValidity()` answers true and `validity.
-// rangeOverflow` is false for a value years past the max — so under it the form
-// posts and the case fails against an environment rather than against the code.
-//
-// The app's half is asserted either way (`max` is today), and rewriting the
-// case to assert only that would drop the half that catches a form submitting
-// around its own rule. One file on the slower environment is the smaller cost.
+/** @vitest-environment happy-dom */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   cleanup,
@@ -18,7 +8,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import userEvent, { type UserEvent } from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useRecordTimeline } from "../design-system/recordtimeline";
@@ -85,6 +75,17 @@ function render(ui: ReactNode) {
 }
 
 const emptyPage = { data: [], page: { next_cursor: null } };
+
+const dayBox = (label: string) =>
+  screen.getByRole<HTMLInputElement>("textbox", { name: label });
+
+// A day as an English reader sees and types it.
+const shown = (day: string) => day.split("-").reverse().join("/");
+
+async function typeDay(user: UserEvent, box: HTMLInputElement, day: string) {
+  await user.tripleClick(box);
+  await user.keyboard(shown(day));
+}
 
 type Captured = { key: string; body: unknown };
 
@@ -338,30 +339,27 @@ describe("log activity from a 360", () => {
     const dayAfterRender = calendarDay(new Date(), INSTALLATION_ZONE);
     // A note's date is the day it happened, live from the start and showing
     // the today that would otherwise be assumed invisibly at submit.
-    const noteDay = screen.getByLabelText<HTMLInputElement>("Date", {
-      selector: "input",
-    });
+    const noteDay = dayBox("Date");
     expect(noteDay.hasAttribute("disabled")).toBe(false);
-    expect([dayBeforeRender, dayAfterRender]).toContain(noteDay.value);
+    expect([dayBeforeRender, dayAfterRender].map(shown)).toContain(
+      noteDay.value,
+    );
     // Becoming a task turns the same box into the due date, keeping the day
     // the writer picked instead of resetting it under them.
-    fireEvent.change(noteDay, { target: { value: PICKED_DAY } });
-    await pickOption(userEvent.setup(), screen.getByLabelText("Type"), "Task");
-    const dueDay = screen.getByLabelText<HTMLInputElement>("Due date", {
-      selector: "input",
-    });
-    expect(dueDay.value).toBe(PICKED_DAY);
+    const user = userEvent.setup();
+    await typeDay(user, noteDay, PICKED_DAY);
+    await pickOption(user, screen.getByLabelText("Type"), "Task");
+    expect(dayBox("Due date").value).toBe(shown(PICKED_DAY));
   });
 
   it("posts a backdated note's occurred_at inside the picked day", async () => {
     const captured: Captured[] = [];
     stubApi({ "POST /activities": createdActivity }, captured);
     render(<LogActivity entityType="company" entityId="o1" />);
-    fireEvent.change(screen.getByLabelText("Date"), {
-      target: { value: PICKED_DAY },
-    });
-    await userEvent.type(screen.getByLabelText("Subject *"), "Call recap");
-    await userEvent.click(screen.getByRole("button", { name: "Log" }));
+    const user = userEvent.setup();
+    await typeDay(user, dayBox("Date"), PICKED_DAY);
+    await user.type(screen.getByLabelText("Subject *"), "Call recap");
+    await user.click(screen.getByRole("button", { name: "Log" }));
     await waitFor(() =>
       expect(captured.some((entry) => entry.key === "POST /activities")).toBe(
         true,
@@ -402,11 +400,11 @@ describe("log activity from a 360", () => {
     const captured: Captured[] = [];
     stubApi({ "POST /activities": createdActivity }, captured);
     render(<LogActivity entityType="company" entityId="o1" />);
-    const noteDay = screen.getByLabelText<HTMLInputElement>("Date");
-    expect(noteDay.value).toBe("2026-08-22");
-    // The ceiling moves with the offer, so the box does not refuse the day it
-    // just proposed.
-    expect(noteDay.max).toBe("2026-08-22");
+    expect(dayBox("Date").value).toBe("22/08/2026");
+    // The ceiling moves with the offer, so the offered day is not refused.
+    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    await screen.findByRole("button", { name: "Saturday, 22 August 2026" });
+    await user.keyboard("{Escape}");
     await user.type(screen.getByLabelText("Subject *"), "Called back");
     await user.click(screen.getByRole("button", { name: "Log" }));
     await waitFor(() =>
@@ -418,7 +416,7 @@ describe("log activity from a 360", () => {
     if (!post) throw new Error("expected a POST /activities to be captured");
     const occurred = new Date(postedOccurredAt(post.body));
     // The day the composer offered IS the day the timeline files it under.
-    expect(calendarDay(occurred, INSTALLATION_ZONE)).toBe(noteDay.value);
+    expect(calendarDay(occurred, INSTALLATION_ZONE)).toBe("2026-08-22");
   });
 
   // A meeting and a call are WITH A CONTACT, and the server refuses either one
@@ -569,9 +567,7 @@ describe("log activity from a 360", () => {
     stubApi({ "POST /activities": createdActivity }, captured);
     render(<LogActivity entityType="company" entityId="o1" />);
     const writersOwnToday = "2026-08-21";
-    fireEvent.change(screen.getByLabelText("Date"), {
-      target: { value: writersOwnToday },
-    });
+    await typeDay(user, dayBox("Date"), writersOwnToday);
     await user.type(screen.getByLabelText("Subject *"), "Called back");
     await user.click(screen.getByRole("button", { name: "Log" }));
     await waitFor(() =>
@@ -589,32 +585,39 @@ describe("log activity from a 360", () => {
     const captured: Captured[] = [];
     stubApi({ "POST /activities": createdActivity }, captured);
     render(<LogActivity entityType="company" entityId="o1" />);
-    // Nothing has occurred in the future: for a note the input is capped at
-    // today, and a value forced past the cap fails the form's own validation,
-    // so the POST never leaves.
-    const noteDay = screen.getByLabelText<HTMLInputElement>("Date");
-    expect(noteDay.max).toBe(noteDay.value);
-    fireEvent.change(noteDay, { target: { value: "2199-01-01" } });
-    await userEvent.type(screen.getByLabelText("Subject *"), "Time travel");
-    await userEvent.click(screen.getByRole("button", { name: "Log" }));
+    const user = userEvent.setup();
+    // A note is capped at today: a day typed past it fails the form's own
+    // validation, so the POST never leaves.
+    const noteDay = dayBox("Date");
+    await typeDay(user, noteDay, "2199-01-01");
+    await user.type(screen.getByLabelText("Subject *"), "Time travel");
+    expect(noteDay.getAttribute("aria-invalid")).toBe("true");
+    await user.click(screen.getByRole("button", { name: "Log" }));
     expect(captured.some((entry) => entry.key === "POST /activities")).toBe(
       false,
     );
     // A due date has no ceiling — tasks are usually for the future.
-    await pickOption(userEvent.setup(), screen.getByLabelText("Type"), "Task");
-    expect(screen.getByLabelText<HTMLInputElement>("Due date").max).toBe("");
+    await pickOption(user, screen.getByLabelText("Type"), "Task");
+    const dueDay = dayBox("Due date");
+    await typeDay(user, dueDay, "2199-01-01");
+    await user.tab();
+    expect(dueDay.getAttribute("aria-invalid")).not.toBe("true");
   });
 
   it("posts a task's due_at as the END of the picked day in the record's zone", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-07-05T05:00:00Z"));
+    const user = userEvent.setup();
     const captured: Captured[] = [];
     stubApi({ "POST /activities": createdActivity }, captured);
     render(<LogActivity entityType="company" entityId="o1" />);
-    await pickOption(userEvent.setup(), screen.getByLabelText("Type"), "Task");
-    fireEvent.change(screen.getByLabelText("Due date"), {
-      target: { value: PICKED_DAY },
-    });
-    await userEvent.type(screen.getByLabelText("Subject *"), "Send proposal");
-    await userEvent.click(screen.getByRole("button", { name: "Log" }));
+    await pickOption(user, screen.getByLabelText("Type"), "Task");
+    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Friday, 10 July 2026" }),
+    );
+    await user.type(screen.getByLabelText("Subject *"), "Send proposal");
+    await user.click(screen.getByRole("button", { name: "Log" }));
     await waitFor(() =>
       expect(captured.some((entry) => entry.key === "POST /activities")).toBe(
         true,

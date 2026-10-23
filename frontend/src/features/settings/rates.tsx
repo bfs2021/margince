@@ -12,6 +12,7 @@ import {
   TextInput,
 } from "../../design-system/atoms";
 import { DataTable, type DataTableColumn } from "../../design-system/datatable";
+import { DateInput, isISODate } from "../../design-system/dateinput";
 import { Heading } from "../../design-system/heading";
 import { Panel, PanelBody, PanelIntro } from "../../design-system/panel";
 import {
@@ -253,10 +254,9 @@ function FxRateModal({ onClose }: Readonly<{ onClose: () => void }>) {
         </Field>
         <Field label={t("settings.rates.colEffective")}>
           {(control) => (
-            <TextInput
+            <DateInput
               {...control}
-              type="date"
-              value={effectiveDate}
+              value={isISODate(effectiveDate) ? effectiveDate : ""}
               onChange={(e) => setEffectiveDate(e.target.value)}
             />
           )}

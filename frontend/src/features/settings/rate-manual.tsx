@@ -7,6 +7,7 @@ import { api } from "../../api/client";
 import type { components } from "../../api/schema";
 import { Button, Field, Modal, TextInput } from "../../design-system/atoms";
 import { ComboBox } from "../../design-system/combobox";
+import { DateInput, isISODate } from "../../design-system/dateinput";
 import {
   DrawerBody,
   DrawerFoot,
@@ -119,6 +120,7 @@ export function PriceForm({
     initial?.cache_write_per_mtok ?? "0",
   );
   const [effectiveDate, setEffectiveDate] = useState(startDate(initial));
+  const floor = today();
   // What the model is FOR. Always sent: a price filed without one is filed as
   // chat, and a new embedder then never reaches the embeddings picker.
   const [lane, setLane] = useState<ModelLane>(
@@ -213,11 +215,10 @@ export function PriceForm({
         {initial ? null : <LaneField lane={lane} onChange={setLane} />}
         <Field label={t("settings.rates.colEffective")}>
           {(control) => (
-            <TextInput
+            <DateInput
               {...control}
-              type="date"
-              min={today()}
-              value={effectiveDate}
+              min={isISODate(floor) ? floor : undefined}
+              value={isISODate(effectiveDate) ? effectiveDate : ""}
               onChange={(e) => setEffectiveDate(e.target.value)}
             />
           )}

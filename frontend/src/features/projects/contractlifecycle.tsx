@@ -6,8 +6,9 @@ import { useEffect, useId, useState } from "react";
 import { api } from "../../api/client";
 import type { components } from "../../api/schema";
 import { ifMatch, requireVersion } from "../../api/version";
-import { Button, Field, Modal, TextInput } from "../../design-system/atoms";
+import { Button, Field, Modal } from "../../design-system/atoms";
 import { Callout } from "../../design-system/callout";
+import { DateInput, isISODate } from "../../design-system/dateinput";
 import {
   DrawerBody,
   DrawerFoot,
@@ -453,10 +454,9 @@ export function ContractCancelModal({
         <p>{t("contracts.cancel.hint")}</p>
         <Field label={t("contracts.cancel.noticeOn")} required>
           {(props) => (
-            <TextInput
+            <DateInput
               {...props}
-              type="date"
-              value={noticeOn}
+              value={isISODate(noticeOn) ? noticeOn : ""}
               onChange={(e) => setNoticeOn(e.target.value)}
             />
           )}
@@ -467,10 +467,9 @@ export function ContractCancelModal({
           required
         >
           {(props) => (
-            <TextInput
+            <DateInput
               {...props}
-              type="date"
-              value={effectiveOn}
+              value={isISODate(effectiveOn) ? effectiveOn : ""}
               onChange={(e) => setEffectiveOn(e.target.value)}
             />
           )}

@@ -14,9 +14,9 @@ import {
   EmptyState,
   Field,
   OverflowMenu,
-  TextInput,
 } from "../../design-system/atoms";
 import { ConfirmModal } from "../../design-system/confirmmodal";
+import { DateInput, isISODate } from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
 import { Eyebrow } from "../../design-system/eyebrow";
 import { Heading } from "../../design-system/heading";
@@ -256,10 +256,9 @@ function ExpiryDialog({
     >
       <Field label={t("roompage.expiryLabel")} hint={t("roompage.expiryHint")}>
         {(control) => (
-          <TextInput
+          <DateInput
             {...control}
-            type="date"
-            value={date}
+            value={isISODate(date) ? date : ""}
             onChange={(e) => setDate(e.target.value)}
           />
         )}

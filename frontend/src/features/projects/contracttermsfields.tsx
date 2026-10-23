@@ -11,11 +11,20 @@
 // is a fresh negotiation and inherits none of them.
 
 import { Field, TextInput } from "../../design-system/atoms";
+import {
+  DateInput,
+  type ISODate,
+  isISODate,
+} from "../../design-system/dateinput";
 import { MoneyInput } from "../../design-system/moneyinput";
 import { Select } from "../../design-system/select";
 import { useT } from "../../i18n";
 import { ContractArrField } from "./contractarr";
 import type { ContractDraft, ValueBasis } from "./contractform";
+
+function day(draftDay: string): ISODate | "" {
+  return isISODate(draftDay) ? draftDay : "";
+}
 
 export function ContractTermsFields({
   draft,
@@ -109,10 +118,9 @@ export function ContractTermsFields({
 
       <Field label={t("contracts.form.startsOn")}>
         {(props) => (
-          <TextInput
+          <DateInput
             {...props}
-            type="date"
-            value={draft.startsOn}
+            value={day(draft.startsOn)}
             onChange={(e) => setDraft({ ...draft, startsOn: e.target.value })}
           />
         )}
@@ -125,10 +133,9 @@ export function ContractTermsFields({
         hint={t("contracts.form.endsOnHint")}
       >
         {(props) => (
-          <TextInput
+          <DateInput
             {...props}
-            type="date"
-            value={draft.endsOn}
+            value={day(draft.endsOn)}
             onChange={(e) => setDraft({ ...draft, endsOn: e.target.value })}
           />
         )}
@@ -136,10 +143,9 @@ export function ContractTermsFields({
 
       <Field label={t("contracts.form.renewalOn")}>
         {(props) => (
-          <TextInput
+          <DateInput
             {...props}
-            type="date"
-            value={draft.renewalOn}
+            value={day(draft.renewalOn)}
             onChange={(e) => setDraft({ ...draft, renewalOn: e.target.value })}
           />
         )}
@@ -184,10 +190,9 @@ export function ContractTermsFields({
         hint={t("contracts.form.signedOnHint")}
       >
         {(props) => (
-          <TextInput
+          <DateInput
             {...props}
-            type="date"
-            value={draft.signedOn}
+            value={day(draft.signedOn)}
             onChange={(e) => setDraft({ ...draft, signedOn: e.target.value })}
           />
         )}

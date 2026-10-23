@@ -8,6 +8,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { api } from "../../api/client";
 import { ifMatch, requireVersion } from "../../api/version";
 import { Button, Field, Modal, TextInput } from "../../design-system/atoms";
+import { DateInput, isISODate } from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
 import { Heading } from "../../design-system/heading";
 import {
@@ -170,10 +171,9 @@ export function EditOfferHeaderModal({
         />
         <Field label={t("offer.validUntil")}>
           {(control) => (
-            <TextInput
+            <DateInput
               {...control}
-              type="date"
-              value={values.valid_until}
+              value={isISODate(values.valid_until) ? values.valid_until : ""}
               onChange={(event) =>
                 setValues((prev) => ({
                   ...prev,
