@@ -4,7 +4,13 @@
 /** @vitest-environment happy-dom */
 import "@testing-library/jest-dom/vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -231,6 +237,129 @@ describe("the tab says what the room still lacks", () => {
     expect(
       screen.getByText(
         translate("en", "checklist.count", { done: "1", total: "4" }),
+      ),
+    ).toBeInTheDocument();
+  });
+});
+
+describe("inviting from the setup list", () => {
+  const AT = "2026-10-22T09:00:00Z";
+  const seat = {
+    id: "part-1",
+    room_id: "room-1",
+    full_name: "Dana Buyer",
+    email: "dana@nordwind.example",
+    capability: "comment",
+    delivery_state: "delivered",
+    has_signed_in: false,
+    source: "manual",
+    created_at: AT,
+    updated_at: AT,
+  };
+
+  // The invite is the last step, so the list goes away once the seats are read
+  // again. The one-time link must outlive it.
+  it("keeps the issued link when the invite finishes the list", async () => {
+    let invited = false;
+    stubWithSession(
+      {
+        ...roomRoutes(),
+        "GET /deal-rooms": () =>
+          jsonResponse({
+            data: [room({ welcome_message: "Hello" })],
+            page: { next_cursor: null },
+          }),
+        "GET /deal-rooms/room-1/participants": () =>
+          jsonResponse({ data: invited ? [seat] : [], page: {} }),
+        "GET /deal-rooms/room-1/documents": () =>
+          jsonResponse({
+            data: [
+              {
+                id: "doc-1",
+                room_id: "room-1",
+                attachment_id: "att-1",
+                group_key: "legal",
+                title: "MSA redline",
+                filename: "msa-redline.docx",
+                position: 0,
+                source: "manual",
+                created_at: AT,
+                updated_at: AT,
+              },
+            ],
+            page: { next_cursor: null },
+          }),
+        "GET /deal-rooms/room-1/threads": () =>
+          jsonResponse({
+            data: [
+              {
+                id: "thread-1",
+                room_id: "room-1",
+                state: "open",
+                required_change: false,
+                author: { name: "Dana Buyer", side: "buyer" },
+                created_at: AT,
+                comments: [],
+              },
+            ],
+            page: { next_cursor: null },
+          }),
+        "POST /deal-rooms/room-1/participants": () => {
+          invited = true;
+          return jsonResponse(
+            {
+              participant: seat,
+              credential: "one-time-credential",
+              credential_expires_at: "2026-11-22T09:00:00Z",
+              queued: false,
+            },
+            201,
+          );
+        },
+      },
+      { deal_room: ["read", "update"] },
+    );
+    const user = userEvent.setup();
+    withProviders(<DealRoomTab dealId="deal-1" dealName="Acme Expansion" />);
+
+    const step = (
+      await screen.findByText(translate("en", "roomtab.setup.invite"))
+    ).closest("li");
+    if (!step) {
+      throw new Error("the invite step is not a list item");
+    }
+    await user.click(
+      within(step).getByRole("button", {
+        name: translate("en", "access.invite"),
+      }),
+    );
+    const dialog = await screen.findByRole("dialog");
+    await user.type(
+      within(dialog).getByLabelText(translate("en", "access.nameLabel"), {
+        exact: false,
+      }),
+      "Dana Buyer",
+    );
+    await user.type(
+      within(dialog).getByLabelText(translate("en", "access.emailLabel"), {
+        exact: false,
+      }),
+      "dana@nordwind.example",
+    );
+    await user.click(
+      within(dialog).getByRole("button", {
+        name: translate("en", "access.inviteConfirm"),
+      }),
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText(translate("en", "roomtab.setup.title")),
+      ).not.toBeInTheDocument(),
+    );
+    expect(
+      screen.getByText(
+        translate("en", "access.issued.title", { name: "Dana Buyer" }),
       ),
     ).toBeInTheDocument();
   });
