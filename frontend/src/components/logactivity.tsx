@@ -21,6 +21,7 @@ import {
   DrawerHead,
 } from "../design-system/drawerbands";
 import { ErrorLine } from "../design-system/errorline";
+import { refuseUnreadableField } from "../design-system/formvalidity";
 import { Heading } from "../design-system/heading";
 import { Panel, PanelBody } from "../design-system/panel";
 import { useSinglePress } from "../design-system/presslatch";
@@ -217,6 +218,9 @@ export function LogActivityForm({
       className="form-stack"
       onSubmit={singlePress((event) => {
         event.preventDefault();
+        if (refuseUnreadableField(event.currentTarget)) {
+          return;
+        }
         log.mutate({
           draft: { ...draft, sourceActivityId, custom: custom.body() },
           zone: recordZone,

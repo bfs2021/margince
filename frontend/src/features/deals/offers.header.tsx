@@ -10,6 +10,7 @@ import { ifMatch, requireVersion } from "../../api/version";
 import { Button, Field, Modal, TextInput } from "../../design-system/atoms";
 import { DateInput, isoOrBlank } from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
+import { refuseUnreadableField } from "../../design-system/formvalidity";
 import { Heading } from "../../design-system/heading";
 import {
   RecordPicker,
@@ -261,7 +262,11 @@ export function EditOfferHeaderModal({
         <Button
           variant="primary"
           disabled={mutation.isPending}
-          onClick={() => mutation.mutate(values)}
+          onClick={(event) => {
+            if (!refuseUnreadableField(event.currentTarget)) {
+              mutation.mutate(values);
+            }
+          }}
         >
           {t("record.save")}
         </Button>

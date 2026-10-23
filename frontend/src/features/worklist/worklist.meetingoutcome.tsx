@@ -40,6 +40,7 @@ import { useMeetingOutcome } from "../../components/taskactions";
 import { Button, Field, Modal, TextInput } from "../../design-system/atoms";
 import { DateInput, isoOrBlank } from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
+import { refuseUnreadableField } from "../../design-system/formvalidity";
 import { Heading } from "../../design-system/heading";
 import { Select } from "../../design-system/select";
 import { useToast } from "../../design-system/toast";
@@ -254,7 +255,10 @@ function MeetingOutcomeDialog({
             className="form-stack"
             onSubmit={(event) => {
               event.preventDefault();
-              if (save.isPending) {
+              if (
+                save.isPending ||
+                refuseUnreadableField(event.currentTarget)
+              ) {
                 return;
               }
               let occurredAt: string | undefined;

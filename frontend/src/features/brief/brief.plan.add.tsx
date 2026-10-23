@@ -4,11 +4,8 @@
 import { useState } from "react";
 import { Button, Field, TextInput } from "../../design-system/atoms";
 import { Callout } from "../../design-system/callout";
-import {
-  DateInput,
-  type ISODate,
-  isoOrBlank,
-} from "../../design-system/dateinput";
+import { DateInput, type ISODate } from "../../design-system/dateinput";
+import { refuseUnreadableField } from "../../design-system/formvalidity";
 import { PanelBody } from "../../design-system/panel";
 import {
   RecordPicker,
@@ -60,9 +57,7 @@ export function AddCommitment({ onDone }: Readonly<{ onDone: () => void }>) {
           <DateInput
             {...control}
             value={dueOn}
-            // The element reports YYYY-MM-DD or "" and nothing else, so this
-            // narrows what it said rather than validating it.
-            onChange={(event) => setDueOn(isoOrBlank(event.target.value))}
+            onChange={(event) => setDueOn(event.target.value)}
           />
         )}
       </Field>
@@ -82,7 +77,10 @@ export function AddCommitment({ onDone }: Readonly<{ onDone: () => void }>) {
           {t("plan.new.cancel")}
         </Button>
         <Button
-          onClick={() => {
+          onClick={(event) => {
+            if (refuseUnreadableField(event.currentTarget)) {
+              return;
+            }
             add.mutate(
               // An empty date is no date, not an empty string: the contract
               // types due_on as nullable, and "" is neither a date nor an

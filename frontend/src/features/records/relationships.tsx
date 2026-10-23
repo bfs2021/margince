@@ -30,6 +30,7 @@ import "./candidatepicker.css";
 import "../../design-system/querystates.css";
 import "./relationships.css";
 import { ErrorLine } from "../../design-system/errorline";
+import { refuseUnreadableField } from "../../design-system/formvalidity";
 import {
   type EdgeOption,
   edgeOptions,
@@ -318,16 +319,17 @@ export function AddRelationshipAction({
           <Button
             variant="primary"
             disabled={!target || mutation.isPending}
-            onClick={() =>
-              target &&
-              mutation.mutate({
-                target,
-                kind,
-                field: endpoint.field,
-                role,
-                startedAt,
-              })
-            }
+            onClick={(event) => {
+              if (target && !refuseUnreadableField(event.currentTarget)) {
+                mutation.mutate({
+                  target,
+                  kind,
+                  field: endpoint.field,
+                  role,
+                  startedAt,
+                });
+              }
+            }}
             data-testid="add-relationship-submit"
           >
             {t("create.save")}

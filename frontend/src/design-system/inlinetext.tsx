@@ -24,15 +24,15 @@ const InlineTextControl = forwardRef<
     multiline?: boolean;
     value: string;
     onDraft: (next: string) => void;
-    onPick: (next: string) => void;
-    onLeave: () => void;
+    onSettle: (next: string) => void;
+    onLeave: (typed?: string) => void;
   }> &
     Omit<
       ComponentPropsWithoutRef<"input"> & ComponentPropsWithoutRef<"textarea">,
       "value" | "defaultValue" | "onChange" | "onBlur" | "min" | "max"
     >
 >(function InlineTextControl(
-  { multiline, type, onDraft, onPick, onLeave, ...props },
+  { multiline, type, onDraft, onSettle, onLeave, ...props },
   ref,
 ) {
   if (multiline) {
@@ -42,7 +42,7 @@ const InlineTextControl = forwardRef<
         rows={4}
         {...props}
         onChange={(event) => onDraft(event.target.value)}
-        onBlur={onLeave}
+        onBlur={() => onLeave()}
       />
     );
   }
@@ -52,7 +52,7 @@ const InlineTextControl = forwardRef<
         ref={ref}
         {...props}
         onDraft={onDraft}
-        onPick={onPick}
+        onSettle={onSettle}
         onLeave={onLeave}
       />
     );
@@ -63,50 +63,75 @@ const InlineTextControl = forwardRef<
       type={type}
       {...props}
       onChange={(event) => onDraft(event.target.value)}
-      onBlur={onLeave}
+      onBlur={() => onLeave()}
     />
   );
 });
 
-// The calendar is portalled out of the field, so focus inside it stays in this edit.
-// A day picked there saves the way Enter does.
+// Every day DateInput reports is settled, so it saves at once. A day settled by
+// the blur that moves to the calendar button is only drafted.
 function InlineDate({
   value,
   onDraft,
-  onPick,
+  onSettle,
   onLeave,
+  onKeyDown,
   ...box
 }: Readonly<{
   value: string;
   onDraft: (next: string) => void;
-  onPick: (next: string) => void;
-  onLeave: () => void;
+  onSettle: (next: string) => void;
+  onLeave: (typed?: string) => void;
 }> &
   Omit<DateInputProps, "value" | "onChange" | "onBlur">) {
   const shell = useRef<HTMLSpanElement>(null);
-  const inCalendar = (node: Element | null) =>
-    node !== null &&
-    panelsOpenedFrom(shell.current).some((panel) => panel.contains(node));
+  const blurring = useRef(false);
+  const settled = useRef<string | null>(null);
+  // While the calendar is open: a press in it that focuses nothing blurs to null.
+  const stays = (next: Element | null) =>
+    shell.current?.contains(next) || panelsOpenedFrom(shell.current).length > 0;
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: not a control — it hears focus leave the text box and calendar button inside it
     <span
       ref={shell}
       className="inlinetext-date"
+      onKeyDownCapture={() => {
+        settled.current = null;
+      }}
+      onBlurCapture={() => {
+        settled.current = null;
+        blurring.current = true;
+      }}
       onBlur={(event) => {
-        const next = event.relatedTarget;
-        if (!shell.current?.contains(next) && !inCalendar(next)) {
-          onLeave();
+        const next = settled.current;
+        blurring.current = false;
+        settled.current = null;
+        if (!stays(event.relatedTarget)) {
+          onLeave(next ?? undefined);
+        } else if (next !== null) {
+          onDraft(next);
         }
       }}
     >
       <DateInput
         {...box}
         value={isoOrBlank(value)}
-        onChange={(event) =>
-          (inCalendar(document.activeElement) ? onPick : onDraft)(
-            event.target.value,
-          )
-        }
+        onChange={(event) => {
+          settled.current = event.target.value;
+          if (!blurring.current) {
+            onSettle(event.target.value);
+          }
+        }}
+        onKeyDown={(event) => {
+          if (event.key !== "Enter") {
+            onKeyDown?.(event);
+            return;
+          }
+          event.preventDefault();
+          if (settled.current === null) {
+            onSettle(value);
+          }
+        }}
       />
     </span>
   );
@@ -334,7 +359,8 @@ export function InlineText({
       return;
     }
     if (field.current && !field.current.checkValidity()) {
-      setFailure(field.current.validationMessage);
+      // Not for a day: DateInput draws its own refusal under the box.
+      setFailure(type === "date" ? null : field.current.validationMessage);
       field.current.focus();
       return;
     }
@@ -389,9 +415,9 @@ export function InlineText({
             readOnly={saving}
             aria-busy={saving || undefined}
             onDraft={setDraft}
-            onPick={(picked) => {
-              setDraft(picked);
-              void commit(true, picked);
+            onSettle={(settled) => {
+              setDraft(settled);
+              void commit(true, settled);
             }}
             onKeyDown={(event) => {
               // In a paragraph Enter is a newline and the commit moves to
@@ -411,12 +437,15 @@ export function InlineText({
                 setEditing(false);
               }
             }}
-            onLeave={() => {
+            onLeave={(typed) => {
               if (cancelling.current) {
                 cancelling.current = false;
                 return;
               }
-              void commit();
+              if (typed !== undefined) {
+                setDraft(typed);
+              }
+              void commit(false, typed);
             }}
           />
           {saving && <BusyMark />}

@@ -7,6 +7,7 @@ import {
 } from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
 import { Select } from "../../design-system/select";
+import { useNow } from "../../format/now";
 import { dayInZone, startOfDayInZone } from "../../format/timezone";
 import { useT } from "../../i18n";
 import { useRecordZone } from "../../lib/recordzone";
@@ -46,6 +47,8 @@ export function ReportingFilters({
 }>) {
   const t = useT();
   const zone = useRecordZone();
+  // The day the period's bounds are counted in, not the viewer's own.
+  const today = isoOrBlank(dayInZone(useNow(0), zone)) || undefined;
   const context = useAnalyticsContext();
   const pipelines = useReportingPipelines();
   const [draftFrom, setDraftFrom] = useState(
@@ -119,6 +122,7 @@ export function ReportingFilters({
               <DateInput
                 {...field}
                 value={isoOrBlank(from)}
+                today={today}
                 onChange={(event) => setDates(event.target.value, through)}
               />
             )}
@@ -128,6 +132,7 @@ export function ReportingFilters({
               <DateInput
                 {...field}
                 value={isoOrBlank(through)}
+                today={today}
                 onChange={(event) => setDates(from, event.target.value)}
               />
             )}

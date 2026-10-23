@@ -12,6 +12,7 @@ import {
   isoOrBlank,
 } from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
+import { refuseUnreadableField } from "../../design-system/formvalidity";
 import { SettingRow } from "../../design-system/settingrow";
 import { formatDate } from "../../format/format";
 import { INTL_LOCALE } from "../../format/intllocale";
@@ -61,9 +62,11 @@ export function HistoryBaselineRow({
             <Button
               disabled={!changed}
               pending={save.isPending}
-              onClick={() =>
-                save.mutate({ date: draft, timezone: viewerZone() })
-              }
+              onClick={(event) => {
+                if (!refuseUnreadableField(event.currentTarget)) {
+                  save.mutate({ date: draft, timezone: viewerZone() });
+                }
+              }}
             >
               {t("connectors.historyBaseline.save")}
             </Button>

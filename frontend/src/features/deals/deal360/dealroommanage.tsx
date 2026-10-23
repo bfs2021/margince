@@ -246,7 +246,7 @@ export function ManageRoomDialog({
                 {...control}
                 value={endDay}
                 disabled={finished}
-                onChange={(event) => setEndDay(isoOrBlank(event.target.value))}
+                onChange={(event) => setEndDay(event.target.value)}
               />
             )}
           </Field>

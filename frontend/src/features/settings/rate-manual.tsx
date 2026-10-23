@@ -14,6 +14,7 @@ import {
   DrawerHead,
 } from "../../design-system/drawerbands";
 import { ErrorLine } from "../../design-system/errorline";
+import { refuseUnreadableField } from "../../design-system/formvalidity";
 import { Heading } from "../../design-system/heading";
 import { WriteRefused } from "../../design-system/querystates";
 import { Select } from "../../design-system/select";
@@ -250,7 +251,10 @@ export function PriceForm({
       </Button>
       <Button
         variant="primary"
-        onClick={() => {
+        onClick={(event) => {
+          if (refuseUnreadableField(event.currentTarget)) {
+            return;
+          }
           setError(null);
           save.mutate({
             provider: provider.trim(),

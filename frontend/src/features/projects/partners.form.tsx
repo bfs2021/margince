@@ -12,6 +12,7 @@ import {
 } from "../../design-system/atoms";
 import { DateInput, isoOrBlank } from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
+import { refuseUnreadableField } from "../../design-system/formvalidity";
 import { Panel, PanelBody } from "../../design-system/panel";
 import { QueryGate } from "../../design-system/querystates";
 import { FieldGuard } from "../../design-system/rbac";
@@ -140,7 +141,9 @@ function PartnerForm({
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        mutation.mutate(partner);
+        if (!refuseUnreadableField(event.currentTarget)) {
+          mutation.mutate(partner);
+        }
       }}
       className="form-stack"
     >

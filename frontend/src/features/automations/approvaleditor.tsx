@@ -18,6 +18,7 @@ import {
 } from "../../design-system/decisioncard.payload";
 import { DrawerBody, DrawerHead } from "../../design-system/drawerbands";
 import { ErrorLine } from "../../design-system/errorline";
+import { refuseUnreadableField } from "../../design-system/formvalidity";
 import { Heading } from "../../design-system/heading";
 import { Select } from "../../design-system/select";
 import { isRealCalendarDay } from "../../format/calendarday";
@@ -401,10 +402,8 @@ export function StagedEditor({
             ) : entry.as === "date" ? (
               <DateInput
                 {...control}
-                // A staged date the control cannot show is shown as empty
-                // rather than passed through: the element would blank a
-                // malformed value on its own, and an empty box a reader can
-                // fill beats one that silently drops what they typed.
+                // A staged date that is not a day shows as an empty box the
+                // reader can fill, not as text the field would refuse.
                 value={isoOrBlank(draft[entry.field])}
                 onChange={(event) => onChange(entry.field, event.target.value)}
               />
@@ -434,7 +433,11 @@ export function StagedEditor({
             variant="primary"
             pending={pending}
             disabled={disabled}
-            onClick={onApprove}
+            onClick={(event) => {
+              if (!refuseUnreadableField(event.currentTarget)) {
+                onApprove();
+              }
+            }}
           >
             {acceptLabel ?? t("decision.approveEdited")}
           </Button>

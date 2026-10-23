@@ -13,6 +13,7 @@ import { type ReactNode, useId, useState } from "react";
 import { Button, Field, Modal, TextInput } from "../design-system/atoms";
 import { DateInput, isoOrBlank } from "../design-system/dateinput";
 import { ErrorLine } from "../design-system/errorline";
+import { refuseUnreadableField } from "../design-system/formvalidity";
 import { Heading } from "../design-system/heading";
 import { MoneyInput } from "../design-system/moneyinput";
 import { Panel, PanelBody } from "../design-system/panel";
@@ -397,7 +398,11 @@ export function AcceptSuggestionDialog({
         <Button
           variant="primary"
           disabled={!draft.name.trim() || accept.isPending}
-          onClick={submit}
+          onClick={(event) => {
+            if (!refuseUnreadableField(event.currentTarget)) {
+              submit();
+            }
+          }}
           data-testid="deal-suggestion-confirm"
         >
           {t("dealSuggestion.confirm")}

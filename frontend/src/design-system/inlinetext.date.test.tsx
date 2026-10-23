@@ -2,7 +2,14 @@
 // SPDX-License-Identifier: BUSL-1.1
 // SPDX-FileCopyrightText: 2026 Gradion
 
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -107,6 +114,84 @@ describe("editing a day where it is read", () => {
       "Enter a date as DD/MM/YYYY.",
     );
     expect(dayBox().value).toBe("31/02/2026");
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it("keeps the edit open when a press in the calendar focuses nothing", async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderCloseDate();
+    await user.click(trigger());
+    await user.click(screen.getByRole("button", { name: /^Choose date/ }));
+    await screen.findByRole("grid", { name: "March 2026" });
+
+    await user.click(screen.getByText("March 2026"));
+
+    expect(dayBox()).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: /^Choose date/ })).toBeVisible();
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it("saves a day whose press does not move focus to it", async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderCloseDate();
+    await user.click(trigger());
+    await user.click(screen.getByRole("button", { name: /^Choose date/ }));
+    const day = await screen.findByRole("button", {
+      name: "Tuesday, 10 March 2026",
+    });
+
+    fireEvent.pointerDown(day);
+    fireEvent.mouseDown(day);
+    act(() => {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+    });
+    fireEvent.pointerUp(day);
+    fireEvent.mouseUp(day);
+    fireEvent.click(day);
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith("2026-03-10"));
+    expect(onSave).toHaveBeenCalledTimes(1);
+  });
+
+  it("saves a typed day when the reader presses outside the field", async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderCloseDate();
+    await user.click(trigger());
+    await user.clear(dayBox());
+    await user.type(dayBox(), "15/04/2026");
+
+    await user.click(document.body);
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith("2026-04-15"));
+    expect(onSave).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps an unreadable typed day open with its one refusal when the reader leaves", async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderCloseDate();
+    await user.click(trigger());
+    await user.clear(dayBox());
+    await user.type(dayBox(), "31/02/2026");
+
+    await user.click(document.body);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Enter a date as DD/MM/YYYY.",
+    );
+    expect(dayBox().value).toBe("31/02/2026");
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it("closes on Enter over the stored day without a write", async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderCloseDate();
+    await user.click(trigger());
+
+    await user.type(dayBox(), "{Enter}");
+
+    await waitFor(() => expect(trigger()).toHaveFocus());
     expect(onSave).not.toHaveBeenCalled();
   });
 

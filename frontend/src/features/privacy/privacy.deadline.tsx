@@ -2,11 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../../api/client";
 import type { components } from "../../api/schema";
 import { Field, PendingBody } from "../../design-system/atoms";
-import {
-  DateInput,
-  type ISODate,
-  isoOrBlank,
-} from "../../design-system/dateinput";
+import { DateInput, type ISODate } from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
 import { FactList } from "../../design-system/factlist";
 import { formatDate } from "../../format/format";
@@ -130,9 +126,7 @@ export function DsrDeadlineFields({
           <DateInput
             {...control}
             value={draft.receivedOn}
-            onChange={(event) =>
-              onChange({ receivedOn: isoOrBlank(event.target.value) })
-            }
+            onChange={(event) => onChange({ receivedOn: event.target.value })}
           />
         )}
       </Field>
@@ -169,9 +163,7 @@ export function DsrDeadlineFields({
           <DateInput
             {...control}
             value={draft.earlierDue}
-            onChange={(event) =>
-              onChange({ earlierDue: isoOrBlank(event.target.value) })
-            }
+            onChange={(event) => onChange({ earlierDue: event.target.value })}
           />
         )}
       </Field>

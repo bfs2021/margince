@@ -15,18 +15,14 @@ import {
   DrawerHead,
 } from "../../design-system/drawerbands";
 import { ErrorLine } from "../../design-system/errorline";
+import { refuseUnreadableField } from "../../design-system/formvalidity";
 import { Heading } from "../../design-system/heading";
 import { Select } from "../../design-system/select";
 import { useT } from "../../i18n";
 import type { MessageKey } from "../../i18n/en";
 import { unwrap } from "../../lib/problem";
 import { useInstallationSettings } from "../../lib/uploadlimit";
-import {
-  type ContractDraft,
-  draftProblem,
-  pricedIn,
-  refuseUnreadableField,
-} from "./contractform";
+import { type ContractDraft, draftProblem, pricedIn } from "./contractform";
 import { contractTermsBody, renewDraftOf } from "./contracttermsbody";
 import { ContractTermsFields } from "./contracttermsfields";
 
@@ -490,7 +486,11 @@ export function ContractCancelModal({
           variant="danger"
           reason={invalid ? t(invalid) : undefined}
           pending={cancel.isPending}
-          onClick={() => cancel.mutate({ contract, noticeOn, effectiveOn })}
+          onClick={(event) => {
+            if (!refuseUnreadableField(event.currentTarget)) {
+              cancel.mutate({ contract, noticeOn, effectiveOn });
+            }
+          }}
         >
           {t("contracts.cancel.submit")}
         </Button>
