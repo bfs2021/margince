@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 
 	"github.com/margince/margince/backend/internal/compose/claims"
 	"github.com/margince/margince/backend/internal/compose/promptlang"
@@ -37,6 +38,11 @@ var knownNature = map[string]bool{
 // maxRecommendations is one: the tab already offers every verb, and a brief
 // with three moves hands the reader back the triage it existed to do.
 const maxRecommendations = 1
+
+// addressInProse matches a link or a mail address. A buyer writes the threads
+// the brief reads, so a move that sends the reader to an address is the
+// buyer's instruction, not the room's reading of itself.
+var addressInProse = regexp.MustCompile(`(?i)(https?://|www\.)\S+|[^\s@]+@[^\s@]+\.[a-z]{2,}`)
 
 // briefSystem is the deal_room_brief site's prompt. It turns on two rules:
 // lead with what a buyer is waiting on, and never attribute the reader's own
@@ -138,7 +144,7 @@ func keepGroundedSentences(sentences []Sentence, in Input) []Sentence {
 			continue
 		}
 		if sentence.Nature == natureRecommendation {
-			if recommendations == maxRecommendations {
+			if recommendations == maxRecommendations || addressInProse.MatchString(sentence.Text) {
 				continue
 			}
 			recommendations++
