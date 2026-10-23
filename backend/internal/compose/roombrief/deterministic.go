@@ -33,7 +33,7 @@ const waitingQuoted = 2
 // quoteRunes bounds a quoted comment, so one long message cannot be the brief.
 const quoteRunes = 140
 
-// Deterministic writes the brief from the input alone, answering in the order
+// Deterministic writes the brief from the input alone. It answers in the order
 // a seller asks: who is waiting on me, who cannot get in, who has not come.
 func Deterministic(in Input, lang string) []Sentence {
 	say := langcopy.For(lang)
@@ -114,8 +114,8 @@ func notSignedInLine(buyers []BuyerIn, say langcopy.Spoken) Sentence {
 	}
 }
 
-// nothingOwedLine is said only of a room that has a conversation: of an empty
-// room it would be true and useless, so an empty room has no brief.
+// nothingOwedLine is said only of a room with a conversation. Of an empty room
+// it would be true and useless, so an empty room has no brief.
 func nothingOwedLine(threads []ThreadIn, say langcopy.Spoken) Sentence {
 	evidence := make([]Evidence, 0, len(threads))
 	for _, thread := range threads {

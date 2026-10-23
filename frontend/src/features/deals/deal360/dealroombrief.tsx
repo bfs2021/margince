@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 // SPDX-FileCopyrightText: 2026 Gradion
 
-// The room brief: what the room's buyers did and what is waiting on the rep,
-// written from the same participants, documents and threads the tab draws.
-// Every sentence names what it was written from, in the room's own words.
+// The room brief: what the room's buyers did and what is waiting on the rep.
+// It is written from the participants, documents and threads the tab draws,
+// and every sentence names what it was written from.
 
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../../api/client";
@@ -22,8 +22,8 @@ import "./dealroomtab.css";
 type DealRoomBrief = components["schemas"]["DealRoomBrief"];
 type Evidence = components["schemas"]["DealRoomBriefEvidence"];
 
-// A brief is written by a model on each read, so it is not read again on every
-// focus of the window; a minute is as fresh as a reader can tell.
+// A model writes the brief on each read, so a window focus does not read it
+// again. A minute is as fresh as a reader can tell.
 const BRIEF_STALE_MS = 60_000;
 
 export function useRoomBrief(roomId: string) {
@@ -45,7 +45,7 @@ export function useRoomBrief(roomId: string) {
 
 /**
  * The brief as an AI panel. It draws nothing for a room with nothing to say,
- * or when the brief cannot be read: the records it summarises are on the tab
+ * or when the brief cannot be read. The records it sums up are on the tab
  * beside it either way.
  */
 export function RoomBrief({ roomId }: Readonly<{ roomId: string }>) {
@@ -102,7 +102,7 @@ function BriefSentences({
   );
 }
 
-// What a citation names, read from the queries the tab already holds, so the
+// What a citation names, read from the queries the tab already holds. So the
 // brief costs no request of its own to say where it came from.
 function useEvidenceNames(roomId: string) {
   const t = useT();

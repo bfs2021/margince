@@ -13,9 +13,9 @@ import { LocaleProvider, translate } from "../../../i18n";
 import { jsonResponse, stubWithSession } from "../../../testing/story-utils";
 import { DealRoomTab } from "./dealroomtab";
 
-// The deal record's own door into the Deal Room: the room's band, what it
-// still lacks, its brief, the documents beside the conversation, and who may
-// enter, with the room's settings in a dialog.
+// The deal record's own door into the Deal Room. It draws the room's band,
+// what it still lacks, its brief, the documents, the conversation and who may
+// enter. The room's settings open in a dialog.
 
 type DealRoom = components["schemas"]["DealRoom"];
 

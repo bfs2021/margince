@@ -3,14 +3,12 @@
 
 package compose
 
-// The certification case for summarize/deal_room_brief. The request comes from
-// roombrief.BriefRequest and the reply is read by roombrief.ParseBrief, the two
-// the service calls.
+// The certification case for summarize/deal_room_brief. It calls
+// roombrief.BriefRequest and roombrief.ParseBrief, as the service does.
 //
-// ParseBrief already drops what is ungrounded, so a reply saying nothing would
-// pass a check that it parsed. What is measured is what production cannot
-// guarantee: that the brief cites the thread the room turns on, and names a
-// word only that thread said and the floor does not.
+// A reply saying nothing parses, so parsing measures nothing. The case checks
+// that the brief cites the thread the room turns on. It also checks that the
+// brief names a word only that thread said, which the floor does not.
 
 import (
 	"context"

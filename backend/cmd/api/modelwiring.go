@@ -202,7 +202,6 @@ func coldStartOptions(modelPath *compose.ModelPath, routingVersion string) []com
 		// prose over records the caller can already see. It caches, so unlike
 		// the meeting brief it carries the routing version.
 		compose.WithContactBrief(modelPath.Summarize, routingVersion),
-		// The room brief too, and like the meeting brief it caches nothing.
 		compose.WithDealRoomBriefWriter(modelPath.Summarize),
 		compose.WithRoleProposals(modelPath.ProposeRoles),
 		compose.WithFilterProposals(modelPath.NlSearch),

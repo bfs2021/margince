@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: BUSL-1.1
 // SPDX-FileCopyrightText: 2026 Gradion
 
-// The deal's own Deal Room reading, shared by two doors: the record's Deal
-// Room tab (deals.tsx) and the room's own page (dealroompage.tsx), reached
-// from a mailed link or a bookmark. Both mount the same sections rather than
-// each drawing its own — a second copy of "who is in the room" is how a tab
-// and a page come to disagree about it.
+// The deal's own Deal Room reading. The record's tab and the room's own page
+// (dealroompage.tsx) mount the same sections, so the two cannot disagree.
 //
 // The tab leads with the room's band, what is still missing, and the brief,
-// then sets the documents beside the conversation. The room's settings open
-// in a dialog here; the room's own page keeps them for a mailed link.
+// then sets the documents beside the conversation. Its settings open in a
+// dialog; the room's page keeps them for a mailed link.
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DoorOpen, ExternalLink, Settings2 } from "lucide-react";
@@ -144,7 +141,7 @@ function RoomReading({
 }
 
 // The room's band: what it is, how it stands, what a buyer reads first and
-// who is in it, with the verbs that act on the whole room at its end.
+// who is in it. The verbs that act on the whole room stand at its end.
 function RoomBand({
   room,
   verbs,

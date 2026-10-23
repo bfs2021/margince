@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 // SPDX-FileCopyrightText: 2026 Gradion
 
-// The room's settings, opened from the tab's Manage room: who may still enter
-// (live, paused, closed), until when, who the buyer turns to, and the words a
-// buyer reads first. One save runs each change through the verb the server
-// owns for it, in the order the room's version allows.
+// The room's settings, opened from the tab's Manage room. They say who may
+// still enter and until when, who the buyer turns to, and what a buyer reads
+// first. One save runs each change through the server's own verb for it.
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DoorOpen, Lock, PauseCircle } from "lucide-react";
@@ -77,8 +76,8 @@ function accessOf(state: DealRoom["state"]): RoomAccess | "" {
     : "";
 }
 
-// The day a date field shows, and the instant it saves: the last second of
-// that day in UTC, the room page's own reading of an end date.
+// The day a date field shows, and the instant it saves. The instant is the
+// last second of that day in UTC, as the room's page reads an end date.
 function dayOf(instant: string | null | undefined): ISODate | "" {
   const day = instant ? instant.slice(0, 10) : "";
   return isISODate(day) ? day : "";
@@ -87,9 +86,9 @@ const endOfDay = (day: string) =>
   day === "" ? null : new Date(`${day}T23:59:59Z`).toISOString();
 
 /**
- * Applies the room's changes: the text first, because it carries the version
- * the end date then needs, and the access verb last, because closing ends
- * every other edit.
+ * Applies the room's changes. The text goes first, because it returns the
+ * version the end date needs. The access verb goes last, because closing
+ * ends every other edit.
  */
 export function useSaveRoom(dealId: string) {
   const t = useT();
@@ -132,8 +131,8 @@ export function useSaveRoom(dealId: string) {
 }
 
 /**
- * The dialog. The caller remounts it (a new `key`) on each opening, so the form
- * starts from the room as it stands, not from an edit that was cancelled.
+ * The dialog. The caller remounts it (a new `key`) on each opening. So the
+ * form starts from the room as it stands, not from a cancelled edit.
  */
 export function ManageRoomDialog({
   room,

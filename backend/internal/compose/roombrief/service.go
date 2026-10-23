@@ -83,8 +83,8 @@ func (s *Service) assemble(ctx context.Context, roomID ids.DealRoomID) (Input, e
 	return FromRoom(room, participants, documents, threads), nil
 }
 
-// wireSentences drops a sentence WHOLE when any citation is not an id, rather
-// than showing a claim on partial evidence.
+// wireSentences drops the whole sentence when any citation is not an id,
+// rather than showing a claim on partial evidence.
 func wireSentences(in []Sentence) []crmcontracts.DealRoomBriefSentence {
 	out := make([]crmcontracts.DealRoomBriefSentence, 0, len(in))
 	for _, sentence := range in {
