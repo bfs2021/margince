@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -15,8 +14,7 @@ import (
 
 	crmcontracts "github.com/margince/margince/backend/internal/contracts"
 	"github.com/margince/margince/backend/internal/shared/kernel/ids"
-	"github.com/margince/margince/backend/internal/shared/kernel/langcopy"
-	"github.com/margince/margince/backend/internal/shared/kernel/textlang"
+	"github.com/margince/margince/backend/internal/shared/kernel/langcopy/langcopytest"
 	"github.com/margince/margince/backend/internal/shared/ports/model"
 )
 
@@ -102,16 +100,8 @@ func TestAQuietRoomSaysNothingIsOwedAndAnEmptyOneSaysNothing(t *testing.T) {
 }
 
 func TestEveryShippedLanguageWritesTheRoomFloor(t *testing.T) {
-	phrases := reflect.ValueOf(floor)
-	for _, lang := range []textlang.Lang{textlang.English, textlang.German, textlang.Vietnamese} {
-		say := langcopy.For(string(lang))
-		for i := range phrases.NumField() {
-			p, ok := reflect.TypeAssert[phrase](phrases.Field(i))
-			if !ok || strings.TrimSpace(say.Say(p)) == "" {
-				t.Errorf("%s has no %s sentence", lang, phrases.Type().Field(i).Name)
-			}
-		}
-	}
+	t.Parallel()
+	langcopytest.Census(t, floor)
 }
 
 func TestTheModelReplyKeepsOnlyGroundedSentences(t *testing.T) {
@@ -198,5 +188,26 @@ func TestFromRoomFoldsTheReadsTheTabMakes(t *testing.T) {
 	}
 	if in.Threads[1].WaitingOnYou || in.Threads[1].Comments[0].Speaker != speakerYourSide {
 		t.Errorf("the seller's last word reads as waiting or as a buyer's: %+v", in.Threads[1])
+	}
+}
+
+func TestALinkRequestCountsOnlyUntilTheBuyerIsBackIn(t *testing.T) {
+	asked := time.Date(2026, 10, 20, 9, 0, 0, 0, time.UTC)
+	back := asked.Add(time.Hour)
+	before := asked.Add(-time.Hour)
+	for name, tc := range map[string]struct {
+		lastSeen *time.Time
+		want     string
+	}{
+		"never in":       {nil, "2026-10-20"},
+		"seen before it": {&before, "2026-10-20"},
+		"back in after":  {&back, ""},
+	} {
+		in := FromRoom(crmcontracts.DealRoom{}, []crmcontracts.DealRoomParticipant{
+			{Id: openapi_types.UUID(ids.NewV7()), FullName: "Lena Vogt", LinkRequestedAt: &asked, LastSeenAt: tc.lastSeen},
+		}, nil, nil)
+		if got := in.Buyers[0].AskedForNewLinkOn; got != tc.want {
+			t.Errorf("%s: asked_for_new_link_on = %q, want %q", name, got, tc.want)
+		}
 	}
 }

@@ -34,16 +34,22 @@ type Service struct {
 	now   func() time.Time
 }
 
-// NewService binds the brief to the room's reads. lane may be nil: the
-// deterministic floor is then the answer.
-func NewService(pool *pgxpool.Pool, rooms Rooms, lane Completer, now func() time.Time) *Service {
-	return &Service{pool: pool, rooms: rooms, lane: lane, now: now}
+// NewService binds the brief to the room's reads, with no model lane: the
+// deterministic floor answers until WithLane binds one.
+func NewService(pool *pgxpool.Pool, rooms Rooms, now func() time.Time) *Service {
+	return &Service{pool: pool, rooms: rooms, now: now}
+}
+
+// WithLane binds the summarize lane that writes the brief.
+func (s *Service) WithLane(lane Completer) *Service {
+	s.lane = lane
+	return s
 }
 
 // Get writes the brief for one room.
 func (s *Service) Get(ctx context.Context, roomID ids.DealRoomID) (crmcontracts.DealRoomBrief, error) {
-	// A reading aid for a person; an agent reading through a passport has the
-	// records themselves.
+	// A reading aid for a human reader; an agent reading through a passport has
+	// the records themselves.
 	if err := auth.RequireHuman(ctx); err != nil {
 		return crmcontracts.DealRoomBrief{}, err
 	}

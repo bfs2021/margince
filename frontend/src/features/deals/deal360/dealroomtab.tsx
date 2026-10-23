@@ -148,7 +148,7 @@ function RoomBand({
 }: Readonly<{ room: DealRoom; verbs: ReactNode }>) {
   const t = useT();
   const headingId = useId();
-  const people = (useParticipants(room.id).data?.data ?? []).filter(
+  const seats = (useParticipants(room.id).data?.data ?? []).filter(
     (p) => !p.revoked_at,
   );
   return (
@@ -169,11 +169,11 @@ function RoomBand({
             {t("roomtab.welcomeEmpty")}
           </p>
         )}
-        <div className="roomtab-band-people">
-          {people.length > 0 ? (
+        <div className="roomtab-band-seats">
+          {seats.length > 0 ? (
             <AvatarStack
               max={4}
-              contacts={people.map((p) => ({
+              contacts={seats.map((p) => ({
                 name: p.full_name,
                 identity: p.id,
               }))}

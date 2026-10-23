@@ -43,18 +43,20 @@ func (r roomBriefReads) ListThreads(
 	return r.store.ListThreads(ctx, roomID, documentID)
 }
 
-// newRoomBriefHandlers builds the room brief over the room's own reads. A nil
-// lane serves the deterministic floor, labelled as such, rather than a 501.
-func newRoomBriefHandlers(pool *pgxpool.Pool, lane roombrief.Completer) roomBriefHandlers {
+// newRoomBriefService builds the room brief over the room's own reads.
+func newRoomBriefService(pool *pgxpool.Pool) *roombrief.Service {
 	reads := roomBriefReads{store: dealrooms.NewStore(InstallationDB(pool))}
-	return roombrief.NewHandlers(roombrief.NewService(pool, reads, lane, time.Now))
+	return roombrief.NewService(pool, reads, time.Now)
 }
 
 // WithDealRoomBriefWriter binds the summarize lane that writes the room brief.
 // No routing version: the brief is stored nowhere, so no text can outlive a
 // re-pointed lane.
 func WithDealRoomBriefWriter(brain completer) Option {
-	return func(s *Server, pool *pgxpool.Pool) {
-		s.roomBriefHandlers = newRoomBriefHandlers(pool, brain)
+	return func(s *Server, _ *pgxpool.Pool) {
+		if s.roomBriefSvc == nil {
+			return
+		}
+		s.roomBriefHandlers = roombrief.NewHandlers(s.roomBriefSvc.WithLane(brain))
 	}
 }

@@ -69,14 +69,14 @@
   text-wrap: pretty;
 }
 
-.roomtab-band-people {
+.roomtab-band-seats {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
 }
 
-.roomtab-band-people .roompage-facts {
+.roomtab-band-seats .roompage-facts {
   margin: 0;
 }
 

@@ -29,6 +29,12 @@ const (
 	speakerYourSide = "your_side"
 )
 
+// The contract's own words for a comment's side and a settled thread.
+const (
+	sideBuyer      = "buyer"
+	threadResolved = "resolved"
+)
+
 // Input is the room as the model is shown it. Dates are calendar days in UTC,
 // the form the grounding filter reads a stated date against.
 type Input struct {
@@ -114,7 +120,7 @@ func buyersFrom(participants []crmcontracts.DealRoomParticipant) []BuyerIn {
 		if p.LastSeenAt != nil {
 			buyer.LastSeenOn = day(*p.LastSeenAt)
 		}
-		if p.LinkRequestedAt != nil {
+		if linkStillOwed(p) {
 			buyer.AskedForNewLinkOn = day(*p.LinkRequestedAt)
 		}
 		if p.DocumentsDownloaded != nil {
@@ -125,6 +131,16 @@ func buyersFrom(participants []crmcontracts.DealRoomParticipant) []BuyerIn {
 	return out
 }
 
+// linkStillOwed reports a link request the buyer has not been in since. The
+// request is kept as history, so a buyer who asked and then signed in again
+// is no longer waiting on a link.
+func linkStillOwed(p crmcontracts.DealRoomParticipant) bool {
+	if p.LinkRequestedAt == nil {
+		return false
+	}
+	return p.LastSeenAt == nil || p.LinkRequestedAt.After(*p.LastSeenAt)
+}
+
 // threadsFrom keeps the threads a reader most needs: the ones waiting on them
 // first, then the most recently active.
 func threadsFrom(threads []crmcontracts.DealRoomThread, titles map[string]string) []ThreadIn {
@@ -132,7 +148,7 @@ func threadsFrom(threads []crmcontracts.DealRoomThread, titles map[string]string
 	for _, thread := range threads {
 		folded := ThreadIn{
 			ID:             thread.Id.String(),
-			Resolved:       thread.ResolvedAt != nil || thread.State == "resolved",
+			Resolved:       thread.State == threadResolved,
 			RequiredChange: thread.RequiredChange,
 			latest:         thread.CreatedAt,
 		}
@@ -144,7 +160,7 @@ func threadsFrom(threads []crmcontracts.DealRoomThread, titles map[string]string
 		if len(comments) > 0 {
 			last := comments[len(comments)-1]
 			folded.latest = last.CreatedAt
-			folded.WaitingOnYou = !folded.Resolved && last.Author.Side == speakerBuyer
+			folded.WaitingOnYou = !folded.Resolved && last.Author.Side == sideBuyer
 		}
 		for _, comment := range comments[max(0, len(comments)-maxThreadComments):] {
 			folded.Comments = append(folded.Comments, commentFrom(comment))
@@ -162,7 +178,7 @@ func threadsFrom(threads []crmcontracts.DealRoomThread, titles map[string]string
 
 func commentFrom(comment crmcontracts.DealRoomComment) CommentIn {
 	speaker := speakerYourSide
-	if comment.Author.Side == speakerBuyer {
+	if comment.Author.Side == sideBuyer {
 		speaker = speakerBuyer
 	}
 	return CommentIn{

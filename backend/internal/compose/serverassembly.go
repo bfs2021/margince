@@ -449,7 +449,6 @@ func (s *Server) wireSystemOfRecordReads(pool *pgxpool.Pool) {
 	// The contact page is the company page's sibling, so it is wired here
 	// rather than beside the handler sets.
 	s.wireContact360(pool)
-	s.roomBriefHandlers = newRoomBriefHandlers(pool, nil)
 	s.wireReversal(pool)
 	s.wireProject360(pool)
 }

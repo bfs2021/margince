@@ -5470,7 +5470,7 @@ Data is delimited by <untrusted-fence> … </untrusted-fence> (the opening marke
 
 ### `summarize` / `deal_room_brief`
 
-`system 3,576 B (~894 tok)`: rules 3,299 B · boundary 277 B · after boundary 0 B · **cacheable 92%**
+`system 3,621 B (~905 tok)`: rules 3,344 B · boundary 277 B · after boundary 0 B · **cacheable 92%**
 
 <details><summary>system prompt</summary>
 
@@ -5481,7 +5481,7 @@ Write at most four sentences. Answer, in order: what a buyer is waiting on the r
 Lead with a thread whose waiting_on_you is true. Say what the buyer ASKED, in their own words where the summary quotes them; "they left a comment" says nothing a reader could act on.
 A comment's speaker is "buyer" or "your_side". "your_side" is the READER or a colleague. Never report words from "your_side" as a buyer's.
 "downloaded" lists the documents a buyer downloaded. A document no buyer downloaded has not been read by anyone the room can see; say so only when it matters.
-A buyer with asked_for_new_link_on set cannot get in until the reader issues a new link.
+asked_for_new_link_on is when a buyer asked for a new link and has not been in since; they cannot get in until the reader issues one.
 Name a date only when the summary supplies it. Never compute one, and never estimate how long ago something was.
 Label every sentence. A FACT restates the summary and cites the record it came from. An ASSESSMENT is a judgment drawn from several records; cite them. A RECOMMENDATION is one concrete move; cite the record that motivates it.
 Cite only the ids the summary gave you: a buyer as participant, a document as document, a thread as thread. Put ids ONLY in evidence, never in the text.

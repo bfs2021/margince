@@ -39,9 +39,8 @@ var knownNature = map[string]bool{
 // with three moves hands the reader back the triage it existed to do.
 const maxRecommendations = 1
 
-// addressInProse matches a link or a mail address. A buyer writes the threads
-// the brief reads, so a move that sends the reader to an address is the
-// buyer's instruction, not the room's reading of itself.
+// addressInProse matches a link or a mail address. Buyers write the threads the
+// brief reads, so a move to an address is a buyer's instruction.
 var addressInProse = regexp.MustCompile(`(?i)(https?://|www\.)\S+|[^\s@]+@[^\s@]+\.[a-z]{2,}`)
 
 // briefSystem is the deal_room_brief site's prompt. It turns on two rules:
@@ -53,7 +52,7 @@ Write at most four sentences. Answer, in order: what a buyer is waiting on the r
 Lead with a thread whose waiting_on_you is true. Say what the buyer ASKED, in their own words where the summary quotes them; "they left a comment" says nothing a reader could act on.
 A comment's speaker is "buyer" or "your_side". "your_side" is the READER or a colleague. Never report words from "your_side" as a buyer's.
 "downloaded" lists the documents a buyer downloaded. A document no buyer downloaded has not been read by anyone the room can see; say so only when it matters.
-A buyer with asked_for_new_link_on set cannot get in until the reader issues a new link.
+asked_for_new_link_on is when a buyer asked for a new link and has not been in since; they cannot get in until the reader issues one.
 Name a date only when the summary supplies it. Never compute one, and never estimate how long ago something was.
 Label every sentence. A FACT restates the summary and cites the record it came from. An ASSESSMENT is a judgment drawn from several records; cite them. A RECOMMENDATION is one concrete move; cite the record that motivates it.
 Cite only the ids the summary gave you: a buyer as participant, a document as document, a thread as thread. Put ids ONLY in evidence, never in the text.
@@ -127,31 +126,16 @@ func ParseBrief(reply string, in Input) ([]Sentence, error) {
 	return keepGroundedSentences(parsed.Sentences, in), nil
 }
 
-// keepGroundedSentences grounds first and spends the recommendation budget
-// after, so one ungrounded recommendation cannot suppress a valid one.
+// keepGroundedSentences applies the one grounding rule and this brief's bounds.
 func keepGroundedSentences(sentences []Sentence, in Input) []Sentence {
-	known := knownRecords(in)
-	out := make([]Sentence, 0, min(len(sentences), maxSentences))
-	recommendations := 0
-	for _, sentence := range sentences {
-		if len(out) == maxSentences {
-			break
-		}
-		if !knownNature[sentence.Nature] {
-			sentence.Nature = natureFact
-		}
-		if !claims.Grounded(sentence, known) {
-			continue
-		}
-		if sentence.Nature == natureRecommendation {
-			if recommendations == maxRecommendations || addressInProse.MatchString(sentence.Text) {
-				continue
-			}
-			recommendations++
-		}
-		out = append(out, sentence)
-	}
-	return claims.Dedupe(out)
+	return claims.KeepBrief(sentences, knownRecords(in), claims.BriefBounds{
+		Sentences:       maxSentences,
+		Recommendations: maxRecommendations,
+		Natures:         knownNature,
+		Fact:            natureFact,
+		Recommendation:  natureRecommendation,
+		Refuse:          func(s Sentence) bool { return addressInProse.MatchString(s.Text) },
+	})
 }
 
 // knownRecords is what the brief was written from, keyed by type and id, with

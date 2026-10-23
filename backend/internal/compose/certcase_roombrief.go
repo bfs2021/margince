@@ -16,13 +16,17 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/margince/margince/backend/internal/compose/aitasks"
+	"github.com/margince/margince/backend/internal/compose/claims"
 	"github.com/margince/margince/backend/internal/compose/roombrief"
+	crmcontracts "github.com/margince/margince/backend/internal/contracts"
 	"github.com/margince/margince/backend/internal/modules/ai"
 	"github.com/margince/margince/backend/internal/shared/kernel/ids"
 	"github.com/margince/margince/backend/internal/shared/kernel/textlang"
 	"github.com/margince/margince/backend/internal/shared/ports/model"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 type roomBriefCases struct{}
@@ -90,55 +94,106 @@ func (roomBriefCases) Prepare(fixture, expected json.RawMessage) (aitasks.Prepar
 	}, nil
 }
 
-// roomBriefInput mints an id per labelled record and folds the fixture into
-// the input production builds. A thread is waiting on the reader when its last
-// comment is a buyer's, the rule FromRoom applies.
+// roomBriefInput mints an id per labelled record, builds the room's reads as
+// the store returns them, and folds them through roombrief.FromRoom. So the
+// waiting rule, the order and the caps are production's.
 func roomBriefInput(f roomBriefFixture) (roombrief.Input, map[string]string, error) {
 	byLabel := map[string]string{}
-	mint := func(label string) (string, error) {
+	mint := func(label string) (openapi_types.UUID, error) {
 		if strings.TrimSpace(label) == "" || byLabel[label] != "" {
-			return "", fmt.Errorf("summarize/deal_room_brief: the label %q is blank or repeated, so an expectation naming it means nothing", label)
+			return openapi_types.UUID{}, fmt.Errorf("summarize/deal_room_brief: the label %q is blank or repeated, so an expectation naming it means nothing", label)
 		}
-		byLabel[label] = ids.NewV7().String()
-		return byLabel[label], nil
+		id := ids.NewV7()
+		byLabel[label] = id.String()
+		return openapi_types.UUID(id), nil
 	}
-	in := roombrief.Input{Title: f.Title, State: f.State}
+	var participants []crmcontracts.DealRoomParticipant
 	for _, b := range f.Buyers {
 		id, err := mint(b.Label)
 		if err != nil {
-			return in, nil, err
+			return roombrief.Input{}, nil, err
 		}
-		in.Buyers = append(in.Buyers, roombrief.BuyerIn{
-			ID: id, Name: b.Name, SignedIn: b.SignedIn, LastSeenOn: b.LastSeenOn,
-			AskedForNewLinkOn: b.AskedForNewLinkOn, Downloaded: b.Downloaded,
-		})
+		participants = append(participants, roomBriefParticipant(id, b))
 	}
-	titles := map[string]string{}
+	var documents []crmcontracts.DealRoomDocument
+	docIDs := map[string]openapi_types.UUID{}
 	for _, d := range f.Documents {
 		id, err := mint(d.Label)
 		if err != nil {
-			return in, nil, err
+			return roombrief.Input{}, nil, err
 		}
-		titles[id] = d.Title
-		in.Documents = append(in.Documents, roombrief.DocumentIn{ID: id, Title: d.Title, Group: d.Group})
+		docIDs[d.Label] = id
+		documents = append(documents, crmcontracts.DealRoomDocument{
+			Id: id, Title: d.Title, GroupKey: crmcontracts.DealRoomDocumentGroup(d.Group),
+		})
 	}
+	var threads []crmcontracts.DealRoomThread
 	for _, t := range f.Threads {
 		id, err := mint(t.Label)
 		if err != nil {
-			return in, nil, err
+			return roombrief.Input{}, nil, err
 		}
-		if len(t.Comments) == 0 {
-			return in, nil, fmt.Errorf("summarize/deal_room_brief: thread %q has no comments", t.Label)
+		thread, err := roomBriefThreadRead(id, t, docIDs)
+		if err != nil {
+			return roombrief.Input{}, nil, err
 		}
-		thread := roombrief.ThreadIn{ID: id, Resolved: t.Resolved, Comments: t.Comments}
-		if t.DocumentLabel != "" {
-			thread.DocumentID = byLabel[t.DocumentLabel]
-			thread.About = titles[thread.DocumentID]
-		}
-		thread.WaitingOnYou = !t.Resolved && t.Comments[len(t.Comments)-1].Speaker == "buyer"
-		in.Threads = append(in.Threads, thread)
+		threads = append(threads, thread)
 	}
-	return in, byLabel, nil
+	room := crmcontracts.DealRoom{Title: f.Title, State: crmcontracts.DealRoomState(f.State)}
+	return roombrief.FromRoom(room, participants, documents, threads), byLabel, nil
+}
+
+func roomBriefParticipant(id openapi_types.UUID, b roomBriefBuyer) crmcontracts.DealRoomParticipant {
+	signedIn := b.SignedIn
+	p := crmcontracts.DealRoomParticipant{Id: id, FullName: b.Name, HasSignedIn: &signedIn}
+	if seen, err := time.Parse(time.DateOnly, b.LastSeenOn); err == nil {
+		p.LastSeenAt = &seen
+	}
+	if asked, err := time.Parse(time.DateOnly, b.AskedForNewLinkOn); err == nil {
+		// Late in the day, so a request on the day a buyer was last seen is
+		// still outstanding.
+		asked = asked.Add(23 * time.Hour)
+		p.LinkRequestedAt = &asked
+	}
+	if len(b.Downloaded) > 0 {
+		downloaded := b.Downloaded
+		p.DocumentsDownloaded = &downloaded
+	}
+	return p
+}
+
+func roomBriefThreadRead(
+	id openapi_types.UUID, t roomBriefThread, docIDs map[string]openapi_types.UUID,
+) (crmcontracts.DealRoomThread, error) {
+	if len(t.Comments) == 0 {
+		return crmcontracts.DealRoomThread{}, fmt.Errorf("summarize/deal_room_brief: thread %q has no comments", t.Label)
+	}
+	thread := crmcontracts.DealRoomThread{Id: id, State: "open"}
+	if t.Resolved {
+		thread.State = "resolved"
+	}
+	if t.DocumentLabel != "" {
+		doc, ok := docIDs[t.DocumentLabel]
+		if !ok {
+			return thread, fmt.Errorf("summarize/deal_room_brief: thread %q is about %q, which the fixture does not carry", t.Label, t.DocumentLabel)
+		}
+		thread.DocumentId = &doc
+	}
+	for _, c := range t.Comments {
+		at, err := time.Parse(time.DateOnly, c.On)
+		if err != nil {
+			return thread, fmt.Errorf("summarize/deal_room_brief: a comment on thread %q has no date: %w", t.Label, err)
+		}
+		side := "seller"
+		if c.Speaker == "buyer" {
+			side = "buyer"
+		}
+		thread.Comments = append(thread.Comments, crmcontracts.DealRoomComment{
+			Author: crmcontracts.DealRoomAuthor{Name: c.Author, Side: side}, Body: c.Body, CreatedAt: at,
+		})
+	}
+	thread.CreatedAt = thread.Comments[0].CreatedAt
+	return thread, nil
 }
 
 // refuseUnmeasurableRoomBrief refuses a scenario no reply could meet, and one
@@ -158,7 +213,7 @@ func refuseUnmeasurableRoomBrief(in roombrief.Input, byLabel map[string]string, 
 	if !strings.Contains(strings.ToLower(string(summary)), token) {
 		return fmt.Errorf("summarize/deal_room_brief: the token %q is in nothing the summary carries, so only an invented brief could name it", want.NamesToken)
 	}
-	if strings.Contains(strings.ToLower(roombrief.Prose(roombrief.Deterministic(in, "en"))), token) {
+	if strings.Contains(strings.ToLower(claims.Prose(roombrief.Deterministic(in, "en"))), token) {
 		return fmt.Errorf("summarize/deal_room_brief: the token %q is already in the floor's own prose, so a reply saying nothing would pass", want.NamesToken)
 	}
 	for _, avoided := range want.Avoids {
@@ -202,7 +257,7 @@ func (c *roomBriefCase) Evaluate(trace aitasks.Trace) aitasks.Outcome {
 	if !cites(sentences, c.mustCite) {
 		wrong = append(wrong, fmt.Sprintf("the brief never cites %q, the thread this room turns on", c.citeLabel))
 	}
-	folded := strings.ToLower(roombrief.Prose(sentences))
+	folded := strings.ToLower(claims.Prose(sentences))
 	if !strings.Contains(folded, strings.ToLower(c.mustName)) {
 		wrong = append(wrong, fmt.Sprintf("the brief never names %q, so it would read the same about any room", c.mustName))
 	}

@@ -124,15 +124,6 @@ func nothingOwedLine(threads []ThreadIn, say langcopy.Spoken) Sentence {
 	return Sentence{Text: say.Say(floor.NothingOwed), Nature: natureFact, Evidence: evidence}
 }
 
-// Prose is the brief as one block of text, for the certification case.
-func Prose(sentences []Sentence) string {
-	texts := make([]string, 0, len(sentences))
-	for _, sentence := range sentences {
-		texts = append(texts, sentence.Text)
-	}
-	return strings.Join(texts, " ")
-}
-
 // Both writers speak the one claim vocabulary, so the grounding rule proved for
 // the other briefs holds here.
 type (
