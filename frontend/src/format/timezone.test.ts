@@ -9,6 +9,7 @@ import {
   startOfDayInZone,
   timezoneOptions,
   viewerZone,
+  zoneNameAndOffset,
   zoneOffsetMs,
 } from "./timezone";
 
@@ -280,5 +281,28 @@ describe("timezone choices", () => {
       "Eastern (US) · UTC-5",
     );
     expect(zones.filter((zone) => zone.value === "UTC")).toHaveLength(1);
+  });
+});
+
+describe("zoneNameAndOffset", () => {
+  const at = new Date("2026-09-05T10:30:00Z");
+
+  it("names a given zone in the reader's language, not the IANA id", () => {
+    expect(zoneNameAndOffset("en-GB", at, "Asia/Bangkok")).toBe(
+      "Indochina Time · UTC+7",
+    );
+    expect(zoneNameAndOffset("vi-VN", at, "Asia/Bangkok")).toBe(
+      "Giờ Đông Dương · UTC+7",
+    );
+  });
+
+  it("reads the offset the zone has at that instant", () => {
+    expect(zoneNameAndOffset("en-GB", at, "Europe/Berlin")).toBe(
+      "Central European Summer Time · UTC+2",
+    );
+  });
+
+  it("shows a zone the runtime cannot resolve as it was stored", () => {
+    expect(zoneNameAndOffset("en-GB", at, "Mars/Olympus")).toBe("Mars/Olympus");
   });
 });

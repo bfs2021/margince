@@ -1,5 +1,5 @@
 import type { Locale } from "../i18n";
-import { middayInstant } from "./calendarday";
+import { calendarDay, middayInstant } from "./calendarday";
 import { INTL_LOCALE } from "./intllocale";
 import {
   dateTimePreferences,
@@ -179,6 +179,27 @@ export function formatDayMonth(
     day: "numeric",
     month: "short",
   }).format(displayDay(utcIso, zone));
+}
+
+// Not `formatDayMonth` on a card: a bare "4 Mar" is ambiguous once the date is
+// outside `now`'s year. `now` is the caller's, so the formatter stays pure.
+export function formatDayMonthNearYear(
+  utcIso: string,
+  locale: Locale,
+  zone: string,
+  now: Date,
+): string {
+  if (dateTimePreferences().dateFormat !== "locale")
+    return formatDate(utcIso, locale, zone);
+  assertIanaZone(zone);
+  const day = displayDay(utcIso, zone);
+  const yearIn = (at: Date) => calendarDay(at, zone).slice(0, 4);
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+    timeZone: zone,
+    day: "numeric",
+    month: "short",
+    ...(yearIn(day) === yearIn(now) ? {} : { year: "numeric" }),
+  }).format(day);
 }
 
 /**

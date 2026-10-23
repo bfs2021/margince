@@ -7,6 +7,7 @@ import {
   formatDate,
   formatDateTime,
   formatDayMonth,
+  formatDayMonthNearYear,
   formatDayRange,
   formatDuration,
   formatMoney,
@@ -232,6 +233,15 @@ describe("date/time formatting (B-EP09.17/19)", () => {
     expect(formatDayMonth(instant, "en", "Europe/Berlin")).toBe("4 Jun");
     // And it is genuinely the year-less sibling of formatDateAbbrev.
     expect(formatDayMonth(instant, "en", "Europe/Berlin")).not.toMatch(/2026/);
+  });
+
+  it("adds the year to a day-month only when it is not the year of now", () => {
+    const now = new Date("2026-06-10T12:00:00Z");
+    const near = (day: string) =>
+      formatDayMonthNearYear(day, "en", "Europe/Berlin", now);
+    expect(near("2026-11-03")).toBe("3 Nov");
+    expect(near("2027-03-04")).toBe("4 Mar 2027");
+    expect(near("2025-12-30")).toBe("30 Dec 2025");
   });
 
   it("carries the zone into a day-month rendering too", () => {

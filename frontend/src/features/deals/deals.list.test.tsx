@@ -46,7 +46,7 @@ describe("DealsScreen", () => {
       stubBackend([deal({ expected_close_date: "2099-10-14" })]),
     );
     render(<DealsScreen />);
-    expect(await screen.findByText("closes 14 Oct")).toBeTruthy();
+    expect(await screen.findByText("closes 14 Oct 2099")).toBeTruthy();
   });
 
   it("board↔table swaps views over the same fetched set without a reload", async () => {

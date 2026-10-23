@@ -90,18 +90,30 @@ export const FALLBACK_RECORD_ZONE = "Europe/Berlin";
  * of those places, and "Tuesday, 08:00" with no zone is the sentence that gets
  * that wrong.
  *
+ * A named `zone` reads that zone instead of the reader's own.
+ *
  * Both halves come from Intl's own names, so the zone reads in the reader's
  * language; the offset is spelled UTC rather than Intl's GMT, because that is
  * what the rest of the product says.
  */
-export function zoneNameAndOffset(locale: string, at: Date): string {
+export function zoneNameAndOffset(
+  locale: string,
+  at: Date,
+  zone?: string,
+): string {
   const named = (style: "long" | "shortOffset") =>
-    new Intl.DateTimeFormat(locale, { timeZoneName: style })
+    new Intl.DateTimeFormat(locale, { timeZone: zone, timeZoneName: style })
       .formatToParts(at)
       .find((piece) => piece.type === "timeZoneName")?.value ?? "";
-  return [named("long"), named("shortOffset").replace("GMT", "UTC")]
-    .filter(Boolean)
-    .join(" · ");
+  try {
+    return [named("long"), named("shortOffset").replace("GMT", "UTC")]
+      .filter(Boolean)
+      .join(" · ");
+  } catch (error) {
+    // A zone the browser's database predates is shown as stored, not dropped.
+    if (!(error instanceof RangeError) || !zone) throw error;
+    return zone;
+  }
 }
 
 export function viewerZone(): string {
