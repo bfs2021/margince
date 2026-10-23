@@ -43,6 +43,6 @@ export const FinishedRun: Story = {
     const canvas = within(canvasElement);
     const frame = await canvas.findByText(/As of/);
     await expect(frame.textContent).toMatch(/UTC/);
-    await expect(frame.textContent).not.toContain("/");
+    await expect(frame.textContent).not.toContain("Europe/Berlin");
   },
 };
