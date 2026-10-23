@@ -1,74 +1,335 @@
 // SPDX-License-Identifier: BUSL-1.1
 // SPDX-FileCopyrightText: 2026 Gradion
 
-import type { ComponentPropsWithRef } from "react";
+import { CalendarDays } from "lucide-react";
+import {
+  type ComponentPropsWithRef,
+  type RefObject,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
+import {
+  type DatePattern,
+  datePattern,
+  formatISODate,
+  type ISODate,
+  parseTypedDate,
+  patternPlaceholder,
+} from "../format/datepattern";
+import { useDateTimePreferences } from "../format/preferences";
+import { type Locale, useLocale, useT } from "../i18n";
+import {
+  type PopupBox,
+  type PopupFrame,
+  useAnchoredPopup,
+  useDismissOnOutsidePress,
+} from "./anchoredpopup";
+import { Button } from "./button";
+import { Calendar, dateOf, isoDay } from "./calendar";
+import { useDialogFocus } from "./dialogfocus";
+import { IconAction } from "./iconaction";
+import "./dateinput.css";
+
+export { type ISODate, isISODate } from "../format/datepattern";
+
+/** What `onChange` hears: the day as `YYYY-MM-DD`, or `""` once cleared. */
+export type DateInputChange = Readonly<{
+  target: Readonly<{ value: ISODate | "" }>;
+}>;
 
 /**
- * A calendar date written the way this control and the contract's `format: date`
- * fields both spell it.
- *
- * A type cannot rule out `2026-02-30`, and the element itself sanitizes anything
- * it cannot read down to `""` — so this is not validation. What it does rule out
- * is the class of mistake a caller actually makes: handing over a `Date`, an
- * epoch number, or a locale-formatted string like `18/07/2026`, each of which
- * would blank the field at runtime with nothing to say why.
- */
-export type ISODate = `${number}-${number}-${number}`;
-
-/**
- * isISODate is how a string the element reported becomes a `value` this
- * control accepts again. The element only ever reports `YYYY-MM-DD` or `""`,
- * so this narrows rather than validates — the same caveat as the type.
- */
-export function isISODate(raw: string): raw is ISODate {
-  return /^\d{4}-\d{2}-\d{2}$/.test(raw);
-}
-
-/**
- * `value` and `defaultValue` are narrowed from React's
- * `string | number | readonly string[]`; the rest of an input's props pass
- * through. `""` is admitted because a cleared date field is the ordinary empty
- * state, and it is what the element reports for a value it rejected.
+ * The text box's own props, with the date narrowed to `YYYY-MM-DD`. `today`
+ * is the day the calendar marks; it is read off the clock when left out.
  */
 export type DateInputProps = Omit<
   ComponentPropsWithRef<"input">,
-  "type" | "value" | "defaultValue"
+  "type" | "value" | "defaultValue" | "onChange" | "min" | "max"
 > &
   Readonly<{
     value?: ISODate | "";
     defaultValue?: ISODate | "";
+    onChange?: (event: DateInputChange) => void;
+    min?: ISODate;
+    max?: ISODate;
+    today?: Date;
   }>;
 
+type Draft = Readonly<{
+  text: string;
+  against: ISODate | "";
+  problem?: string;
+}>;
+
 /**
- * The one date field.
- *
- * A native `type="date"` rather than a hand-rolled calendar, and that is a
- * deliberate exception to the rule that governs `Select`. The rule exists
- * because a browser draws `<select>`'s option list in the platform's own idiom
- * and no CSS reaches it — a visible hole in a surface built entirely from these
- * tokens. A date input is the opposite case: its CLOSED FACE is an ordinary text
- * box that takes our tokens completely, and what the platform draws is the
- * picker popover, which appears only on request and is the one part users
- * already know how to drive. Reimplementing it would mean owning keyboard
- * navigation, locale-aware parsing, and a month grid's accessibility — to
- * replace something that ships correct.
- *
- * What it does own is the FORMAT. `value` is always `YYYY-MM-DD`, which is what
- * the HTML spec requires of the element and, not coincidentally, what the
- * contract's `format: date` fields carry — so a value round-trips from wire to
- * control to wire without a parse step anyone can get wrong. A caller with a
- * `Date` converts before it gets here, on purpose: this control never guesses at
- * a timezone.
- *
- * No label of its own, exactly like `TextInput` — the label is composed outside
- * by `Field` or a screen's own shell.
+ * The one date field. A typed day reports once it reads as one; on blur or Enter
+ * a day it cannot read keeps its text, sets `aria-invalid` and `validationMessage`.
  */
-export function DateInput(props: DateInputProps) {
+export function DateInput({
+  value,
+  defaultValue,
+  onChange,
+  min,
+  max,
+  today,
+  className,
+  disabled,
+  readOnly,
+  name,
+  placeholder,
+  onBlur,
+  onKeyDown,
+  ref,
+  "aria-invalid": ariaInvalid,
+  ...box
+}: DateInputProps) {
+  const t = useT();
+  const { locale } = useLocale();
+  const { dateFormat } = useDateTimePreferences();
+  const pattern = datePattern(locale, dateFormat);
+  const [own, setOwn] = useState<ISODate | "">(defaultValue ?? "");
+  const current = value ?? own;
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const live = draft?.against === current ? draft : null;
+  const [openedOn, setOpenedOn] = useState<Date | null>(null);
+  const shell = useRef<HTMLSpanElement | null>(null);
+  const input = useRef<HTMLInputElement | null>(null);
+  const popupId = useId();
+  const refusal = (day: ISODate) => outsideRange(day, min, max, pattern, t);
+
+  useEffect(() => {
+    input.current?.setCustomValidity(live?.problem ?? "");
+  }, [live?.problem]);
+
+  // `typed` keeps the reader's own text in the box until blur, so the caret stays put.
+  const report = (next: ISODate | "", typed?: string) => {
+    setDraft(typed === undefined ? null : { text: typed, against: next });
+    if (value === undefined) {
+      setOwn(next);
+    }
+    if (next !== current) {
+      onChange?.({ target: { value: next } });
+    }
+  };
+  const commit = () => {
+    if (!live) {
+      return;
+    }
+    const read = readTyped(live.text, pattern, refusal, t);
+    if (read.problem === undefined) {
+      report(read.day);
+    } else {
+      setDraft({ ...live, problem: read.problem });
+    }
+  };
+  const type = (text: string) => {
+    const read = readTyped(text, pattern, refusal, t);
+    if (read.problem === undefined && read.day !== current) {
+      report(read.day, text);
+    } else {
+      setDraft({ text, against: current });
+    }
+  };
+
   return (
-    <input
-      {...props}
-      type="date"
-      className={`input ${props.className ?? ""}`.trim()}
-    />
+    <span
+      ref={shell}
+      className={["field-shell", "date-input", className]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <input
+        {...box}
+        ref={(node) => {
+          input.current = node;
+          if (typeof ref === "function") {
+            ref(node);
+          } else if (ref) {
+            ref.current = node;
+          }
+        }}
+        type="text"
+        className="input"
+        autoComplete="off"
+        disabled={disabled}
+        readOnly={readOnly}
+        placeholder={placeholder ?? placeholderOf(pattern, t)}
+        aria-invalid={live?.problem === undefined ? ariaInvalid : true}
+        value={live ? live.text : shown(current, pattern)}
+        onChange={(event) => type(event.target.value)}
+        onBlur={(event) => {
+          commit();
+          onBlur?.(event);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            commit();
+          }
+          onKeyDown?.(event);
+        }}
+      />
+      <IconAction
+        label={t("calendar.chooseDate")}
+        icon={<CalendarDays aria-hidden="true" />}
+        disabled={disabled || readOnly}
+        opensDialog
+        disclosure={{ expanded: openedOn !== null, controls: popupId }}
+        onClick={() =>
+          setOpenedOn((opened) => (opened ? null : (today ?? new Date())))
+        }
+      />
+      {name !== undefined && (
+        <input type="hidden" name={name} value={current} disabled={disabled} />
+      )}
+      {openedOn && (
+        <DatePopup
+          id={popupId}
+          anchor={shell}
+          selected={current}
+          today={openedOn}
+          locale={locale}
+          refusal={refusal}
+          onPick={(next) => {
+            report(next);
+            setOpenedOn(null);
+          }}
+          onClose={() => setOpenedOn(null)}
+        />
+      )}
+    </span>
   );
+}
+
+type Translate = ReturnType<typeof useT>;
+
+function DatePopup({
+  id,
+  anchor,
+  selected,
+  today,
+  locale,
+  refusal,
+  onPick,
+  onClose,
+}: Readonly<{
+  id: string;
+  anchor: RefObject<HTMLSpanElement | null>;
+  selected: ISODate | "";
+  today: Date;
+  locale: Locale;
+  refusal: (day: ISODate) => string | undefined;
+  onPick: (next: ISODate | "") => void;
+  onClose: () => void;
+}>) {
+  const t = useT();
+  const panel = useRef<HTMLDivElement | null>(null);
+  const [month, setMonth] = useState(() =>
+    selected ? dateOf(selected) : today,
+  );
+  const frame = useAnchoredPopup(anchor, panel, true, onClose);
+  useDismissOnOutsidePress(true, onClose, anchor, panel);
+  useDialogFocus({
+    open: true,
+    onClose,
+    container: panel,
+    initialFocusTo: () =>
+      panel.current?.querySelector<HTMLElement>('[data-day][tabindex="0"]') ??
+      null,
+    returnFocusTo: () =>
+      anchor.current?.querySelector<HTMLElement>("button") ?? null,
+  });
+  const todayRefused = refusal(isoDay(today)) !== undefined;
+
+  return createPortal(
+    <div
+      ref={panel}
+      id={id}
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("calendar.chooseDate")}
+      className="date-popup"
+      style={frame ? placed(frame) : undefined}
+    >
+      <Calendar
+        month={month}
+        onMonthChange={setMonth}
+        selected={selected}
+        onSelect={onPick}
+        today={today}
+        locale={locale}
+        refusal={refusal}
+      />
+      <div className="date-popup-foot">
+        <Button disabled={todayRefused} onClick={() => onPick(isoDay(today))}>
+          {t("calendar.today")}
+        </Button>
+        <Button onClick={() => onPick("")}>{t("calendar.clear")}</Button>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+// Not `contentSizedPopupBox`: its floor is the field's width, which stretches a month across a wide form.
+function placed(frame: PopupFrame): PopupBox {
+  return {
+    left: frame.left,
+    top: frame.top,
+    bottom: frame.bottom,
+    maxHeight: frame.maxHeight,
+    "--popupRoom": `${frame.room}px`,
+  };
+}
+
+function shown(day: ISODate | "", pattern: DatePattern): string {
+  return day === "" ? "" : formatISODate(day, pattern);
+}
+
+function placeholderOf(pattern: DatePattern, t: Translate): string {
+  return patternPlaceholder(pattern, {
+    day: t("calendar.patternDay"),
+    month: t("calendar.patternMonth"),
+    year: t("calendar.patternYear"),
+  });
+}
+
+function outsideRange(
+  day: ISODate,
+  min: ISODate | undefined,
+  max: ISODate | undefined,
+  pattern: DatePattern,
+  t: Translate,
+): string | undefined {
+  if (min && day < min) {
+    return t("calendar.earliest", { date: formatISODate(min, pattern) });
+  }
+  if (max && day > max) {
+    return t("calendar.latest", { date: formatISODate(max, pattern) });
+  }
+  return undefined;
+}
+
+function readTyped(
+  text: string,
+  pattern: DatePattern,
+  refusal: (day: ISODate) => string | undefined,
+  t: Translate,
+):
+  | Readonly<{ day: ISODate | ""; problem?: undefined }>
+  | Readonly<{ problem: string }> {
+  if (text.trim() === "") {
+    return { day: "" };
+  }
+  const day = parseTypedDate(text, pattern);
+  if (day === null) {
+    return {
+      problem: t("calendar.invalidDate", {
+        pattern: placeholderOf(pattern, t),
+      }),
+    };
+  }
+  const refused = refusal(day);
+  return refused === undefined ? { day } : { problem: refused };
 }

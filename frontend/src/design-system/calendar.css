@@ -46,7 +46,7 @@
   color: var(--textPrimary);
   cursor: pointer;
 }
-.calendar-day:hover:not(:disabled) {
+.calendar-day:hover:not([aria-disabled="true"]) {
   background: var(--bgHover);
 }
 .calendar-day:focus-visible {
@@ -72,7 +72,7 @@
 /* The chosen day: the chip ground, an ink ring and weight, so it reads apart
    from today's disc and stays neutral like every other selected state. */
 .calendar-day[aria-pressed="true"],
-.calendar-day[aria-pressed="true"]:hover:not(:disabled) {
+.calendar-day[aria-pressed="true"]:hover:not([aria-disabled="true"]) {
   background: var(--bgChip);
   box-shadow: inset 0 0 0 1px var(--textPrimary);
   color: var(--textPrimary);
@@ -81,7 +81,7 @@
 
 /* A day nothing can be chosen on: secondary ink and a line through it, so the
    refusal is read as well as seen, and no hover that would promise a press. */
-.calendar-day:disabled {
+.calendar-day[aria-disabled="true"] {
   color: var(--textSecondary);
   text-decoration: line-through;
   cursor: default;
