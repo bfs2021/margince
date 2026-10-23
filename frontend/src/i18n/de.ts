@@ -5511,6 +5511,8 @@ export const de = {
     "Dieser Abschnitt konnte nicht geladen werden. Der Rest der Seite ist nicht betroffen.",
   "today.quiet": "Gerade besteht kein Handlungsbedarf.",
   "task.untitled": "Aufgabe ohne Titel",
+  "task.next.openContact": "Kontakt öffnen",
+  "task.next.noAddress": "Dieser Kontakt hat keine E-Mail-Adresse.",
   "today.withheld":
     "Nicht enthalten: {sections}. Du hast keinen Zugriff darauf.",
   "today.source.moments": "Erkenntnisse von Margince",
@@ -14319,6 +14321,7 @@ export const de = {
   "contact.action.noTransport":
     "Keine Adresse und kein Thread, auf den geantwortet werden kann.",
   "contact.action.call": "Anrufen",
+  "contact.action.noPhone": "Dieser Kontakt hat keine Telefonnummer.",
   "contact.action.meetings": "Termine",
   "contact.action.workAsLead": "Als Lead bearbeiten",
   "contact.action.openLead": "Lead öffnen",

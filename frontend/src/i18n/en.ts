@@ -5584,6 +5584,8 @@ export const en = {
     "This section did not load. The rest of the page is unaffected.",
   "today.quiet": "Nothing needs attention right now.",
   "task.untitled": "Untitled task",
+  "task.next.openContact": "Open contact",
+  "task.next.noAddress": "No email address on this contact.",
   "today.withheld": "Not included: {sections}. You do not have access to them.",
   "today.source.moments": "Margince findings",
   "today.source.nextSteps": "open tasks",
@@ -14280,6 +14282,7 @@ export const en = {
   // way to reach them, and consent that says not to.
   "contact.action.noTransport": "No address and no thread to reply to.",
   "contact.action.call": "Call",
+  "contact.action.noPhone": "No phone number on this contact.",
   "contact.action.meetings": "Meetings",
   "contact.action.workAsLead": "Work as a lead",
   "contact.action.openLead": "Open the lead",

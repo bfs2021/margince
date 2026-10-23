@@ -5390,6 +5390,8 @@ export const vi = {
     "Không thể tải phần này. Phần còn lại của trang không bị ảnh hưởng.",
   "today.quiet": "Hiện chưa có gì cần chú ý.",
   "task.untitled": "Việc cần làm chưa có tiêu đề",
+  "task.next.openContact": "Mở liên hệ",
+  "task.next.noAddress": "Liên hệ này chưa có địa chỉ email.",
   "today.withheld":
     "Không bao gồm: {sections}. Bạn không có quyền truy cập các mục này.",
   "today.source.moments": "phát hiện của Margince",
@@ -13945,6 +13947,7 @@ export const vi = {
   "contact.action.noTransport":
     "Không có địa chỉ và không có chuỗi thư nào để trả lời.",
   "contact.action.call": "Gọi",
+  "contact.action.noPhone": "Liên hệ này chưa có số điện thoại.",
   "contact.action.meetings": "Cuộc họp",
   "contact.action.workAsLead": "Xử lý như lead",
   "contact.action.openLead": "Mở lead",
