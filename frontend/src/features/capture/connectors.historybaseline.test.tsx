@@ -2,7 +2,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   cleanup,
-  fireEvent,
   render as rtlRender,
   screen,
   waitFor,
@@ -67,9 +66,9 @@ it("saves the chosen date in the reader's own zone", async () => {
     name: en["connectors.historyBaseline.save"],
   });
   expect(save.hasAttribute("disabled")).toBe(true);
-  fireEvent.change(
+  await user.type(
     screen.getByLabelText(en["connectors.historyBaseline.label"]),
-    { target: { value: "2026-03-01" } },
+    "01/03/2026",
   );
   await user.click(save);
 

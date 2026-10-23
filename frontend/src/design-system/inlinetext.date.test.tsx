@@ -1,0 +1,124 @@
+/** @vitest-environment happy-dom */
+// SPDX-License-Identifier: BUSL-1.1
+// SPDX-FileCopyrightText: 2026 Gradion
+
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import "@testing-library/jest-dom/vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { LocaleProvider } from "../i18n";
+import { InlineText } from "./inlinetext";
+
+afterEach(cleanup);
+
+function renderCloseDate() {
+  const onSave = vi.fn(async (_next: string) => {});
+  render(
+    <LocaleProvider initial="en">
+      <InlineText
+        label="Expected close"
+        value="2026-03-01"
+        display="1 Mar 2026"
+        type="date"
+        placeholder="Add a date"
+        canEdit
+        onSave={onSave}
+      />
+    </LocaleProvider>,
+  );
+  return { onSave };
+}
+
+const trigger = () =>
+  screen.getByRole("button", { name: "Change Expected close" });
+const dayBox = () =>
+  screen.getByRole<HTMLInputElement>("textbox", { name: "Expected close" });
+
+describe("editing a day where it is read", () => {
+  it("saves a day picked in the calendar, as Enter does, and puts the reader back on the value", async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderCloseDate();
+    await user.click(trigger());
+    expect(dayBox().value).toBe("01/03/2026");
+
+    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    await screen.findByRole("dialog", { name: "Choose date" });
+    expect(onSave).not.toHaveBeenCalled();
+    await user.click(
+      screen.getByRole("button", { name: "Tuesday, 10 March 2026" }),
+    );
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith("2026-03-10"));
+    await waitFor(() => expect(trigger()).toHaveFocus());
+    expect(onSave).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the edit open while the calendar is up, and Escape there closes only the calendar", async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderCloseDate();
+    await user.click(trigger());
+    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    await screen.findByRole("dialog", { name: "Choose date" });
+    await user.keyboard("{ArrowRight}");
+
+    await user.keyboard("{Escape}");
+
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(dayBox().value).toBe("01/03/2026");
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it("closes without a write once focus leaves the field and its calendar", async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderCloseDate();
+    await user.click(trigger());
+    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    await screen.findByRole("dialog", { name: "Choose date" });
+    await user.keyboard("{Escape}");
+
+    await user.click(document.body);
+
+    expect(
+      screen.queryByRole("textbox", { name: "Expected close" }),
+    ).toBeNull();
+    expect(trigger()).toHaveTextContent("1 Mar 2026");
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it("saves a day typed in the reader's pattern on Enter", async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderCloseDate();
+    await user.click(trigger());
+    await user.clear(dayBox());
+    await user.type(dayBox(), "15/04/2026{Enter}");
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith("2026-04-15"));
+    expect(onSave).toHaveBeenCalledTimes(1);
+  });
+
+  it("refuses a typed day it cannot read, and writes nothing over the stored one", async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderCloseDate();
+    await user.click(trigger());
+    await user.clear(dayBox());
+    await user.type(dayBox(), "31/02/2026{Enter}");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Enter a date as DD/MM/YYYY.",
+    );
+    expect(dayBox().value).toBe("31/02/2026");
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it("saves a typed day when the reader tabs away", async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderCloseDate();
+    await user.click(trigger());
+    await user.clear(dayBox());
+    await user.type(dayBox(), "15/04/2026");
+    await user.tab();
+    await user.tab();
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith("2026-04-15"));
+  });
+});

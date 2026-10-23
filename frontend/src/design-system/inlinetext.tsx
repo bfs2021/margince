@@ -10,6 +10,8 @@ import { useT } from "../i18n";
 import { isImeCommit } from "../lib/imecommit";
 import { problemMessageOf } from "../lib/problem";
 import { BusyMark, Button, Field, Textarea, TextInput } from "./atoms";
+import { DateInput, type DateInputProps, isoOrBlank } from "./dateinput";
+import { panelsOpenedFrom } from "./dialogfocus";
 import "./inlinechoice.css";
 
 // Free-text editing follows the same save/refusal contract as choices.
@@ -23,22 +25,105 @@ import "./inlinechoice.css";
 // commit (a chooser commits the instant something is picked; typing has no
 // such moment, so Enter or losing focus stands in for it), and something to
 // press when the value is empty, since there is no text to click on.
-// One control, two elements. The edit session's rules — focus on open, Escape
-// reverts, blur commits, `readOnly` while saving — are identical for a line and
-// for a paragraph, so they are written once above and this only decides which
-// element receives them. Written as a forwarding component rather than a
-// ternary at the call site so the whole prop set cannot drift between the two
+// One control, three elements. The edit session's rules — focus on open, Escape
+// reverts, blur commits, `readOnly` while saving — are identical for a line, a
+// day and a paragraph, so they are written once above and this only decides
+// which element receives them. Written as a forwarding component rather than a
+// ternary at the call site so the whole prop set cannot drift between the
 // branches, which is exactly how one of them would quietly lose `aria-invalid`.
 const InlineTextControl = forwardRef<
   HTMLInputElement & HTMLTextAreaElement,
-  { multiline?: boolean } & ComponentPropsWithoutRef<"input"> &
-    ComponentPropsWithoutRef<"textarea">
->(function InlineTextControl({ multiline, ...props }, ref) {
+  Readonly<{
+    multiline?: boolean;
+    value: string;
+    onDraft: (next: string) => void;
+    onPick: (next: string) => void;
+    onLeave: () => void;
+  }> &
+    Omit<
+      ComponentPropsWithoutRef<"input"> & ComponentPropsWithoutRef<"textarea">,
+      "value" | "defaultValue" | "onChange" | "onBlur" | "min" | "max"
+    >
+>(function InlineTextControl(
+  { multiline, type, onDraft, onPick, onLeave, ...props },
+  ref,
+) {
   if (multiline) {
-    return <Textarea ref={ref} rows={4} {...props} />;
+    return (
+      <Textarea
+        ref={ref}
+        rows={4}
+        {...props}
+        onChange={(event) => onDraft(event.target.value)}
+        onBlur={onLeave}
+      />
+    );
   }
-  return <TextInput ref={ref} {...props} />;
+  if (type === "date") {
+    return (
+      <InlineDate
+        ref={ref}
+        {...props}
+        onDraft={onDraft}
+        onPick={onPick}
+        onLeave={onLeave}
+      />
+    );
+  }
+  return (
+    <TextInput
+      ref={ref}
+      type={type}
+      {...props}
+      onChange={(event) => onDraft(event.target.value)}
+      onBlur={onLeave}
+    />
+  );
 });
+
+// The calendar is portalled out of the field, so focus moving into it, and a
+// day picked there, belong to this edit: the pick saves as Enter does.
+function InlineDate({
+  value,
+  onDraft,
+  onPick,
+  onLeave,
+  ...box
+}: Readonly<{
+  value: string;
+  onDraft: (next: string) => void;
+  onPick: (next: string) => void;
+  onLeave: () => void;
+}> &
+  Omit<DateInputProps, "value" | "onChange" | "onBlur">) {
+  const shell = useRef<HTMLSpanElement>(null);
+  const inCalendar = (node: Element | null) =>
+    node !== null &&
+    panelsOpenedFrom(shell.current).some((panel) => panel.contains(node));
+  return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: not a control — it hears focus leave the text box and calendar button inside it
+    <span
+      ref={shell}
+      className="inlinetext-date"
+      onBlur={(event) => {
+        const next = event.relatedTarget;
+        if (!shell.current?.contains(next) && !inCalendar(next)) {
+          onLeave();
+        }
+      }}
+    >
+      <DateInput
+        {...box}
+        value={isoOrBlank(value)}
+        onChange={(event) =>
+          (inCalendar(document.activeElement) ? onPick : onDraft)(
+            event.target.value,
+          )
+        }
+      />
+    </span>
+  );
+}
 
 // The field for a reader who cannot edit it. `placeholder` is written for
 // someone about to press it ("Add legal name"): shown plain to a viewer who
@@ -254,7 +339,7 @@ export function InlineText({
   // `byKeyboard` is what tells the two exits apart: an Enter press ends the
   // edit without moving the reader anywhere, so focus goes back to the value
   // they were on; a blur means they have already moved, and is left alone.
-  const commit = async (byKeyboard = false) => {
+  const commit = async (byKeyboard = false, typed = draft) => {
     // A commit already in flight owns the next state transition; a second
     // one racing in behind it (Enter, then the blur disabling the input for
     // `saving` fires synchronously) would double-send the same edit.
@@ -266,7 +351,7 @@ export function InlineText({
       field.current.focus();
       return;
     }
-    const next = multiline ? draft : draft.trim();
+    const next = multiline ? typed : typed.trim();
     // Saving what is already stored writes an audit row for a change that did
     // not happen. Blur fires on every exit now, so this guard is what keeps
     // "clicked in, typed nothing, clicked out" silent.
@@ -316,7 +401,11 @@ export function InlineText({
             // needs. `aria-busy` carries the reason.
             readOnly={saving}
             aria-busy={saving || undefined}
-            onChange={(event) => setDraft(event.target.value)}
+            onDraft={setDraft}
+            onPick={(picked) => {
+              setDraft(picked);
+              void commit(true, picked);
+            }}
             onKeyDown={(event) => {
               // In a paragraph Enter is a newline and the commit moves to
               // Cmd/Ctrl+Enter; in a line Enter is still the commit.
@@ -335,7 +424,7 @@ export function InlineText({
                 setEditing(false);
               }
             }}
-            onBlur={() => {
+            onLeave={() => {
               if (cancelling.current) {
                 cancelling.current = false;
                 return;
