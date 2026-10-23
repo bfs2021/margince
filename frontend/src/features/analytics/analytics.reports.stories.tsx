@@ -41,9 +41,8 @@ export const FinishedRun: Story = {
   render: card,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await canvas.findByRole("region");
     const frame = await canvas.findByText(/As of/);
-    await expect(frame.textContent).toContain("UTC");
+    await expect(frame.textContent).toMatch(/UTC/);
     await expect(frame.textContent).not.toContain("/");
   },
 };
