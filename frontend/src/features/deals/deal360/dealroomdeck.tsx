@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 // SPDX-FileCopyrightText: 2026 Gradion
 
-// The parts of the room's reading above its documents: the band, the notice a
-// stopped room shows, what the room still lacks, and the attendance line. The
-// tab draws all four; the room's own page draws the notice and the line.
+// The parts of the room's reading above its documents. They are the band, a
+// stopped room's notice, what the room still lacks, and the attendance line.
+// The tab draws all four; the room's own page draws the notice and the line.
 
 import { DoorOpen } from "lucide-react";
 import { type ReactNode, useId, useState } from "react";
@@ -221,11 +221,10 @@ export function RoomSetup({
 
 // Who is in the room, under its name: how many were invited, how many have
 // been through the door, and when a buyer last looked. The counts come from
-// the same participants read the Access panel makes, so this is a second
-// READING of one request rather than a second request.
+// the participants read the access panel already makes, so no second request.
 //
-// It is a summary and the panel is the register: the line says how many, the
-// panel says who — which is why the two are not one fact said twice.
+// The line says how many and the panel says who, so the two are not one fact
+// said twice.
 export function RoomFacts({ room }: Readonly<{ room: DealRoom }>) {
   const t = useT();
   const { locale } = useLocale();
