@@ -14,23 +14,10 @@ import { DateInput, type DateInputProps, isoOrBlank } from "./dateinput";
 import { panelsOpenedFrom } from "./dialogfocus";
 import "./inlinechoice.css";
 
-// Free-text editing follows the same save/refusal contract as choices.
-// description, edited where it is read rather than inside a form that also
-// asks about legal names and size bands.
-//
-// It keeps the same rules as InlineChoice above — a viewer who may not edit
-// sees the value with no hover affordance, a failed save keeps the typed
-// text and shows the refusal beside the field, Escape reverts — and adds the
-// two a text field needs that a chooser does not: an explicit MOMENT of
-// commit (a chooser commits the instant something is picked; typing has no
-// such moment, so Enter or losing focus stands in for it), and something to
-// press when the value is empty, since there is no text to click on.
-// One control, three elements. The edit session's rules — focus on open, Escape
-// reverts, blur commits, `readOnly` while saving — are identical for a line, a
-// day and a paragraph, so they are written once above and this only decides
-// which element receives them. Written as a forwarding component rather than a
-// ternary at the call site so the whole prop set cannot drift between the
-// branches, which is exactly how one of them would quietly lose `aria-invalid`.
+// Edits a value where it is read, under InlineChoice's save and refusal rules.
+// Typing has no moment of choice, so Enter or leaving the field commits it.
+// One forwarding control holds the line, the day and the paragraph, so their
+// shared props cannot drift apart and lose `aria-invalid` on one branch.
 const InlineTextControl = forwardRef<
   HTMLInputElement & HTMLTextAreaElement,
   Readonly<{
@@ -81,8 +68,8 @@ const InlineTextControl = forwardRef<
   );
 });
 
-// The calendar is portalled out of the field, so focus moving into it, and a
-// day picked there, belong to this edit: the pick saves as Enter does.
+// The calendar is portalled out of the field, so focus inside it stays in this edit.
+// A day picked there saves the way Enter does.
 function InlineDate({
   value,
   onDraft,
