@@ -27,14 +27,14 @@
     --glowB: rgba(91, 97, 214, .10);
     --shadow: 0 1px 2px rgba(16, 26, 21, .04), 0 18px 40px -18px rgba(16, 26, 21, .18);
     --mesh:
-      radial-gradient(55% 80% at 100% 0%, rgba(91, 97, 214, .30), transparent 60%),
-      radial-gradient(70% 90% at 85% 10%, rgba(43, 182, 115, .55), transparent 60%),
-      radial-gradient(80% 120% at 0% 100%, #0b7a53, transparent 70%),
-      linear-gradient(135deg, #075a3c 0%, #06311f 100%);
+      radial-gradient(55% 80% at 100% 0%, rgba(91, 97, 214, .16), transparent 60%),
+      radial-gradient(70% 90% at 85% 10%, rgba(43, 182, 115, .30), transparent 60%),
+      radial-gradient(80% 120% at 0% 100%, rgba(11, 122, 83, .70), transparent 70%),
+      linear-gradient(135deg, #08603f 0%, #06402a 100%);
     --bandFill:
-      radial-gradient(60% 220% at 92% 0%, rgba(255, 255, 255, .22), transparent 60%),
-      radial-gradient(40% 200% at 100% 100%, rgba(91, 97, 214, .35), transparent 70%),
-      linear-gradient(100deg, #0a6f4b 0%, #0b7a53 45%, #16a06c 100%);
+      radial-gradient(60% 220% at 92% 0%, rgba(255, 255, 255, .10), transparent 60%),
+      radial-gradient(40% 200% at 100% 100%, rgba(91, 97, 214, .16), transparent 70%),
+      linear-gradient(100deg, #0a6f4b 0%, #0b7a53 55%, #108a5e 100%);
   }
   @page { size: 1280px 720px; margin: 0; }
   * { box-sizing: border-box; }
@@ -134,17 +134,8 @@
   }
   .stat .label { margin-top: 14px; font-size: 18px; color: var(--ink3); }
 
-  /* Title and closing: a dark emerald mesh with a faint grid that fades out. */
+  /* Title and closing: a dark emerald mesh. */
   .hero { background: var(--mesh); color: #fff; }
-  .hero::before {
-    content: ""; position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
-    background-size: 48px 48px;
-    -webkit-mask-image: radial-gradient(80% 90% at 85% 15%, #000, transparent 75%);
-    mask-image: radial-gradient(80% 90% at 85% 15%, #000, transparent 75%);
-  }
   .hero .inner { position: absolute; inset: 0; padding: 64px 88px 72px; display: flex; flex-direction: column; }
   .hero .lockup svg { height: 34px; }
   .hero .lockup span { font-size: 34px; }

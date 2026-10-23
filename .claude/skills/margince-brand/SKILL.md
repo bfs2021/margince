@@ -113,8 +113,8 @@ Emerald is the one brand colour. Grey carries everything else, and no colour is 
 - Every content slide opens under the band: a rounded emerald gradient bar set 20px in from the edge, with the
   lockup at the left and the deck name and a page pill at the right.
 - A document's first page opens under a rounded emerald mesh card that holds the lockup, kind, title and meta.
-- Title and closing slides are a full deep-emerald mesh with a faint grid fading in from the top right. A section
-  slide has a rounded mesh panel on its left third.
+- Title and closing slides are a full deep-emerald mesh with a soft mint glow at the top right. A section slide
+  has a rounded mesh panel on its left third.
 - Cards are white, with a 22px radius, a hairline edge and a soft shadow. No hard rules, borders or bars.
 - One idea per slide: an eyebrow, a heading that states the idea in one sentence, then at most five points.
 - Leave empty ground empty. Split a full slide in two rather than shrink its type.

@@ -21,10 +21,10 @@
     --warning: #f5a524;
     --gutter: 20mm;
     --mesh:
-      radial-gradient(55% 80% at 100% 0%, rgba(91, 97, 214, .30), transparent 60%),
-      radial-gradient(70% 90% at 85% 10%, rgba(43, 182, 115, .55), transparent 60%),
-      radial-gradient(80% 120% at 0% 100%, #0b7a53, transparent 70%),
-      linear-gradient(135deg, #075a3c 0%, #06311f 100%);
+      radial-gradient(55% 80% at 100% 0%, rgba(91, 97, 214, .16), transparent 60%),
+      radial-gradient(70% 90% at 85% 10%, rgba(43, 182, 115, .30), transparent 60%),
+      radial-gradient(80% 120% at 0% 100%, rgba(11, 122, 83, .70), transparent 70%),
+      linear-gradient(135deg, #08603f 0%, #06402a 100%);
   }
   @page {
     size: A4;
@@ -55,16 +55,6 @@
     background: var(--mesh); color: #fff;
     padding: 10mm 12mm 11mm;
   }
-  .band::before {
-    content: ""; position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
-    background-size: 7mm 7mm;
-    -webkit-mask-image: radial-gradient(70% 100% at 90% 10%, #000, transparent 75%);
-    mask-image: radial-gradient(70% 100% at 90% 10%, #000, transparent 75%);
-  }
-  .band > * { position: relative; }
   .lockup { display: flex; align-items: center; gap: 8px; }
   .lockup svg { height: 17px; width: auto; color: #fff; }
   .lockup span { font: 700 17px/1 Outfit, sans-serif; letter-spacing: -0.02em; }
