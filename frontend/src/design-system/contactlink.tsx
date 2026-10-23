@@ -51,7 +51,7 @@ type ContactValue = {
       kind: "email";
       // The record a message to this address is filed under.
       record: WriteToRecord;
-      // The record takes no writes — archived, closed — so the address is a
+      // The record takes no writes (archived, closed), so the address is a
       // fact to keep and not a door to open. The verb beside it carries the
       // reason; a second control saying the same thing would say it twice.
       readOnly?: boolean;

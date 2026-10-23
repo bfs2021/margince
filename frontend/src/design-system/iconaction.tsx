@@ -30,11 +30,7 @@ type IconActionFace = {
   /** The glyph, `aria-hidden` — the label is what names this control. */
   icon: ReactNode;
   variant?: "primary" | "ghost" | "danger";
-  /**
-   * For a glyph that sits IN a line of text (a table cell, a reading's label
-   * row) rather than in a row of verbs: the square keeps its whole target but
-   * takes one line box of its host, so the line it joins keeps its height.
-   */
+  /** A glyph inside a line of text: the square keeps its target and takes one line box. */
   inline?: boolean;
   /** Passed through, for a control a test already reaches by its own handle. */
   testId?: string;
@@ -87,29 +83,8 @@ type IconActionLink = {
 } & { [Key in Exclude<keyof IconActionPress, "href">]?: never };
 
 /**
- * A verb whose glyph is its whole label: square, named, and named again on
- * hover.
- *
- * `Button iconOnly` already draws the square and already documents that the
- * caller owes it an accessible name. What it cannot do is give a SIGHTED reader
- * that name — and a row of unlabelled glyphs is a row of guesses, which is the
- * reason icon-only buttons get talked out of. This pairs the two halves so they
- * cannot come apart: one `label`, spoken through `aria-label` and shown through
- * `useTooltip`, so the name a screen reader hears and the name a pointer reveals
- * are the same string and there is no second prop for them to disagree in.
- *
- * WHEN to reach for it, and it is not "whenever there is an icon": only for a
- * verb a reader already knows from the glyph — mail, phone, calendar, pencil,
- * link, the overflow ellipsis. A verb whose consequence a reader must read
- * before pressing (convert, merge, archive, disqualify) keeps its words, and a
- * verb that is rare enough to need explaining belongs in an overflow menu where
- * it can have a whole line. Squaring those saves a few pixels and costs the
- * reader the one thing they needed.
- *
- * The handlers ride a wrapping span rather than the button: focus and pointer
- * events reach it from the control inside, and the alternative is merging a
- * caller's ref and pointer handlers into `Button`'s own prop contract, which is
- * guarded on purpose against exactly that kind of arrival.
+ * A verb whose glyph is its whole label: one `label` is its `aria-label` and its tooltip.
+ * The handlers sit on a wrapping span, so a caller's ref and pointer events stay out of `Button`'s props.
  */
 export function IconAction(
   props: Readonly<IconActionFace & (IconActionPress | IconActionLink)>,
