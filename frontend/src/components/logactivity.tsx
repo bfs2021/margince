@@ -267,6 +267,7 @@ export function LogActivityForm({
               // against the same clock, so the box refuses exactly the days the
               // submit would have moved.
               max={latestDayOf(draft.kind, recordZone)}
+              today={isoOrBlank(todayDay(draft.kind, recordZone)) || undefined}
               onChange={(event) => setField({ day: event.target.value })}
             />
           )}

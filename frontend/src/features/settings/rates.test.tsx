@@ -10,6 +10,9 @@ import {
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { today } from "../../format/calendarday";
+import { formatDate } from "../../format/format";
+import { viewerZone } from "../../format/timezone";
 import { LocaleProvider } from "../../i18n";
 import { type GrantSpec, meFixture } from "../../testing/mefixture";
 import { ModelPricesCard } from "../ai/ai-price-sync";
@@ -380,6 +383,31 @@ describe("the rate sheets", () => {
       name: /^Wednesday, 15 July 2026, Earliest date: /,
     });
     expect(lastWeek.getAttribute("aria-disabled")).toBe("true");
+  });
+
+  it("offers the floor as Today, so the marked day is one the price may take", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-07-20T12:00:00Z"));
+    const user = userEvent.setup();
+    mount(RATE_SETTER);
+    await screen.findByText("claude-opus-4-8");
+    await user.click(
+      within(rateCard("Model prices")).getByRole("button", {
+        name: "Add model rate",
+      }),
+    );
+    const dialog = within(await screen.findByRole("dialog"));
+    const effective = dialog.getByRole<HTMLInputElement>("textbox", {
+      name: "Effective",
+    });
+    await user.tripleClick(effective);
+    await user.keyboard("{Backspace}");
+    await user.click(dialog.getByRole("button", { name: "Choose date" }));
+    const pickToday = await screen.findByRole("button", { name: "Today" });
+    expect(pickToday).toHaveProperty("disabled", false);
+    await user.click(pickToday);
+
+    expect(effective.value).toBe(formatDate(today(), "en", viewerZone()));
   });
 
   it("shows write affordances for an admin", async () => {

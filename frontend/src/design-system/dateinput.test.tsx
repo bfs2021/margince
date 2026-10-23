@@ -20,7 +20,7 @@ afterEach(() => {
   setDateTimePreferences({ dateFormat: "locale", timeFormat: "locale" });
 });
 
-const TODAY = new Date(2026, 4, 20);
+const TODAY = "2026-05-20";
 
 function Due(
   props: Readonly<
@@ -284,6 +284,53 @@ describe("a form around a day it cannot read", () => {
     await user.keyboard("31/02/2026{Enter}");
 
     expect(post).toHaveBeenCalledWith("");
+  });
+});
+
+// The boxes a real layout gives: a field ending at the page gutter of a phone,
+// and the calendar's own width. Happy-dom lays nothing out.
+function laidOut(field: Readonly<{ left: number; right: number }>) {
+  vi.stubGlobal("innerWidth", 390);
+  vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+    function (this: HTMLElement) {
+      return this.classList.contains("date-input")
+        ? new DOMRect(field.left, 300, field.right - field.left, 40)
+        : new DOMRect(0, 0, 0, 0);
+    },
+  );
+  vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockImplementation(
+    function (this: HTMLElement) {
+      return this.classList.contains("date-popup") ? 274 : 0;
+    },
+  );
+}
+
+describe("where the calendar opens", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("hangs off the end of a field in the right-hand column, inside the screen", async () => {
+    laidOut({ left: 201, right: 374 });
+    const user = userEvent.setup();
+    render(<Due />);
+
+    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    const dialog = await screen.findByRole("dialog", { name: "Choose date" });
+
+    expect(dialog.style.left).toBe("100px");
+  });
+
+  it("stays on the screen when the field's end is nearer the start than its width", async () => {
+    laidOut({ left: 16, right: 190 });
+    const user = userEvent.setup();
+    render(<Due />);
+
+    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    const dialog = await screen.findByRole("dialog", { name: "Choose date" });
+
+    expect(dialog.style.left).toBe("4px");
   });
 });
 

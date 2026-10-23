@@ -385,6 +385,26 @@ describe("the start a meeting outcome saves", () => {
     });
   });
 
+  it("marks the record's today, under the cap, while the browser is a day ahead", async () => {
+    // 10:00Z is the 19th at 23:00 in Pago Pago and the 20th from UTC-10 eastward.
+    vi.useFakeTimers({ toFake: ["Date"], shouldAdvanceTime: true });
+    vi.setSystemTime(new Date("2026-01-20T10:00:00Z"));
+    stubWithMeetingRead([]);
+    const user = userEvent.setup();
+    renderUnderAToastRegion("Pacific/Pago_Pago");
+    await user.click(await screen.findByRole("button", { name: /update/i }));
+    await user.click(
+      await screen.findByRole("button", { name: "Choose date" }),
+    );
+    const today = await screen.findByRole("button", { name: "Today" });
+    expect(today).toHaveProperty("disabled", false);
+    await user.click(today);
+
+    expect(
+      screen.getByRole<HTMLInputElement>("textbox", { name: "Date" }).value,
+    ).toBe("19/01/2026");
+  });
+
   it("sends nothing when the picked day does not exist in the record zone", async () => {
     // Apia skipped 30 December 2011 when it moved across the date line.
     const sent: Record<string, unknown>[] = [];

@@ -3,12 +3,12 @@
 
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
-import { expect, screen, userEvent, within } from "storybook/test";
+import { expect, screen, userEvent, waitFor, within } from "storybook/test";
 import { type Locale, LocaleProvider } from "../i18n";
 import { DateInput, type ISODate } from "./dateinput";
 import { Field } from "./field";
 
-const TODAY = new Date(2026, 4, 20);
+const TODAY = "2026-05-20";
 
 const meta: Meta<typeof DateInput> = {
   title: "Components/Forms and input/Date input",
@@ -163,5 +163,39 @@ export const AtPhoneWidth: Story = {
     await expect(
       await screen.findByRole("dialog", { name: "Choose date" }),
     ).toBeTruthy();
+  },
+};
+
+// The field sits in the right-hand column of a phone form, as in Log activity.
+// The calendar hangs off the field's end and stays inside the page gutter.
+export const AtPhoneEndEdge: Story = {
+  render: () => (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "var(--space-3)",
+      }}
+    >
+      <Due label="Starts" initial="2026-05-04" />
+      <Due label="Due date" initial="2026-05-06" />
+    </div>
+  ),
+  globals: { viewport: { value: "phone" } },
+  tags: ["uat-phone"],
+  play: async ({ canvasElement }) => {
+    const openers = await within(canvasElement).findAllByRole("button", {
+      name: "Choose date",
+    });
+    const opener = openers.at(-1);
+    if (opener) {
+      await userEvent.click(opener);
+    }
+    const dialog = await screen.findByRole("dialog", { name: "Choose date" });
+    await waitFor(() => {
+      const box = dialog.getBoundingClientRect();
+      expect(box.left).toBeGreaterThanOrEqual(16);
+      expect(box.right).toBeLessThanOrEqual(globalThis.innerWidth - 16);
+    });
   },
 };

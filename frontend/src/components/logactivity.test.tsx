@@ -61,14 +61,14 @@ function jsonResponse(body: unknown, status = 200) {
 // actually used.
 const INSTALLATION_ZONE = "Asia/Ho_Chi_Minh";
 
-function render(ui: ReactNode) {
+function render(ui: ReactNode, zone = INSTALLATION_ZONE) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   return rtlRender(
     <QueryClientProvider client={client}>
       <LocaleProvider initial="en">
-        <RecordZoneProvider zone={INSTALLATION_ZONE}>{ui}</RecordZoneProvider>
+        <RecordZoneProvider zone={zone}>{ui}</RecordZoneProvider>
       </LocaleProvider>
     </QueryClientProvider>,
   );
@@ -113,34 +113,14 @@ const FAR_WEST_READER = "America/Bogota";
 // — asserted anyway, because the two directions fail separately.
 const FAR_EAST_READER = "Pacific/Kiritimati";
 
-// The due_at off a captured request body. A narrowing read rather than a cast:
-// the body is genuinely unknown here, and a request that carried no due date at
-// all would otherwise pass the assertions below as `undefined`.
-function postedDueAt(body: unknown): string {
-  if (typeof body !== "object" || body === null || !("due_at" in body)) {
-    throw new Error("expected the logged activity to carry a due_at");
+// An instant off a captured body, narrowed so a missing one cannot pass as `undefined`.
+function postedInstant(body: unknown, key: "due_at" | "occurred_at"): string {
+  const instant: unknown =
+    body && Object.getOwnPropertyDescriptor(body, key)?.value;
+  if (typeof instant !== "string") {
+    throw new Error(`expected the logged activity to carry ${key}`);
   }
-  const dueAt = body.due_at;
-  if (typeof dueAt !== "string") {
-    throw new Error(`expected due_at to be an instant, got ${typeof dueAt}`);
-  }
-  return dueAt;
-}
-
-// The occurred_at off a captured request body, narrowed the same way and for the
-// same reason: an entry that carried no instant would otherwise satisfy a day
-// comparison as `undefined` on both sides.
-function postedOccurredAt(body: unknown): string {
-  if (typeof body !== "object" || body === null || !("occurred_at" in body)) {
-    throw new Error("expected the logged activity to carry an occurred_at");
-  }
-  const occurredAt = body.occurred_at;
-  if (typeof occurredAt !== "string") {
-    throw new Error(
-      `expected occurred_at to be an instant, got ${typeof occurredAt}`,
-    );
-  }
-  return occurredAt;
+  return instant;
 }
 
 function stubApi(
@@ -371,7 +351,7 @@ describe("log activity from a 360", () => {
     // the record pages render timelines — and still on it for a reader at
     // either edge of the twelve hours `middayInstant` promises. A note never
     // carries a due date, backdated or not.
-    const occurred = new Date(postedOccurredAt(post.body));
+    const occurred = new Date(postedInstant(post.body, "occurred_at"));
     expect(calendarDay(occurred, INSTALLATION_ZONE)).toBe(PICKED_DAY);
     expect(calendarDay(occurred, FAR_WEST_READER)).toBe(PICKED_DAY);
     expect(calendarDay(occurred, FAR_EAST_READER)).toBe(PICKED_DAY);
@@ -414,7 +394,7 @@ describe("log activity from a 360", () => {
     );
     const post = captured.find((entry) => entry.key === "POST /activities");
     if (!post) throw new Error("expected a POST /activities to be captured");
-    const occurred = new Date(postedOccurredAt(post.body));
+    const occurred = new Date(postedInstant(post.body, "occurred_at"));
     // The day the composer offered IS the day the timeline files it under.
     expect(calendarDay(occurred, INSTALLATION_ZONE)).toBe("2026-08-22");
   });
@@ -577,10 +557,27 @@ describe("log activity from a 360", () => {
     );
     const post = captured.find((entry) => entry.key === "POST /activities");
     if (!post) throw new Error("expected a POST /activities to be captured");
-    const occurred = new Date(postedOccurredAt(post.body));
+    const occurred = new Date(postedInstant(post.body, "occurred_at"));
     expect(calendarDay(occurred, INSTALLATION_ZONE)).toBe(writersOwnToday);
   });
 
+  it("marks the record's today, under the cap, while the browser is a day ahead", async () => {
+    // 10:00Z is the 23rd at 23:00 in Pago Pago and the 24th from UTC-10 eastward.
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-24T10:00:00Z"));
+    const user = userEvent.setup();
+    stubApi({});
+    render(
+      <LogActivity entityType="company" entityId="o1" />,
+      "Pacific/Pago_Pago",
+    );
+    await typeDay(user, dayBox("Date"), "2026-10-20");
+    await user.click(screen.getByRole("button", { name: "Choose date" }));
+    const today = await screen.findByRole("button", { name: "Today" });
+    expect(today).toHaveProperty("disabled", false);
+    await user.click(today);
+    expect(dayBox("Date").value).toBe("23/10/2026");
+  });
   it("refuses a future day for a note but not for a task's due date", async () => {
     const captured: Captured[] = [];
     stubApi({ "POST /activities": createdActivity }, captured);
@@ -631,7 +628,7 @@ describe("log activity from a 360", () => {
       source: "manual",
     });
     if (!post) throw new Error("expected a POST /activities to be captured");
-    const dueAt = new Date(postedDueAt(post.body));
+    const dueAt = new Date(postedInstant(post.body, "due_at"));
     // The instant has to fall on the day the writer picked, read in the zone
     // the deadline is ANCHORED to — the bare `yyyy-mm-dd` handed to `new Date`
     // is UTC midnight, which is the previous calendar day for every writer west
@@ -642,7 +639,11 @@ describe("log activity from a 360", () => {
     // machine running the test, so it agreed only where the record zone and the
     // runner's zone happened to be the same one.
     expect(
-      formatTimeOfDay(postedDueAt(post.body), "en", INSTALLATION_ZONE),
+      formatTimeOfDay(
+        postedInstant(post.body, "due_at"),
+        "en",
+        INSTALLATION_ZONE,
+      ),
     ).toBe("23:59");
   });
 

@@ -38,11 +38,7 @@ import { ifMatch, requireVersion } from "../../api/version";
 import { ActivityBodyField } from "../../components/activitybodyfield";
 import { useMeetingOutcome } from "../../components/taskactions";
 import { Button, Field, Modal, TextInput } from "../../design-system/atoms";
-import {
-  DateInput,
-  isISODate,
-  isoOrBlank,
-} from "../../design-system/dateinput";
+import { DateInput, isoOrBlank } from "../../design-system/dateinput";
 import { ErrorLine } from "../../design-system/errorline";
 import { Heading } from "../../design-system/heading";
 import { Select } from "../../design-system/select";
@@ -181,7 +177,8 @@ function MeetingOutcomeDialog({
   const [draft, setDraft] = useState<OutcomeDraft | null>(null);
   const [seed, setSeed] = useState<OutcomeSeed | null>(null);
   const [dayRefused, setDayRefused] = useState(false);
-  const latestDay = calendarDay(new Date(), recordZone);
+  const latestDay =
+    isoOrBlank(calendarDay(new Date(), recordZone)) || undefined;
   // The SAME read the task detail makes, and keyed the same way, so a write
   // that invalidates ["activity", id] refreshes whichever of the two is open.
   const meeting = useActivity(id);
@@ -310,7 +307,8 @@ function MeetingOutcomeDialog({
                     value={isoOrBlank(draft.day)}
                     // A meeting cannot have happened in the future, and the cap
                     // makes the box say so rather than leaving the server to.
-                    max={isISODate(latestDay) ? latestDay : undefined}
+                    max={latestDay}
+                    today={latestDay}
                     onChange={(event) => {
                       setDayRefused(false);
                       setDraft({ ...draft, day: event.target.value });

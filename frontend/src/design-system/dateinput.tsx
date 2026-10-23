@@ -21,12 +21,8 @@ import {
 } from "../format/datepattern";
 import { useDateTimePreferences } from "../format/preferences";
 import { type Locale, useLocale, useT } from "../i18n";
-import {
-  type PopupBox,
-  type PopupFrame,
-  useAnchoredPopup,
-  useDismissOnOutsidePress,
-} from "./anchoredpopup";
+import { useAnchoredToTrigger } from "./anchored";
+import { useDismissOnOutsidePress } from "./anchoredpopup";
 import { Button } from "./button";
 import { Calendar, dateOf, isoDay } from "./calendar";
 import { useDialogFocus } from "./dialogfocus";
@@ -45,8 +41,8 @@ export type DateInputChange = Readonly<{
 }>;
 
 /**
- * The text box's own props, with the date narrowed to `YYYY-MM-DD`. `today`
- * is the day the calendar marks; it is read off the clock when left out.
+ * The text box's own props, with the date narrowed to `YYYY-MM-DD`. `today` is the
+ * day the calendar marks and Today picks: pass the day a `min`/`max` counts from.
  */
 export type DateInputProps = Omit<
   ComponentPropsWithRef<"input">,
@@ -58,7 +54,7 @@ export type DateInputProps = Omit<
     onChange?: (event: DateInputChange) => void;
     min?: ISODate;
     max?: ISODate;
-    today?: Date;
+    today?: ISODate;
   }>;
 
 // `base` is the value before the reader began typing, `reported` what the text
@@ -103,7 +99,7 @@ export function DateInput({
     draft && (current === draft.base || current === draft.reported)
       ? draft
       : null;
-  const [openedOn, setOpenedOn] = useState<Date | null>(null);
+  const [openedOn, setOpenedOn] = useState<ISODate | null>(null);
   const shell = useRef<HTMLSpanElement | null>(null);
   const input = useRef<HTMLInputElement | null>(null);
   const popupId = useId();
@@ -191,7 +187,9 @@ export function DateInput({
         opensDialog
         disclosure={{ expanded: openedOn !== null, controls: popupId }}
         onClick={() =>
-          setOpenedOn((opened) => (opened ? null : (today ?? new Date())))
+          setOpenedOn((opened) =>
+            opened ? null : (today ?? isoDay(new Date())),
+          )
         }
       />
       {name !== undefined && (
@@ -231,7 +229,7 @@ function DatePopup({
   id: string;
   anchor: RefObject<HTMLSpanElement | null>;
   selected: ISODate | "";
-  today: Date;
+  today: ISODate;
   locale: Locale;
   refusal: (day: ISODate) => string | undefined;
   onPick: (next: ISODate | "") => void;
@@ -239,10 +237,8 @@ function DatePopup({
 }>) {
   const t = useT();
   const panel = useRef<HTMLDivElement | null>(null);
-  const [month, setMonth] = useState(() =>
-    selected ? dateOf(selected) : today,
-  );
-  const frame = useAnchoredPopup(anchor, panel, true, onClose);
+  const [month, setMonth] = useState(() => dateOf(selected || today));
+  const at = useAnchoredToTrigger(true, anchor, panel, "end");
   useDismissOnOutsidePress(true, onClose, anchor, panel);
   useDialogFocus({
     open: true,
@@ -254,7 +250,7 @@ function DatePopup({
     returnFocusTo: () =>
       anchor.current?.querySelector<HTMLElement>("button") ?? null,
   });
-  const todayRefused = refusal(isoDay(today)) !== undefined;
+  const todayRefused = refusal(today) !== undefined;
 
   return createPortal(
     <div
@@ -264,19 +260,23 @@ function DatePopup({
       aria-modal="true"
       aria-label={t("calendar.chooseDate")}
       className="date-popup"
-      style={frame ? placed(frame) : undefined}
+      style={{
+        top: `${at.top}px`,
+        left: `${at.left}px`,
+        maxHeight: `${at.maxHeight}px`,
+      }}
     >
       <Calendar
         month={month}
         onMonthChange={setMonth}
         selected={selected}
         onSelect={onPick}
-        today={today}
+        today={dateOf(today)}
         locale={locale}
         refusal={refusal}
       />
       <div className="date-popup-foot">
-        <Button disabled={todayRefused} onClick={() => onPick(isoDay(today))}>
+        <Button disabled={todayRefused} onClick={() => onPick(today)}>
           {t("calendar.today")}
         </Button>
         <Button onClick={() => onPick("")}>{t("calendar.clear")}</Button>
@@ -284,17 +284,6 @@ function DatePopup({
     </div>,
     document.body,
   );
-}
-
-// Not `contentSizedPopupBox`: its floor is the field's width, which stretches a month across a wide form.
-function placed(frame: PopupFrame): PopupBox {
-  return {
-    left: frame.left,
-    top: frame.top,
-    bottom: frame.bottom,
-    maxHeight: frame.maxHeight,
-    "--popupRoom": `${frame.room}px`,
-  };
 }
 
 function shown(day: ISODate | "", pattern: DatePattern): string {
