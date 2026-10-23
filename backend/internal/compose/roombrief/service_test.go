@@ -10,6 +10,7 @@ import (
 	"time"
 
 	crmcontracts "github.com/margince/margince/backend/internal/contracts"
+	"github.com/margince/margince/backend/internal/platform/clocktest"
 	"github.com/margince/margince/backend/internal/shared/apperrors"
 	"github.com/margince/margince/backend/internal/shared/kernel/ids"
 	"github.com/margince/margince/backend/internal/shared/kernel/principal"
@@ -50,7 +51,7 @@ func actor(kind principal.PrincipalType) context.Context {
 
 func TestAnAgentIsRefusedBeforeTheRoomIsRead(t *testing.T) {
 	rooms := &countingRooms{}
-	_, err := NewService(nil, rooms, time.Now).Get(actor(principal.PrincipalAgent), ids.From[ids.DealRoomKind](ids.NewV7()))
+	_, err := NewService(nil, rooms, func() time.Time { return clocktest.Now(t) }).Get(actor(principal.PrincipalAgent), ids.From[ids.DealRoomKind](ids.NewV7()))
 	if !errors.Is(err, apperrors.ErrPermissionDenied) {
 		t.Fatalf("an agent's read = %v, want permission denied", err)
 	}
@@ -61,7 +62,7 @@ func TestAnAgentIsRefusedBeforeTheRoomIsRead(t *testing.T) {
 
 func TestARoomTheCallerCannotSeeIsNotReadFurther(t *testing.T) {
 	rooms := &countingRooms{roomErr: apperrors.ErrNotFound}
-	_, err := NewService(nil, rooms, time.Now).Get(actor(principal.PrincipalHuman), ids.From[ids.DealRoomKind](ids.NewV7()))
+	_, err := NewService(nil, rooms, func() time.Time { return clocktest.Now(t) }).Get(actor(principal.PrincipalHuman), ids.From[ids.DealRoomKind](ids.NewV7()))
 	if !errors.Is(err, apperrors.ErrNotFound) {
 		t.Fatalf("an unseen room = %v, want not found", err)
 	}
