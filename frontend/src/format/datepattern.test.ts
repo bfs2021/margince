@@ -1,13 +1,21 @@
 // SPDX-License-Identifier: BUSL-1.1
 // SPDX-FileCopyrightText: 2026 Gradion
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import { LOCALES } from "../i18n/locale";
 import {
   datePattern,
   formatISODate,
   parseTypedDate,
   patternPlaceholder,
 } from "./datepattern";
+import { formatDate } from "./format";
+import {
+  type DateFormat,
+  FIXED_DATE_PATTERNS,
+  setDateTimePreferences,
+} from "./preferences";
+import { viewerZone } from "./timezone";
 
 const LETTERS = { day: "dd", month: "mm", year: "yyyy" };
 
@@ -65,4 +73,29 @@ describe("a typed day", () => {
   ])("names no day in %j", (typed) => {
     expect(parseTypedDate(typed, dayFirst)).toBeNull();
   });
+});
+
+// The box a reader types into and the date every page prints must agree, or a
+// day typed as 06/05 reads back as 05/06 on the record.
+describe("the field and the page", () => {
+  afterEach(() =>
+    setDateTimePreferences({ dateFormat: "locale", timeFormat: "locale" }),
+  );
+  // The record type makes the table name every fixed value the schema has.
+  const formats = ["locale", ...Object.keys(FIXED_DATE_PATTERNS)].filter(
+    (key): key is DateFormat =>
+      key === "locale" || Object.hasOwn(FIXED_DATE_PATTERNS, key),
+  );
+
+  it.each(formats)(
+    "write a day alike under %s in every UI language",
+    (format) => {
+      setDateTimePreferences({ dateFormat: format, timeFormat: "locale" });
+      for (const locale of LOCALES) {
+        expect(formatISODate("2026-05-06", datePattern(locale, format))).toBe(
+          formatDate("2026-05-06", locale, viewerZone()),
+        );
+      }
+    },
+  );
 });

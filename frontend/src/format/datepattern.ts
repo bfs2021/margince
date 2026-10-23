@@ -4,7 +4,14 @@
 import type { Locale } from "../i18n";
 import { isRealCalendarDay } from "./calendarday";
 import { INTL_LOCALE } from "./intllocale";
-import type { DateFormat } from "./preferences";
+import {
+  type DateFormat,
+  type DatePart,
+  type DatePattern,
+  FIXED_DATE_PATTERNS,
+} from "./preferences";
+
+export type { DatePattern } from "./preferences";
 
 /** A calendar day as the contract's `format: date` fields spell it. */
 export type ISODate = `${number}-${number}-${number}`;
@@ -14,23 +21,11 @@ export function isISODate(raw: string): raw is ISODate {
   return /^\d{4}-\d{2}-\d{2}$/.test(raw);
 }
 
-type DatePart = "day" | "month" | "year";
-
-/** How a reader writes a day: which part comes first, and what stands between. */
-export type DatePattern = Readonly<{
-  order: readonly [DatePart, DatePart, DatePart];
-  separator: string;
-}>;
-
-const FIXED: Record<Exclude<DateFormat, "locale">, DatePattern> = {
-  dmy: { order: ["day", "month", "year"], separator: "." },
-  mdy: { order: ["month", "day", "year"], separator: "/" },
-  ymd: { order: ["year", "month", "day"], separator: "-" },
-};
-
 /** The installation's date format, or the UI language's own when it names none. */
 export function datePattern(locale: Locale, format: DateFormat): DatePattern {
-  return format === "locale" ? localePattern(locale) : FIXED[format];
+  return format === "locale"
+    ? localePattern(locale)
+    : FIXED_DATE_PATTERNS[format];
 }
 
 function localePattern(locale: Locale): DatePattern {
@@ -48,7 +43,7 @@ function localePattern(locale: Locale): DatePattern {
   const separator = parts.find((part) => part.type === "literal")?.value;
   const [first, second, third] = order;
   if (!first || !second || !third || separator === undefined) {
-    return FIXED.dmy;
+    return FIXED_DATE_PATTERNS.dmy;
   }
   return { order: [first, second, third], separator };
 }
@@ -85,7 +80,7 @@ export function parseTypedDate(
   }
   const groups = [match[1], match[3], match[4]];
   const order: DatePattern["order"] =
-    groups[0]?.length === 4 ? FIXED.ymd.order : pattern.order;
+    groups[0]?.length === 4 ? FIXED_DATE_PATTERNS.ymd.order : pattern.order;
   const value = new Map(order.map((part, index) => [part, groups[index]]));
   const year = value.get("year");
   const month = value.get("month");
