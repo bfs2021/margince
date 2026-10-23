@@ -21,6 +21,7 @@ import (
 	"github.com/margince/margince/backend/internal/modules/ai"
 	"github.com/margince/margince/backend/internal/modules/capture"
 	"github.com/margince/margince/backend/internal/shared/kernel/ids"
+	"github.com/margince/margince/backend/internal/shared/kernel/provenance"
 	"github.com/margince/margince/backend/internal/shared/ports/datasource"
 )
 
@@ -220,7 +221,7 @@ func conversationRows(ctx context.Context, tx pgx.Tx, requestID ids.UUID,
 ) ([]threadMessage, error) {
 	rows, err := tx.Query(ctx, `
 		SELECT id, coalesce(direction, ''), coalesce(subject, ''),
-		       coalesce(left(body, $1), ''), occurred_at
+		       coalesce(left(body, $1), ''), occurred_at, NOT `+provenance.MailBodyCompleteSQL("activity")+`
 		  FROM activity
 		 WHERE thread_key = (SELECT thread_key FROM activity WHERE id = $2)
 		   AND thread_key IS NOT NULL
@@ -256,7 +257,7 @@ func conversationRows(ctx context.Context, tx pgx.Tx, requestID ids.UUID,
 	for rows.Next() {
 		var message threadMessage
 		if err := rows.Scan(&message.ID, &message.Direction, &message.Subject,
-			&message.Body, &message.At); err != nil {
+			&message.Body, &message.At, &message.Incomplete); err != nil {
 			return nil, err
 		}
 		out = append(out, message)
