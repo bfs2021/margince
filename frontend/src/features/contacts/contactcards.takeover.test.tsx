@@ -59,7 +59,11 @@ function view(claims: ConversationClaim[], tasks: string[] = []): Contact360 {
 function renderCard(claims: ConversationClaim[], tasks: string[] = []) {
   render(
     <StoryProviders>
-      <ContactCommitmentsCard view={view(claims, tasks)} firstName="Dana" />
+      <ContactCommitmentsCard
+        view={view(claims, tasks)}
+        firstName="Dana"
+        onAllTasks={() => {}}
+      />
     </StoryProviders>,
   );
 }
@@ -130,7 +134,8 @@ describe("a promise nobody was asked to keep", () => {
       "GET /me": meRoute({ activity: ["read", "create"], contact: ["read"] }),
     });
     renderCard([{ ...OWNERLESS, task_activity_id: "t-1" }], ["t-1"]);
-    await screen.findAllByText(/Send the signed contract/);
+    // The open task is the promise now, and the Tasks tab lists it.
+    await screen.findByRole("heading", { name: "Commitments" });
     await act(async () => {});
     expect(screen.queryByRole("button", { name: "I’ll take this" })).toBeNull();
   });
