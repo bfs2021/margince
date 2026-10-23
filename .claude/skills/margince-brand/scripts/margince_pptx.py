@@ -126,7 +126,7 @@ def _text(slide, x, y, w, h, text, *, font=BODY_FONT, size=21, color=INK2, bold=
 def _lines(text, size, width):
     # A bold Outfit glyph averages just under half an em, so this estimates how many
     # lines a heading wraps to; text boxes cannot report their own height.
-    return max(1, math.ceil(len(text) * size * 0.48 / width))
+    return max(1, math.ceil(len(text) * size * 0.46 / width))
 
 
 def _slide(prs, ground):

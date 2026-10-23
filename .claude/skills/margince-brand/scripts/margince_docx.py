@@ -180,7 +180,7 @@ def _first_page_card(header, title, kind, meta):
     _cell_margins(cell, top=CARD_INSET + Mm(10))
     logo = cell.paragraphs[0]
     logo.add_run().add_picture(str(ASSETS / "lockup-white.png"), height=Mm(5.5))
-    _spacing(logo, after=30)
+    _spacing(logo, after=20)
     if kind:
         para = cell.add_paragraph()
         _run(para, "●  ", size=7, color=MINT)
@@ -188,7 +188,7 @@ def _first_page_card(header, title, kind, meta):
         _spacing(para, after=4)
     para = cell.add_paragraph()
     para.paragraph_format.line_spacing = 1.0
-    _run(para, title, font=HEADING_FONT, size=28, color=WHITE, bold=True)
+    _run(para, title, font=HEADING_FONT, size=26, color=WHITE, bold=True)
     _spacing(para, after=6)
     if meta:
         _run(cell.add_paragraph(), meta, size=9.5, color=PALE)
@@ -254,8 +254,9 @@ def callout(doc, label, text, *, warn=False):
     return table
 
 
-def table(doc, header, rows, *, numeric=()):
-    """numeric names the column indexes that hold figures; they align right."""
+def table(doc, header, rows, *, numeric=(), widths=None):
+    """numeric names the column indexes that hold figures; they align right.
+    widths gives each column's share of the text width, such as (1, 4, 2)."""
     grid = doc.add_table(rows=1, cols=len(header))
     edge = (LINE, 4)
     _borders(grid, {"top": edge, "left": edge, "bottom": edge, "right": edge, "insideH": edge})
@@ -273,6 +274,13 @@ def table(doc, header, rows, *, numeric=()):
             _spacing(cell.paragraphs[0])
             if i in numeric:
                 cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+            if widths:
+                cell.width = int(TEXT_W * widths[i] / sum(widths))
+    if widths:
+        # LibreOffice lays a table out from its column grid and ignores cell widths.
+        grid.autofit = False
+        for i, column in enumerate(grid.columns):
+            column.width = int(TEXT_W * widths[i] / sum(widths))
     _spacing(doc.add_paragraph(), after=4)
     return grid
 
