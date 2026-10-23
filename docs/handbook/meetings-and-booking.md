@@ -53,7 +53,7 @@ The guest's link stops working at once. The tab lists only your own links that a
 Also called: cancel a proposal, revoke a booking link, withdraw an invitation.
 
 ### How do I get a reminder email before a meeting?
-To send your guest a reminder in Margince, open **Settings → Meetings** and turn on **Email reminder one hour before**. Then choose **Save settings**.
+To send your guest a reminder in Margince, open **Settings → Meetings** and, under **What guests see**, turn on **Reminder email**. It saves at once.
 The reminder goes from your connected mailbox, an hour before each future meeting. It gives the time in your time zone and names that zone. The meeting page shows "Email reminder scheduled.", "Email reminder queued for delivery." or "The reminder could not be sent."
 Also called: meeting reminder, remind the guest, notification before a call.
 
@@ -73,7 +73,7 @@ Margince checks your hours, notice and live calendar again each time a guest boo
 
 The Margince booking page shows your name from **Settings → Account**, and your company name and logo from the company profile. When new meetings get a video call, it names the video app: Google Meet or Microsoft Teams. Guests never see which calendar provider you use, your calendar names, or other guests.
 
-Turning off **Accept bookings** stops new bookings on your public page. Personal links you already sent keep working until they run out. **Replace link** stops the old public address once you confirm, but guests keep the private links that let them change their own meetings.
+Turning off **Accept bookings** stops new bookings on your public page. Personal links you already sent keep working until they run out. **Replace address** stops the old public address once you confirm, but guests keep the private links that let them change their own meetings.
 
 Every calendar invitation carries a private link that lets the guest move or cancel the meeting. Anyone who can read the full invitation, such as a colleague who manages your calendar, can use that link too. Think about who can read your calendar.
 
@@ -83,6 +83,6 @@ A guest gives consent to the meeting separately from any marketing consent, and 
 
 ## When the calendar adds no video call
 
-**Add a video call link to new meetings** asks your calendar for the link when the meeting is created. Google Calendar adds Google Meet. Outlook adds its own default, Microsoft Teams for a work or school Microsoft 365 account.
+Your booking link can use Google Meet or Microsoft Teams as its **Video call**. Then Margince asks your calendar for the link when the meeting is created. You pick it under **Edit link**. Google Meet needs bookings to land in a Google calendar, and Microsoft Teams in a Microsoft 365 calendar.
 
 The link can take a few seconds to appear. Until then the meeting says "The link appears once the calendar accepts the invitation." If the calendar makes no link, the invitation still goes out. The meeting says "The calendar did not add a video link. Add one in your calendar."

@@ -80,6 +80,10 @@ const RETIRED_NOUN: Record<string, RegExp> = {
 // catalog is judged against the retired noun.
 const HUMAN_SENSE_KEYS: Record<string, readonly string[]> = {
   en: [
+    // A booking guest is a human, not the CRM contact record type.
+    "scheduling.personalLinksFoot",
+    "scheduling.whenTitle",
+
     // Names this rename leaves alone: Settings → People, which heads the SEATS
     // group beside Company and Sales, not this record type.
     "settings.group.people",
@@ -129,7 +133,7 @@ const HUMAN_SENSE_KEYS: Record<string, readonly string[]> = {
     "hold.heldByAddress",
     "hold.heldByDomain",
     "mailSharing.danger",
-    "mailSharing.posture.private",
+    "mailSharing.plate.private",
     "roompage.closeBody",
     "timeline.group.bulk_one",
     "timeline.group.bulk_other",
@@ -158,6 +162,9 @@ const HUMAN_SENSE_KEYS: Record<string, readonly string[]> = {
     "contact.card.committee_other",
   ],
   de: [
+    // The meeting host and a booking guest are humans, not the CRM contact
+    // record type.
+    "scheduling.personalLinksFoot",
     // Reviewed work names its human author, never a contact record.
     "homeRepair.reason.adopted",
     // These name users, recipients and participants, not contact records.
@@ -227,6 +234,7 @@ const HUMAN_SENSE_KEYS: Record<string, readonly string[]> = {
     "share.rosterLoading",
     "share.subject",
     "users.deactivateConfirmBody",
+    "users.membersTitle",
     // Somebody on a message, an invitation or a deal room — a sender, a
     // recipient, an attendee, a guest.
     "access.issued.oneTime",
@@ -266,6 +274,7 @@ const HUMAN_SENSE_KEYS: Record<string, readonly string[]> = {
     "contact.card.committee_other",
   ],
   vi: [
+    "linkedinReach.sub",
     // Reviewed work names its human author, never a contact record.
     "homeRepair.reason.classificationAdopted",
     "homeRepair.reason.adopted",
@@ -324,7 +333,9 @@ const HUMAN_SENSE_KEYS: Record<string, readonly string[]> = {
     "recordAccess.option.owner",
     "recordAccess.option.ownerNeeded",
     "whoCanSee.reason.sameTeam",
-    // The meeting host is a human, not the CRM contact record type.
+    // The meeting host and a booking guest are humans, not the CRM contact
+    // record type.
+    "scheduling.personalLinksFoot",
     "scheduling.windowHorizon",
     "scheduling.windowLimits",
     "scheduling.calendarUnavailable",
@@ -397,6 +408,7 @@ const HUMAN_SENSE_KEYS: Record<string, readonly string[]> = {
     "ob.digest.referenceNote",
     "ob.manual.icpHint",
     "contact.intro.stepRoutePick",
+    "settings.page.authentication.sub",
     "settings.voice.noticeAskQueueFull",
     "settings.voice.refusalSpeaker",
     "settings.voice.speakerQuestion",
@@ -449,6 +461,12 @@ const HUMAN_SENSE_KEYS: Record<string, readonly string[]> = {
     "compose.multiRecipientWarning",
     "compose.sharedUnsubscribeToken",
     "compose.threadGone",
+    // "người gửi" is a sender, a human the mailbox heard from.
+    "connectors.heldPointer.label",
+    "connectors.heldPointer.none",
+    "connectors.heldPointer.some_one",
+    "connectors.heldPointer.some_other",
+    "connectors.heldPointer.unknown",
     "connectors.mailPosture.help.classified",
     "connectors.mailPosture.help.held",
     "email.access.sentence.participants",
@@ -459,7 +477,7 @@ const HUMAN_SENSE_KEYS: Record<string, readonly string[]> = {
     "hold.heldByAddress",
     "hold.heldByDomain",
     "mailSharing.danger",
-    "mailSharing.posture.private",
+    "mailSharing.plate.private",
     "roompage.banner.closed",
     "roompage.banner.expired",
     "roompage.banner.paused",
@@ -546,7 +564,6 @@ const HUMAN_SENSE_KEYS: Record<string, readonly string[]> = {
     "heldThreads.heldByOthers_one",
     "heldThreads.heldByOthers_other",
     "lead.bulkOwnerPick",
-    "linkedinReach.sub",
     "log.transcriptHint",
     "noticeDuty.what",
     "ob.manual.buying_centerHint",

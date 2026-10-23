@@ -11294,9 +11294,12 @@ export interface paths {
          * Preview a backfill window — the scope before the spend.
          * @description Returns the provider-side message count for a CAP-PARAM-4 window plus the projected AI
          *     token/cost estimate (ADR-0063; the ADR-0020 preview-before-spend obligation). MUST precede
-         *     `startConnectorBackfill` — the estimate is what the user consents to. Labeled an estimate:
-         *     actual spend is metered per task. Requires a `connected` connection; needs one provider
-         *     round-trip, so a provider outage surfaces honestly as 502.
+         *     `startConnectorBackfill`: the estimate is what the user consents to. The one exception is an
+         *     import asked for at connect (`ConnectConnectorRequest.import_window`): the window chosen there
+         *     is the consent, the callback takes and stamps its own estimate, and it starts only when that
+         *     estimate is small enough to need no review. Labeled an estimate: actual spend is metered per
+         *     task. Requires a `connected` connection; needs one provider round-trip, so a provider outage
+         *     surfaces honestly as 502.
          */
         post: operations["previewConnectorBackfill"];
         delete?: never;
@@ -22401,6 +22404,14 @@ export interface components {
          */
         AuthenticationPolicy: {
             /**
+             * @description The provider keys a visitor's login screen draws today: the ones the installation
+             *     offers AND holds an OAuth client for, the same answer `/auth/capabilities`
+             *     gives as `oidc_providers`. Where `sign_in_providers` says what was chosen, this says
+             *     what took effect, so a screen can mark a chosen provider that is still missing its
+             *     app. Empty when none is drawn, never absent.
+             */
+            sign_in_screen: string[];
+            /**
              * @description Every provider this deployment mounted, each marked with whether the
              *     installation has chosen to offer it — which is a stored choice, not a
              *     guarantee the provider has working credentials. Password is never listed, and
@@ -24078,8 +24089,9 @@ export interface components {
         /**
          * @description Whether a connect started right now would proceed, decided by the same predicate the connect
          *     endpoint itself uses so the two cannot disagree. Reported for the mail providers a contact can
-         *     choose between (gmail, graph, imap); the paired calendar connectors (gcal, graphcal) are
-         *     created by a mail grant rather than picked, so they are absent.
+         *     choose between (gmail, graph, imap). The paired calendar connectors (gcal, graphcal) are absent:
+         *     each is its own grant, asked for after its mail provider's (`ConnectConnectorRequest.also_connect`)
+         *     or connected directly, on the same vendor OAuth app as its mail provider.
          */
         CaptureProviderAvailability: {
             /**
@@ -24114,9 +24126,10 @@ export interface components {
         };
         /**
          * @description Connect a capture source. Providers differ in kind, not in path: an OAuth provider
-         *     (gmail, gcal, graph, graphcal) needs no body and answers with `authorize_url`; a credential
-         *     provider (imap) submits `imap` and answers with the created `connection`. Exactly one
-         *     of `authorize_url` or `connection` is returned.
+         *     (gmail, gcal, graph, graphcal) answers with `authorize_url`; a credential provider (imap)
+         *     submits `imap` and answers with the created `connection`. Exactly one of `authorize_url`
+         *     or `connection` is returned. The OAuth body is optional and may carry `return_to`,
+         *     `also_connect` and `import_window`, all of which ride the signed state to the callback.
          */
         ConnectConnectorRequest: {
             /**
@@ -24132,12 +24145,40 @@ export interface components {
              */
             redirect_uri?: string;
             /**
-             * @description Which surface the post-consent redirect lands on. Absent means `onboarding`.
-             *     A closed enum, never a URL — the server maps it to a fixed path, so it carries no
+             * @description Which surface the post-consent redirect lands on: `onboarding` lands on
+             *     `/#/onboarding/connect/{outcome}/{provider}`, `settings` on
+             *     `/#/settings/connections/{outcome}/{provider}` and `meetings` on
+             *     `/#/settings/meetings/{outcome}/{provider}`. Absent means `onboarding`.
+             *     A closed enum, never a URL: the server maps it to a fixed path, so it carries no
              *     open-redirect surface. Ignored by credential providers, which never redirect.
              * @enum {string}
              */
-            return_to?: "onboarding" | "settings";
+            return_to?: "onboarding" | "settings" | "meetings";
+            /**
+             * @description The paired calendar to ask for straight after this mail grant, in one round trip:
+             *     the mail callback stores its grant, then redirects to the calendar's own consent
+             *     instead of landing, and the landing names the calendar's outcome. Only `gcal` after
+             *     `gmail` and `graphcal` after `graph`; any other pairing is refused with
+             *     `422 also_connect_mismatch`. The calendar must be connectable right now, or the
+             *     request answers exactly as a direct connect to it would. A declined or failed
+             *     calendar consent leaves the mail grant in place.
+             * @enum {string}
+             */
+            also_connect?: "gcal" | "graphcal";
+            /**
+             * @description The past-email window to import once the mail grant is stored. The callback takes
+             *     the estimate then, and starts the import by itself only when that estimate is small
+             *     enough to need no review; above that, or when the estimate fails, nothing starts and
+             *     the landing carries the held window as `?import={window}` after its route (also on a
+             *     chained calendar's landing), so the screen previews it (`previewConnectorBackfill`)
+             *     and offers the start. No query means the import started or none was asked for. OAuth
+             *     mail providers only (a calendar is refused with `422 not_a_mailbox`, `imap` with
+             *     `422 connector_unsupported`); a window above what this installation offers
+             *     (`BackfillStatus.offered_windows`) is refused with `422 window_invalid`. Absent means
+             *     no import starts. A failure to start one still lands the connect as connected.
+             * @enum {string}
+             */
+            import_window?: "3m" | "6m" | "12m" | "24m" | "36m" | "60m" | "84m" | "120m";
             /** @description Direct IMAP credentials (the `imap` provider only). */
             imap?: {
                 host: string;
@@ -25186,7 +25227,18 @@ export interface components {
             has_payload: boolean;
             /** @description Some attempt of this logical call asked a decision model. True on a call the decision lane answered and on one it fell back from, where the terminal attempt is a completion; the detail ladder says which. */
             decision_attempted: boolean;
+            outcome: components["schemas"]["AiCallOutcome"];
+            /**
+             * Format: int64
+             * @description Price-sheet estimate for every attempt of this logical call, in millionths of one US dollar, priced on read exactly as the usage report prices it, so the list sums to the usage total. Omitted, never 0, when any attempt had usage but no effective rate. A cache hit costs 0.
+             */
+            estimated_cost_microusd?: number;
         };
+        /**
+         * @description How one call ended, as a reader scans for it. `declined`: the model was reached and withheld or rejected the answer. `failed`: any other error code. `fallback`: it answered, but degraded, after a decision model fell back, or after a retry. `answered`: first try.
+         * @enum {string}
+         */
+        AiCallOutcome: "answered" | "fallback" | "declined" | "failed";
         /**
          * @description The configuration an AI call ran under, resolved from its `config_hash`.
          *
@@ -25286,6 +25338,8 @@ export interface components {
             tasks: string[];
             /** @description The same tasks in the same order, each with the name a screen shows for it. */
             task_options: components["schemas"]["AiCallTaskOption"][];
+            /** @description Every model a reader sees (served model, or configured model when none was reported) across terminal calls, sorted, independent of the current page and filters. Each is a value the `model` filter accepts. */
+            models: string[];
         };
         /** @description One task the call log can be filtered to. */
         AiCallTaskOption: {
@@ -69596,7 +69650,7 @@ export interface operations {
                 task?: string;
                 /** @description Filter to calls that ended on one provider (openai_compatible, gemini, …). */
                 provider?: string;
-                /** @description Filter to calls that ended on one configured model id. */
+                /** @description Only calls whose configured model id, or the model a reader sees for them (served model, or configured model when none was reported), is exactly this. The response's `models` lists every value a reader sees. */
                 model?: string;
                 /** @description Filter to calls one model answered: the model the provider named, else the configured one. */
                 served_model?: string;
@@ -69604,6 +69658,14 @@ export interface operations {
                 served_provider?: string;
                 /** @description Filter to calls that ended on one tier. */
                 tier?: string;
+                /** @description Only calls that occurred at or after this instant. */
+                from?: string;
+                /** @description Only calls that occurred before this instant. Must be after `from` when both are set. */
+                to?: string;
+                /** @description Only calls in this outcome bucket, the same bucket each summary reports. */
+                outcome?: components["schemas"]["AiCallOutcome"];
+                /** @description Case-insensitive substring over task key (underscores also match spaces), provider, configured and served model, and error code. */
+                q?: string;
             };
             header?: never;
             path?: never;
@@ -69611,7 +69673,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description One page of terminal calls. */
+            /** @description One page of terminal calls. Every filter combines with AND. */
             200: {
                 headers: {
                     [name: string]: unknown;

@@ -22,6 +22,9 @@ var queryEnumTable = map[string][]queryEnum{
 	"GET /v1/ai/call-stats/flow": {
 		{Name: "window", Values: []string{"24h", "7d", "30d"}, Array: false, Explode: true},
 	},
+	"GET /v1/ai/calls": {
+		{Name: "outcome", Values: []string{"answered", "fallback", "declined", "failed"}, Array: false, Explode: true},
+	},
 	"GET /v1/analytics/editions/{id}/evidence": {
 		{Name: "metric", Values: []string{"bookings_won", "closed_win_rate", "open_pipeline", "stage_age", "qualified_pipeline_created", "meetings_held", "accepted_opportunities", "forecast_landing"}, Array: false, Explode: true},
 	},

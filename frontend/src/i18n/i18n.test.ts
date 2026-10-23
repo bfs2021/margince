@@ -142,6 +142,8 @@ const KEPT_IN_ENGLISH = new Set<string>([
   "oauthApp.microsoft.clientIdPlaceholder",
   "oauthApp.tenant",
   "oauthApp.tenantPlaceholder",
+  // A product name, the same word in every language.
+  "oauthApp.unlock.gmail",
   // A URL, which is the same string in every language.
   "scheduling.locationExample",
   "aiRouting.baseUrl.placeholder",
@@ -190,13 +192,14 @@ const KEPT_IN_ENGLISH = new Set<string>([
   // .withheld), so this value is the placeholder and a full stop.
   "worklist.partial",
   // Brand and provider names: proper nouns, not translated in any locale.
-  "connectors.provGmail",
   "connectors.provGcal",
+  "connectors.provGmail",
   "connectors.provGraph",
   "connectors.provTelegram",
+  "connectors.vendorGoogle",
+  "connectors.vendorMicrosoft",
   "ob.s4.provGoogle",
   "ob.s4.provMicrosoft",
-  "ob.conv.connect.linkedinName",
   "magic.by.system",
   // A number and a plus sign, written alike in every locale.
   "lead.signal.employees.201+",
@@ -309,7 +312,6 @@ const KEPT_IN_ENGLISH = new Set<string>([
 
   // Other cases verified individually against the source.
   "shell.logoAria",
-  "ob.conv.connect.scopeMicrosoft",
 
   // Worked examples of a German commercial register entry, the shape the
   // legal-notice read actually parses regardless of which locale a reader

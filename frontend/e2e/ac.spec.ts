@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
-import { SETTINGS_PAGES } from "../src/features/settings/settingscatalog";
+import { SETTINGS_PAGES } from "../src/lib/settingscatalog";
 import { de } from "../src/i18n/de";
 import { en, type MessageKey } from "../src/i18n/en";
 import { meFixture } from "../src/testing/mefixture";
@@ -159,7 +159,7 @@ const CORE_SCREENS = [
   "analytics",
   "settings",
   // Settings is many pages behind one route (SETTINGS_PAGES in
-  // features/settings/settingscatalog.ts), and a bare `settings` resolves to Account,
+  // lib/settingscatalog.ts), and a bare `settings` resolves to Account,
   // the shortest of them. Sweeping that alone and calling settings covered is
   // how the widest page in the product went unmeasured: `fields` carries two
   // full list surfaces with their own toolbars, `integrations` four
@@ -462,16 +462,22 @@ test("features/10 §7: the locale switch flips the chrome DE↔EN", async ({
   // locales ship, so the control is a list rather than a toggle — a toggle
   // cannot say where the next click lands.
   await page.goto("/#/settings/account");
-  // The panel the language row sits in.
+  // A card title on the page, so the check below reads chrome the language
+  // control does not draw itself.
   await expect(
-    page.getByRole("heading", { name: de["settings.preferencesTitle"] }),
+    page.getByRole("heading", { name: de["account.signInCard"] }),
   ).toBeVisible();
   await page.getByRole("combobox", { name: "Sprache" }).click();
   await page.getByRole("option", { name: "English" }).click();
+  // The pick waits in the page's save bar; the language turns once it is saved.
+  await page
+    .getByRole("region", { name: de["saveBar.unsaved"] })
+    .getByRole("button", { name: de["saveBar.save"], exact: true })
+    .click();
   // The surface around the control follows the choice, not just the control's
   // own face: every word on it is rendered from the catalog that just changed.
   await expect(
-    page.getByRole("heading", { name: en["settings.preferencesTitle"] }),
+    page.getByRole("heading", { name: en["account.signInCard"] }),
   ).toBeVisible();
   await expect(page.getByRole("combobox", { name: "Language" })).toBeVisible();
 });
@@ -487,12 +493,10 @@ test("features/10 §7: Settings → Account offers language and appearance", asy
 }) => {
   await page.goto("/#/settings/account");
   await expect(
-    page.getByRole("heading", { name: de["settings.preferencesTitle"] }),
+    page.getByRole("heading", { name: de["account.browserCard"] }),
   ).toBeVisible();
   await expect(page.getByRole("combobox", { name: "Sprache" })).toBeVisible();
-  await expect(
-    page.getByRole("combobox", { name: "Darstellung" }),
-  ).toBeVisible();
+  await expect(page.getByRole("group", { name: "Darstellung" })).toBeVisible();
 });
 
 /**

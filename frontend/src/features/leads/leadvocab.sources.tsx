@@ -32,6 +32,7 @@ import { useSinglePress } from "../../design-system/presslatch";
 import { QueryStates } from "../../design-system/querystates";
 import { Select } from "../../design-system/select";
 import { Switch } from "../../design-system/switch";
+import { useToast } from "../../design-system/toast";
 import { formatNumber } from "../../format/format";
 import {
   type PluralTranslator,
@@ -305,7 +306,7 @@ function DiscoveredSources({
     <>
       <PanelGroupHead title={t("leadSources.discovered")} level="h3" />
       <PanelBody>
-        <p className="t-caption">{t("leadSources.discoveredSub")}</p>
+        <PanelIntro>{t("leadSources.discoveredSub")}</PanelIntro>
       </PanelBody>
       <DataTable
         bleed
@@ -334,6 +335,7 @@ export function LeadSourcesCard() {
   const failure = [adopt, update]
     .filter((m) => m.isError)
     .sort((a, b) => b.submittedAt - a.submittedAt)[0];
+  const toast = useToast();
   const refusalId = useId();
   const refusedPatch = failure === update ? update.variables : undefined;
   const refusedAdopt = failure === adopt ? adopt.variables?.key : undefined;
@@ -348,7 +350,11 @@ export function LeadSourcesCard() {
       refusedPatch?.id === source.id && refusedPatch[field] !== undefined
         ? refusalId
         : undefined,
-    onUpdate: (patch) => update.mutate(patch),
+    // A row's controls write the moment they change, so each write confirms itself.
+    onUpdate: (patch) =>
+      update.mutate(patch, {
+        onSuccess: () => toast.show(t("settings.saved")),
+      }),
     onRename: (source) => {
       rename.reset();
       setRenaming(source);

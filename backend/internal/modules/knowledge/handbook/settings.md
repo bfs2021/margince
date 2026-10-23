@@ -8,7 +8,6 @@ To open Settings in Margince, open the account menu at the top right of the scre
 Settings opens on **Overview**, which lists every page you can open. The page list down the side is in groups: **You**, **Company**, **People**, **Sales**, **Data**, **AI** and **Governance**.
 To go right to one page, press ⌘K (Ctrl+K) and type its name, or the name of a setting on it. Or type into **Search settings** at the top of the settings list. When the page was found by one of its settings, **Search settings** shows that setting under the page name.
 
-Settings is not in the side list on the left.
 Also called: preferences, admin settings, configuration, options.
 
 ### What settings pages are there?
@@ -27,13 +26,12 @@ You see only the pages your permissions open. The Reset data page appears only w
 Your own things in Margince are under **You** in Settings.
 - Change your password, display name, email signature, language or theme (appearance): **Account**.
 - Turn on two-step sign-in, with a code from your phone: **Account**.
-- Set when customers can book you: **Meetings**, in **Availability**.
+- Set when customers can book you, and share your booking link: **Meetings**, in **When people can book** and **Booking links**.
 - Set up how your drafts sound: **Writing voice**.
 - Choose how each kind of notification reaches you, and whether the morning brief and weekly review come by email: **Notifications**.
 - Connect your AI tool, such as Claude or ChatGPT, or create an API key for a script: **AI access**.
 - Connect your mailbox or calendar, or import from LinkedIn: **Connections**.
-- Keep a sender out of capture, or see why an email did not come in: **Capture activity**.
-
+- Keep a sender out of capture, release a held thread, or see why an email did not come in: **Capture activity**.
 See [Your own settings](your-own-settings.md) for each one step by step.
 
 ### Which settings page do I need for colleagues and the company?
@@ -45,7 +43,7 @@ Things for the whole company in Margince each have one settings page.
 - Change the company name, time zone, base currency, date format, time format or exchange rates: **Company profile**.
 - Set up single sign-on, the Google and Microsoft apps or the app an extension signs in to, or require two-step sign-in: **Sign-in and apps**.
 - Mark your own email domains, or refuse a domain: **Capture rules**.
-- Set up webhooks or a provider of contact data: **Integrations**.
+- Set up webhooks, a provider of contact data, or the company's Telegram bot: **Integrations**.
 
 ### Which settings page do I need for sales and data?
 Sales and data settings in Margince each have one page.
@@ -99,7 +97,9 @@ Every Margince settings page carries a badge beside its heading. It says who a c
 | **Installation** | The whole installation, such as sign-in, seats and which model does which work. |
 | **Mixed** | The page holds settings of more than one kind. Read the card. |
 
-Three pages are **Mixed**, each for a clear reason. *Connections* and *Capture activity* sit with your own settings, but each carries one card that holds for everybody. *Integrations* holds a provider setting for the whole installation beside settings for the company.
+Two pages are **Mixed**, each for a clear reason. *Capture activity* sits with your own settings, but carries one card that holds for everybody. *Integrations* holds a provider setting for the whole installation beside settings for the company.
+
+*Connections* is **Only you**. Its row showing the company's email sharing rule is marked **Whole company** and offers no control: change it on **Capture rules**.
 
 ---
 
@@ -164,6 +164,9 @@ The Integrations page in Settings (group **Data**) shows what the installation i
 
 **Contact data** is a licensed provider of contact data, with its budget and a policy for how often it refreshes the data. **Accounting source** connects the system your invoices come from and links its customers to companies; see [Contracts and invoices](contracts-and-invoices.md#how-do-i-connect-my-accounting-system). **Webhooks** send a signed message to another system when events you picked happen. You can look at each one sent and send it again. How to set one up, such as a message to a chat channel when a deal is won: [Sending events to other tools](sending-events-to-other-tools.md).
 
+**Telegram bot** is the one bot that sends and receives messages for the whole
+company. Admin and Ops connect or change it; other readers see which bot it is.
+
 ## Extensions
 
 The Extensions page in Settings (group **Governance**) lists the add-ons your installation was built with, and what each may reach. You cannot add one from inside the app. Each add-on names what it is for, its release, and the kinds of record it adds.
@@ -174,7 +177,7 @@ If an add-on's screen shows nothing, give a role access to it here with its swit
 
 The Capture rules page in Settings (group **Data**) decides what comes into the CRM, in the order the page shows:
 
-**Mail sharing and sync**, at the top: whether captured mail is shared with colleagues, and how often each mailbox syncs. It holds for everybody, so it lives here. Your own **Connections** page shows the current sharing setting and links here.
+**Mail sharing and sync**, at the top: whether captured mail is shared with colleagues, and how often each mailbox syncs. It holds for everybody, so it lives here. Your own **Connections** page shows the current sharing setting on a row marked **Whole company**.
 
 **Own email domains** are the domains that belong to this company. Mail between colleagues is not stored for anyone, including you. Take note: no mailbox offers again the mail skipped while a domain is on this list.
 
@@ -309,20 +312,17 @@ System health and Reset data sit in the **Governance** group, and Data import in
 - **Data import**: a ZIP of CSV files, or one CSV, of companies, contacts,
   prospects (leads), deals and activities. The limit is 10 MB unless the installation sets another.
   Nothing is written until you check the test run.
-- **Search index**: building the index again, behind search and behind what the
-  AI finds.
-- **Data updates**: progress and controls for background changes. Work that needs
-  review waits until an authorized user starts it.
-- **Background jobs**: jobs that wait to run, and jobs that failed, by owner.
-  Admin and Ops.
-- **AI provider status**: whether each AI provider is answering, as the app
-  and its background jobs found it, in one view. See [AI providers](ai-providers.md).
+- **Search index**: building the index again, behind search and behind what the AI finds.
+- **Data updates**: progress and controls for background changes. Work that needs review waits until an authorized user starts it.
+- **Background jobs**: jobs that wait to run, and jobs that failed, by owner. Admin and Ops.
+- **AI provider status**: whether each AI provider is answering, as the app and its background jobs found it, in one view. See [AI providers](ai-providers.md).
 - **Mail capture checks**: whether the passes that fix mail capture in the
   background keep up. It shows when each last worked, and how many contacts and
   threads wait in each mailbox. It also shows how many filed meetings are held
   back in the whole installation. It shows counts only; the contacts and messages stay
   in view to their mailbox owner alone. The same readers as Background jobs see
   it.
+- **Links in outgoing mail**: the address Margince puts in the links it emails, such as unsubscribe links, marked **Reachable**, **Unreachable** or **Not checked**. If nobody outside can reach it, those links open nothing.
 - **Automatic work**: the tasks, reply reminders and approval requests Margince made for each colleague in 7 or 30 days, and their outcome.
   **Not mine** counts a task moved to someone else; a rejected request is not Not mine. Over 10% on at least 10 items shows **needs a look**, and changes nothing. The same readers as Background jobs see it.
 - **Restore drills**: when a restore from a backup was last tested, if it

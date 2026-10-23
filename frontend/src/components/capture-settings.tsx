@@ -7,6 +7,7 @@ import { NumberSettingRow } from "../design-system/numbersetting";
 import { Panel, PanelGroupHead } from "../design-system/panel";
 import { PanelNotices } from "../design-system/panelnotices";
 import { QueryGate } from "../design-system/querystates";
+import { useSavePage } from "../design-system/savepage";
 import { SettingList, SettingRow } from "../design-system/settingrow";
 import { Switch } from "../design-system/switch";
 import { useToast } from "../design-system/toast";
@@ -115,6 +116,11 @@ export function CaptureSettingsCard() {
   const canManage = useCanWrite("capture_settings", "update");
   const query = useCaptureSettings();
   const update = useUpdateCaptureSettings();
+  // In a page the bar shows a refused number, so the card would say it twice.
+  const inPage = useSavePage() !== null;
+  const refusedNumber = READ_ROWS.some(
+    (row) => update.variables?.[row.property] !== undefined,
+  );
   const locked = !canManage || update.isPending;
   const adminOnly = canManage ? undefined : t("captureSettings.adminOnly");
   const reasonFor = (
@@ -189,8 +195,12 @@ export function CaptureSettingsCard() {
                   refusal={t(`captureReading.${row.copy}.refusal`)}
                   disabled={locked}
                   reason={reasonFor(settings, row.property)}
-                  describedBy={refusedFor(row.property)}
-                  onCommit={(next) => update.mutate({ [row.property]: next })}
+                  describedBy={inPage ? undefined : refusedFor(row.property)}
+                  onCommit={(next) =>
+                    inPage
+                      ? update.mutateAsync({ [row.property]: next })
+                      : update.mutate({ [row.property]: next })
+                  }
                 />
               ))}
             </SettingList>
@@ -199,7 +209,7 @@ export function CaptureSettingsCard() {
       </QueryGate>
       <PanelNotices
         refused={
-          update.isError
+          update.isError && !(inPage && refusedNumber)
             ? {
                 title: t("captureSettings.updateFailed"),
                 error: update.error,

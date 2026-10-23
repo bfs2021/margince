@@ -7,6 +7,8 @@ import { useT } from "../../i18n";
 import { useCompanyContextShown } from "../../lib/companycontextreach";
 import { isImeCommit } from "../../lib/imecommit";
 import { navigate, routeHash } from "../../lib/router";
+import type { SettingsPage } from "../../lib/settingscatalog";
+import { settingsHref } from "../../lib/settingsrouting";
 import {
   hashWithParams,
   NO_URL_PARAMS,
@@ -16,9 +18,7 @@ import {
   CONFIGURATION_FILTER_PARAM,
   useConfiguration,
 } from "./configurationentries";
-import type { SettingsPage } from "./settingscatalog";
 import { PAGE_ICONS } from "./settingsnavicons";
-import { settingsHref } from "./settingsrouting";
 import {
   CONFIGURATION_PAGE,
   type SettingsHit,

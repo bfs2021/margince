@@ -658,6 +658,7 @@ export const en = {
     "The AI budget has reached its limit. This work resumes automatically when budget is available.",
   "reporting.latestSnapshot": "Latest snapshot",
   "reporting.contextDetails": "Reporting details",
+  "reporting.pipelineFilter": "Open pipeline · expected close",
   "reporting.targetRemaining": "{amount} remaining",
   "reporting.targetExceeded": "{amount} above target",
   "reporting.targetPeriodSummary": "{actual} of {target} · {percent}%",
@@ -685,6 +686,7 @@ export const en = {
   "reporting.acceptedOn": "Accepted on",
   "reporting.record": "Record",
   "reporting.dealValue": "Deal value",
+  "reporting.valueChanges": "Value changes",
   "reporting.movement.new": "New deals",
   "reporting.movement.pulled_in": "Pulled into the period",
   "reporting.movement.pushed_out": "Pushed out of the period",
@@ -715,6 +717,7 @@ export const en = {
   "reporting.remaining": "Remaining",
   "reporting.ownerMetric": "{metric} by team member",
   "reporting.quarterStart": "Choose the first month of the fiscal quarter.",
+  "reporting.additional": "More analysis",
   "reporting.settings": "Reporting settings",
   "reporting.execution.skipped": "Skipped",
   "reporting.execution.suspended": "Paused",
@@ -1037,6 +1040,8 @@ export const en = {
   "scheduling.pickAgreed": "Pick the agreed time",
   "scheduling.openTimes": "Your open times",
   "scheduling.guestPicks": "{name} picks the time",
+  "scheduling.guestPicksHelp":
+    "You send one personal link. They see your open times and book one.",
   "scheduling.guestPicksOne":
     "They book one of the open times in the calendar.",
   "scheduling.guest": "Your guest",
@@ -1160,9 +1165,6 @@ export const en = {
   "scheduling.copied": "Copied",
   "scheduling.copyFallback": "Select and copy the link below.",
   "scheduling.preview": "Preview public page",
-  "scheduling.acceptBookings": "Accept bookings",
-  "scheduling.acceptBookingsHelp":
-    "Turn off to stop new bookings. The link stays the same.",
   "scheduling.settings": "Meeting settings",
   "scheduling.save": "Save settings",
   "settings.tab.meetings": "Meetings",
@@ -3534,7 +3536,7 @@ export const en = {
   "co.commercial.title": "Commercial",
   "linkedinImport.title": "LinkedIn connections",
   "linkedinImport.sub":
-    "Import your LinkedIn export to see who your team already knows.",
+    "Shows which companies on file you know someone at. Imported connections never become contacts and nobody can email them from here.",
   "linkedinImport.profileLabel": "Your LinkedIn profile URL",
   "linkedinImport.profilePlaceholder": "https://www.linkedin.com/in/…",
   "linkedinImport.saveProfile": "Save profile",
@@ -3543,21 +3545,22 @@ export const en = {
   "linkedinImport.importFailed": "The export was not imported. Retry.",
   "linkedinImport.editProfile": "Edit",
   "linkedinImport.editProfileTitle": "Your LinkedIn profile",
-  "linkedinImport.profileNotSet": "Not recorded yet",
+  "linkedinImport.profileNotSet": "Not added",
   "linkedinImport.connectedNote":
     "Connected. Imported connections are attributed to this profile, so the CRM shows which colleague knows someone.",
   "linkedinImport.notConnectedNote":
-    "Saving your profile URL attributes imported connections to you by name.",
+    "Lets Margince credit the imported connections to you by name.",
   "linkedinImport.whichFile":
     "Connections.csv from LinkedIn’s “Get a copy of your data”. Imported connections never become contacts, and no one can email them.",
-  "linkedinImport.choose": "Choose Connections.csv",
+  "linkedinImport.choose": "Import Connections.csv",
   "linkedinImport.reachVisibleUnread":
     "Your reach setting could not be read, so it cannot be changed here yet.",
   "linkedinImport.reachVisibleSaveFailed": "Your reach setting was not saved",
   "linkedinImport.reachVisibleLabel": "Let colleagues see your reach",
   "linkedinImport.reachVisibleHelp":
     "On: colleagues who can read a company see how many of your connections work there. A count, never the names. Off: you are left out of that list. Your own reach page is unchanged either way.",
-  "linkedinImport.importLabel": "Connections export",
+  "linkedinImport.importLabel": "How to get Connections.csv from LinkedIn",
+  "linkedinImport.dropHint": "Drop Connections.csv here, or choose it",
   "linkedinImport.noMatchesYet":
     "No matches yet, which is normal for a new company. Connections are matched against contacts as mail is read, and matching reruns every hour.",
   "linkedinImport.working": "Reading export…",
@@ -3574,7 +3577,7 @@ export const en = {
   "companyReach.connections": "Connections here",
   "companyReach.none": "No colleague reach is shown for this company.",
   "companyReach.readFailed": "This reach list could not be read",
-  "linkedinReach.title": "Network reach",
+  "linkedinReach.title": "LinkedIn network",
   "linkedinReach.sub":
     "Companies on file where you know someone, most connections first.",
   "linkedinReach.allUnresolved":
@@ -4643,15 +4646,8 @@ export const en = {
   "settings.page.reviewtemplates.sub":
     "Questions a rep answers when a deal is won or lost.",
   "settings.tab.reviewtemplates": "Outcome reviews",
-  "reviewTemplates.editHint":
-    "Edits apply to future reviews. Existing reviews retain their original questions and answers.",
   "reviewTemplates.question": "Question",
-  "reviewTemplates.answerType": "Answer type",
-  "reviewTemplates.options": "Choices (one per line)",
-  "reviewTemplates.requiredChoice": "Answer required",
-  "reviewTemplates.removeQuestion": "Remove question",
   "reviewTemplates.addQuestion": "Add question",
-  "reviewTemplates.save": "Save template",
   "reviewTemplates.edit": "Edit questions",
   "reviewTemplates.title": "Outcome review questions",
   "reviewTemplates.empty": "No review questions are set up",
@@ -6590,13 +6586,15 @@ export const en = {
   "explain.col.pipeline": "Pipeline",
 
   "settings.profileTitle": "Profile",
-  "settings.securityTitle": "Security",
-  "settings.preferencesTitle": "Language and appearance",
   "unsaved.title": "Discard unsaved changes?",
   "unsaved.body":
     "Leaving this page discards what you entered. Go back to save it first.",
   "unsaved.dialogBody": "Closing this dialog discards what you entered.",
   "unsaved.discard": "Discard changes",
+  "unsaved.saveTitle": "Save your changes?",
+  "unsaved.saveBody": "This page has changes you have not saved yet.",
+  "unsaved.stay": "Stay",
+  "unsaved.saveRefused": "Not saved. Stay on the page to see why.",
   "settings.addedItem": "“{name}” added",
   "settings.removedItem": "“{name}” removed",
   "settings.removed": "Removed",
@@ -6609,6 +6607,7 @@ export const en = {
     "Set by {name} (.env file). Change it there.",
   "settings.lockedBy.config_file_unnamed":
     "Set by {name} (configuration file). Change it there.",
+  "settings.nameTooLong": "Use {max} characters or fewer.",
   "settings.signatureFromTemplate": "Company template",
   "settings.signatureTemplateHint":
     "Your company’s signature template signs your mail. It fills in your name, title and phone.",
@@ -6675,19 +6674,12 @@ export const en = {
   "delivery.weekday7": "Sunday",
   "delivery.panelTitle": "Email summaries",
   "settings.appearance": "Appearance",
-  "settings.appearanceHelp":
-    "Light, dark or the device setting. The account menu also changes it.",
   "settings.displayName": "Display name",
   "settings.displayNameHelp":
     "Shown to colleagues on records you edit, in pickers and in the audit log.",
-  "settings.displayNameSave": "Save",
   "settings.greetingName": "Greeting name",
   "settings.greetingNameHelp":
     "The name you are greeted by in drafted messages and greetings. Empty uses the first word of your display name.",
-  "settings.greetingNameSave": "Save",
-  "settings.languageHelp":
-    "Saved to your account, so every device you sign in on uses it.",
-  "settings.deviceCard": "This device",
   "settings.installApp": "Margince app",
   "settings.installAppHelp":
     "Adds Margince to this device as an app with its own window and icon.",
@@ -7733,7 +7725,6 @@ export const en = {
   "settings.resetDataConfirmBody":
     "Type the company name to confirm. This cannot be undone.",
   "settings.resetDataConfirmName": "Type this company name:",
-  "settings.resetDataConfirmLabel": "Confirm company name",
   "settings.resetDataResult":
     "Cleared: tables {tables}, job rows {jobs}, event streams {streams}, cache keys {keys}, stored files {objects}.",
   "settings.resetDataDrainWarning":
@@ -8264,7 +8255,6 @@ export const en = {
   "notifications.title": "Delivery by kind",
   "notifications.sub":
     "Every notice also stays in your notification center, whatever you choose here.",
-  "notifications.saveFailed": "That choice was not saved",
   "notifications.saveFailedFor": "“{setting}” was not saved",
   "notifications.class.approval_pending.label": "Approvals waiting on you",
   "notifications.class.approval_pending.help":
@@ -8375,7 +8365,6 @@ export const en = {
   "privacy.fulfilErasureTitle": "Fulfill erasure request",
   "privacy.erasureIrreversible":
     "This permanently erases the contact across the whole system: record, captured activity and derived values. It cannot be undone. The erasure itself is audited.",
-  "privacy.typeErase": "Type ERASE to confirm",
   "privacy.erasureConfirm": "Erase and suppress",
   "privacy.legalHoldTitle": "Blocked by legal hold",
   "privacy.legalHold":
@@ -8390,10 +8379,12 @@ export const en = {
     "No records held. Every erasure so far was completed in full.",
   "restricted.heldLabel": "Records held now",
   "restricted.kind": "Record",
+  "restricted.occurred": "Dated",
   "restricted.deals": "Deal or project",
   "restricted.noDeal": "No deal on record",
   "restricted.reason": "Held because",
   "restricted.until": "Held until",
+  "restricted.redacted": "Redacted",
   "restricted.since": "Since {date}",
   "restricted.nothingRedacted": "Nothing removed",
   "restricted.redactedCount_one": "{count} field removed",
@@ -8403,6 +8394,7 @@ export const en = {
   "restricted.kind.call": "Call",
   "restricted.kind.meeting": "Meeting",
   "restricted.kind.message": "Message",
+  "restricted.decide": "Decision",
   "restricted.reasonLabel": "Why",
   "restricted.reasonHint":
     "Recorded in the audit trail with your name. State what you decided and on what basis.",
@@ -8816,26 +8808,15 @@ export const en = {
 
   "ob.s4.provGoogle": "Google",
   "ob.s4.provMicrosoft": "Microsoft",
-  "ob.s4.provImap": "Other mailbox (IMAP/SMTP)",
-  "ob.s4.microsoftBtn": "Connect Microsoft",
-  "ob.s4.microsoftHint":
-    "Reads your mail and can send from it. You grant both on Microsoft’s screen and can disconnect at any time.",
   "ob.s4.microsoftUnverified":
     "An “unverified app” notice may appear. It refers to this self-hosted installation, not a third party.",
   "ob.s4.microsoftFailed": "Microsoft connection not completed",
-  "ob.s4.connectOkTitle": "Mailbox connected",
-  "ob.s4.connectOkBody": "Capture starts on the next sync.",
   "ob.s4.connectVerifying": "Confirming connection…",
-  "ob.s4.connectLive": "Live and capturing",
   "ob.s4.connectConfirmFailed": "The connection could not be confirmed.",
   "ob.s4.connectRetry": "Connect again in Settings under Connections.",
   "ob.s4.connectDenied": "Access was declined. Nothing was connected.",
-  "ob.s4.googleBtn": "Connect Gmail",
-  "ob.s4.googleHint":
-    "Reads your mail and can send from it. You grant both on Google’s screen and can disconnect at any time.",
   "ob.s4.googleUnverified":
     "If Google warns about an “unverified app”, select Advanced, then Continue. Google’s screen lists exactly what is granted.",
-  "backfill.title": "Import old emails",
   "backfill.intro":
     "Choose how far back to go. Nothing starts until you click Start import.",
   "backfill.windowLabel": "How far back",
@@ -8865,8 +8846,6 @@ export const en = {
   "backfill.startCta": "Start import",
   "backfill.starting": "Starting…",
   "backfill.skip": "Not now",
-  "backfill.skippedNote":
-    "No old emails imported. New emails still come in. You can import old emails later in Settings.",
   "backfill.loading": "Checking the import…",
   "backfill.statusUnavailable":
     "The import status is not available right now. New emails still come in.",
@@ -8911,25 +8890,31 @@ export const en = {
 
   // The units an installation composed, offered on the settings page that
   // already holds the kind of credential each one is configured with. The two
-  // headings differ because the two pages mean different things — one is your
+  // headings differ because the two pages mean different things: one is your
+  // own account somewhere, the other is the installation's.
+  "extUnits.open": "Open",
+
+  // The units an installation composed, offered on the settings page that
+  // already holds the kind of credential each one is configured with. The two
+  // headings differ because the two pages mean different things: one is your
   // own account somewhere, the other is the installation's.
   "extUnits.openNamed": "Settings for {name}",
-  "extUnits.user.title": "Your other accounts",
+  "extUnits.user.title": "Other accounts",
   "extUnits.user.sub":
-    "Accounts this installation can connect on your behalf. Each is private to you, and disconnecting it affects only you.",
+    "Add-ons this installation offers that sign in as you. Each is private to you, and disconnecting one affects only you.",
   "extUnits.workspace.title": "Installation add-ons",
   "extUnits.workspace.sub":
     "Add-ons this installation runs with one shared credential. Settings here apply to all users.",
 
   // Connected inboxes (Settings → Connections): the "manage in Settings"
   // surface the onboarding copy promises.
-  "connectors.title": "Connected mailboxes and calendars",
+  "connectors.title": "Mail and calendar",
   // The rep's standing overnight authority — one question, asked beside the
   // mailbox connect in onboarding and again in Settings. The danger line names
   // the features that go empty, because "some things stop working" is not
   // something a rep can weigh.
   "overnightGrant.title": "Overnight preparation",
-  "overnightGrant.label": "Let Margince prepare the Morning brief overnight",
+  "overnightGrant.label": "Prepare my Morning brief overnight",
   "overnightGrant.help":
     "Ranks today’s deals and mail and writes notes for your Morning brief. It acts as you, sees only what you can see and never sends.",
   "overnightGrant.dangerTitle": "Overnight agent will not run",
@@ -9046,16 +9031,11 @@ export const en = {
   "connectionOutcomes.contacts_other": "{count} contacts",
   "connectionOutcomes.companies_one": "{count} company",
   "connectionOutcomes.companies_other": "{count} companies",
-  "mailSharing.title": "Email sharing",
   "mailSharing.label": "Share captured mail with the team",
   "mailSharing.help":
     "Every colleague who can see a contact can read its captured mail. Single messages can be limited afterwards.",
   "mailSharing.danger":
     "With email sharing off, the CRM is hard to use. New mail is visible only to the people on each message.",
-  "mailSharing.posture.shared":
-    "Newly captured mail is readable by colleagues who can see the contact.",
-  "mailSharing.posture.private":
-    "Newly captured mail is held to the people on the message and the capturing mailbox.",
   "mailSharing.posture.where": "Change in Capture rules",
   "mailSharing.sharedPosture.label": "Allow mailboxes to share on arrival",
   "mailSharing.sharedPosture.help":
@@ -9065,12 +9045,14 @@ export const en = {
   "mailSharing.dangerTitle": "Email sharing is off",
   "mailSharing.sharedPosture.warningTitle": "This asserts a legal basis",
   "mailSharing.saveFailed": "Setting not saved",
-  "mailSharing.save": "Save",
   "mailSharing.cardTitle": "Mail sharing and sync",
   "connectors.originLabel": "Address used in emailed links",
+  "connectors.originReachable": "Reachable",
   "connectors.originUnreachable": "Unreachable",
   "connectors.loading": "Loading connectors…",
-  "connectors.loadFailed": "Could not load connectors. Reload the page.",
+  "connectors.originUnchecked": "Not checked",
+  "connectors.sub":
+    "Connect the account you work in. Your email files itself to the right contacts and deals, and your calendar puts meetings on records and gives your booking link your free times.",
   "connectors.provGmail": "Gmail",
   "connectors.provGcal": "Google Calendar",
   "connectors.provGraph": "Outlook",
@@ -9087,13 +9069,9 @@ export const en = {
     "Reconnect this mailbox to send from it. A mailbox connected before sending existed cannot be upgraded in place; the provider grants sending only on a new connection.",
   "connectors.lastSynced": "Last synced {at}",
   "connectors.neverSynced": "Awaiting first sync",
-  "connectors.nextCheck": "Next check around {at}",
-  "connectors.polled": "Polled on a schedule (no push subscription)",
-  "connectors.pushRenewal": "Push renewal by {at}",
   "connectors.notConfigured":
     "Mail capture is not configured on this installation.",
   "connectors.reconnect": "Reconnect",
-  "connectors.reconnectNamed": "Reconnect {name}",
   "connectors.disconnect": "Disconnect",
   "connectors.signatureEnrich.label": "Read contact details from this mailbox",
   "connectors.contextTag.label": "Tag for created contacts",
@@ -9140,7 +9118,7 @@ export const en = {
   "captureNotice.yourControl":
     "You decide per sender and per thread, in Settings under Connections: keep a correspondent out entirely, share a thread with the team, or delete what a sender brought in. Nothing here asks for your agreement. This describes what happens, so you know it before you connect.",
   "connectors.mailPosture.label": "Mail visibility",
-  "connectors.mailPosture.classified": "Held until classified",
+  "connectors.mailPosture.classified": "Held until checked",
   "connectors.mailPosture.held": "Always held",
   "connectors.mailPosture.shared": "Shared with the team",
   "connectors.mailPosture.sharedNeedsAdmin":
@@ -9154,11 +9132,7 @@ export const en = {
   "connectors.mailPosture.historyTitle": "Apply to captured mail?",
   "connectors.mailPosture.historyBody":
     "This setting applies to mail captured from now on. Mail already in the CRM keeps its visibility unless you narrow it to match.",
-  "connectors.mailPosture.historyConfirm": "Change mail visibility",
   "connectors.mailPosture.historyApply": "Also narrow captured mail",
-  "connectors.disconnectTitle": "Disconnect this mailbox?",
-  "connectors.disconnectBody":
-    "This deletes the stored credential for this mailbox. Capture stops immediately; captured records stay in the CRM, and reconnecting asks for permission again.",
   "connectors.disconnectBodyGoogleNote":
     "Google may still list Margince under your account’s third-party access. Remove it there to revoke access fully.",
   "connectors.disconnectBodyMicrosoftNote":
@@ -9196,29 +9170,9 @@ export const en = {
   "connectors.dismissOutcome": "Dismiss",
   "connectors.oauthConnected": "Connected",
   "connectors.oauthNotConnected": "Nothing was connected",
-  "connectors.connectFailed": "Could not connect",
 
-  // The "Add a connection" affordance (Task 1): one verb in the card's header
-  // opens a dialog listing the providers still addable, each with the sentence
-  // it needs. `addOpen` names the act of OPENING that list, and the picks inside
-  // it name the act of connecting — so no two buttons on the surface read the
-  // same while both are on screen.
-  "connectors.addConnection": "Add connector",
-  "connectors.addOpen": "Add connector",
-  "connectors.connect": "Connect",
-  "connectors.connectProvider": "Connect {provider}",
-  "connectors.addGmailBrings":
-    "Mail sent and received in Gmail. Margince can also send from it.",
-  "connectors.addGcalBrings":
-    "Your Google Calendar, connected separately from Gmail.",
-  "connectors.addGraphBrings":
-    "Mail sent and received on a Microsoft work account. Margince can also send from it.",
-  "connectors.addGraphCalBrings":
-    "Your Outlook calendar, connected separately from Outlook mail.",
-  "connectors.addImapBrings":
-    "Any other mail host, using an app password. Capture only.",
-  "connectors.addTestMailboxBrings":
-    "Test mailbox for QC. No real mail is sent or received.",
+  // The card's header verb, which opens the connect dialog (connectFlow.*).
+  "connectors.addOpen": "Add account",
   "connectors.providerNotConfigured":
     "{provider} is not configured on this installation.",
 
@@ -9256,6 +9210,11 @@ export const en = {
   "connectors.telegramNotConfigured":
     "Messaging channels are not configured on this installation.",
   "connectors.telegramConnectCta": "Connect Telegram bot",
+
+  "connectors.telegramEmptyTitle": "No bot connected",
+  "connectors.telegramEmptyNote":
+    "A connected bot captures and sends Telegram messages for the whole company.",
+  "connectors.telegramNotConfiguredTitle": "Not available on this installation",
   "connectors.telegramReadOnly":
     "Only an administrator or operations user can connect or change the bot.",
   "connectors.telegramEditToken": "Replace token",
@@ -9271,11 +9230,6 @@ export const en = {
   "connectors.telegramReplaceCta": "Replace token",
   "connectors.telegramConnectedAs": "Connected as @{username}.",
   "connectors.telegramConnectFailed": "Bot not connected",
-  "connectors.openNamed": "Open {name}",
-  "connectors.emptyLabel": "No mailbox connected",
-  "connectors.emptyHint":
-    "Connect a mailbox or calendar to capture its mail and meetings.",
-  "connectors.telegramEmptyLabel": "No bot connected",
 
   // The workspace's own consumer-mail list (CAP-PARAM-5): what the shipped
   // baseline missed, and what it got wrong. Admin-curated and shared, because
@@ -9399,7 +9353,6 @@ export const en = {
   "ob.s4.imapHint":
     "Use an app password. It is stored encrypted and deleted on disconnect.",
   "ob.s4.imapConnect": "Test and connect",
-  "ob.s4.connecting": "Connecting…",
   "ob.s4.accessToggle": "Access granted",
   "ob.s4.scope1Lead": "Read access.",
   "ob.s4.scope1Rest":
@@ -9411,9 +9364,6 @@ export const en = {
   "ob.s4.scope3Rest": "Export or delete everything at any time.",
   "ob.s4.scope4Lead": "Disconnect in one click.",
   "ob.s4.scope4Rest": "The CRM keeps working but stops capturing.",
-  "ob.s4.capturedTitle": "Mailbox connected",
-  "ob.s4.capturedBody":
-    "New mail appears here as the first sweep runs, usually within minutes.",
   "ob.s4.connectFailed": "Mailbox not connected",
   "ob.s4.notNow": "Not now",
 
@@ -9581,48 +9531,14 @@ export const en = {
   "ob.conv.scene.decisionSub":
     "Your site names several legal entities. The one you select appears on every quote and invoice.",
   "ob.conv.scene.continue": "Continue",
-  "ob.conv.connect.sceneTitle": "Connect your accounts",
+  "ob.conv.connect.sceneTitle": "Connect your mail and calendar",
   "ob.conv.connect.sceneSub":
-    "I build your contacts, companies and history from the mail already in your mailbox.",
-  "ob.conv.connect.mailboxTitle": "Your mailbox",
-  "ob.conv.connect.mailboxHint":
-    "Select one. Contacts, companies and history come from this mailbox.",
-  "ob.conv.connect.networkTitle": "Your network",
-  "ob.conv.connect.networkHint":
-    "Save your profile so a network imported later is attributed to you. The import is in Settings.",
+    "Margince turns your mail into contacts, companies and history, and offers only your free times on your booking link.",
   "ob.conv.connect.recommended": "Recommended",
-  // Neither grant carries calendar or contacts — those are their own,
-  // separate consent (Settings → Calendar) — and neither carries sign-in:
-  // both connect the SAME two things here, mail read and send, so the two
-  // lines say the same thing rather than inventing a difference that is not
-  // in the grant.
-  "ob.conv.connect.gmailBrings": "Mail read and sent via Google",
-  "ob.conv.connect.microsoftBrings": "Mail read and sent via Microsoft",
-  "ob.conv.connect.imapBrings":
-    "Mail from any host, with your email address and an app password",
-  "ob.conv.connect.linkedinAuth": "Profile link, saved to your account",
-  "ob.conv.connect.saveCta": "Save",
   "ob.conv.connect.dialogDone": "Done",
-  "ob.conv.connect.scopeGoogle": "OAuth, read and send scopes",
-  "ob.conv.connect.scopeMicrosoft": "OAuth, Graph API",
-  "ob.conv.connect.scopeImap": "Mail address and password",
-  "ob.conv.connect.connectCta": "Connect",
-  "ob.conv.connect.connectedCta": "Connected",
   "ob.conv.connect.savedCta": "Saved",
-  "ob.conv.connect.blockedCard":
-    "A mailbox is already selected. Disconnect it in Settings to switch.",
-  "ob.conv.connect.guaranteesToggle": "What connecting does",
-  "ob.conv.connect.dialogHeadlineAccess": "{name} access needed",
   "ob.conv.connect.dialogHeadlineImap": "Connect mail host",
-  "ob.conv.connect.appMissingCard":
-    "Your company has not registered its {name} app yet.",
-  "ob.conv.connect.appUnusableCard":
-    "Your company’s {name} app cannot be opened. An administrator must fix it; a new app is not needed.",
   "ob.conv.connect.unsupportedCard": "This installation does not serve {name}.",
-  "ob.conv.connect.appSetupLink": "Set it up in Settings",
-  "ob.conv.connect.dialogIntro":
-    "{brings}. I read it once to build your contacts and history, then keep it in sync.",
-  "ob.conv.connect.linkedinName": "LinkedIn",
   "ob.conv.connect.linkedinSaved": "Profile saved",
   "ob.conv.connect.linkedinSkippedNote": "Skipped: add it later in Settings",
   "ob.conv.connect.rosterFailedTitle": "Mailboxes could not be checked",
@@ -9712,10 +9628,8 @@ export const en = {
     "My earlier read of {host} did not finish. Enter a website again, or enter the details manually.",
   "ob.conv.recap.readDeferred":
     "My read of {host} is paused. Enter a website again, or enter the details manually.",
-  "ob.conv.connect.skip": "Continue without a mailbox",
+  "ob.conv.connect.skip": "Skip for now",
   "ob.conv.connect.continue": "Continue",
-  "ob.conv.connect.mailboxNeeded":
-    "A mailbox is still needed: mail is what gets read and drafted. Connect one above, or continue without one for now.",
   "ob.conv.linkedin.cardBody":
     "Your profile address, so an imported connection reads “Anna knows them”, not “the company knows them”.",
   "ob.conv.linkedin.dialogHeadline": "Your LinkedIn profile",
@@ -9883,7 +9797,6 @@ export const en = {
   // A separate operation from connecting, and the copy has to keep them
   // separate: connecting grants access, the backread spends budget reading
   // history. Read-only, and it writes nothing until the reader approves.
-  "ob.backread.heading": "Import period",
   "ob.backread.estimating": "Counting messages in this period…",
   "ob.backread.estimate": "About {messages} messages in this period.",
   "ob.backread.estimateAtLeast":
@@ -9894,7 +9807,6 @@ export const en = {
     "The period could not be estimated: {detail} Start anyway, or select another period.",
   "ob.backread.note":
     "The mailbox is not changed. Imported emails and contacts appear as the import progresses.",
-  "ob.backread.start": "Connect and import",
   "ob.backread.startFailed":
     "The mailbox history import did not start: {detail} Retry, or continue and start it later in Settings.",
   "ob.backread.running": "Importing mailbox history",
@@ -9920,8 +9832,6 @@ export const en = {
     "The import could not be stopped: {detail} It keeps running meanwhile. Retry.",
   "ob.backread.detailUnavailable": "An unexpected error occurred.",
   "ob.backread.cancel": "Stop import",
-  "ob.backread.explore": "Continue during import",
-  "ob.backread.skip": "Skip history import",
 
   "auth.title": "Margince",
   "auth.checking": "Checking session…",
@@ -10038,7 +9948,6 @@ export const en = {
   "password.cancel": "Cancel",
   "password.submit": "Save new password",
   "password.doneTitle": "Password changed",
-  "password.done": "All other devices were signed out.",
   "password.changeFailedTitle": "Password not changed",
   // Deliberately says nothing about WHICH field: this is the fallback for a
   // refusal the server did not explain, and naming the current password would
@@ -10676,7 +10585,8 @@ export const en = {
   "settings.boundary.unknownTitle": "Settings page not found",
   "settings.boundary.unknownBody":
     "The link may be outdated or mistyped. The settings overview lists every page your role can open.",
-  "settings.page.account.sub": "How you appear and sign in.",
+  "settings.page.account.sub":
+    "How colleagues see you, how you sign in, and the language and look Margince uses for you.",
   "settings.page.voice.sub": "The wording drafts use when they write as you.",
   "settings.page.agents.sub":
     "Use Margince from the AI assistant you already use. It works as you, and can only see and change what you can.",
@@ -10689,7 +10599,7 @@ export const en = {
   "settings.page.company.sub":
     "Brand, business context, and the currency and calendar every report uses.",
   "settings.page.authentication.sub":
-    "How people sign in to this installation, which apps may act for it, and which IdP groups grant roles.",
+    "The Google and Microsoft apps every mail and calendar connector runs through, and the ways people sign in.",
   "settings.page.members.sub":
     "Everyone with a seat, and what each can access.",
   "settings.page.teams.sub": "Groups that records can be shared with.",
@@ -11044,7 +10954,6 @@ export const en = {
     "Show every processing step for the message at {at}",
   "captureActivity.emptyFiltered":
     "No loaded rows match. Load more to see the rest of the window.",
-  "captureActivity.loadMore": "Load more",
   "captureActivity.empty": "No capture activity in the last 24 hours.",
   "captureActivity.payloadsOff":
     "This installation does not record message senders or subjects, so the rows below show only the result.",
@@ -11286,6 +11195,7 @@ export const en = {
     "Add writing samples to build your Voice DNA, which only you can see. It learns only from what you add, and a first build takes about a minute.",
   "settings.voice.privacy": "Only you can see your Voice DNA.",
   "settings.voice.status.collecting": "Collecting",
+  "settings.voice.status.ready": "Ready",
   "settings.voice.status.stale": "Rebuild needed",
   "settings.voice.bandThin": "thin",
   "settings.voice.bandGood": "good",
@@ -11697,7 +11607,6 @@ export const en = {
   "users.createTeam": "Create team",
   "users.notArchived": "Team not archived",
   "users.teamNotChanged": "Membership not changed",
-  "users.inviteFailed": "Invitation not sent",
   "users.access.title": "User access",
   "users.access.identity":
     "Reads every contact, company, lead and deal in the company.",
@@ -11808,7 +11717,6 @@ export const en = {
     "The server could not be reached. Check the connection and retry.",
   "users.link.retry": "Retry",
   "users.link.done": "Done",
-  "settings.companyTitle": "Company profile",
   "settings.companyContextTitle": "Business context",
   "settings.companyEditContext": "Edit business context",
   "settings.companyGroupSet_one": "{count} of {total} set",
@@ -12030,17 +11938,64 @@ export const en = {
   "aicalls.title": "AI call trace",
   "aicalls.withheld":
     "Only an administrator or operations user can read the call trace. It records every model call the installation made.",
-  "aicalls.col.detail": "Detail",
-  "aicalls.expandCall": "Show attempts for {task} at {when}",
+  "aicalls.open": "Open the {feature} call from {when}",
   "aicalls.col.when": "When",
-  "aicalls.col.task": "Task",
+  "aicalls.filtersLabel": "Filters",
+  "aicalls.unit": "calls",
+  "aicalls.col.feature": "Feature",
   "aicalls.col.model": "Model",
   "aicalls.col.tokens": "Tokens in / out",
   "aicalls.col.latency": "Latency",
+  "aicalls.col.cost": "Cost",
+  "aicalls.cost.unpriced": "Not priced",
+  "aicalls.cost.unpricedHint":
+    "The price sheet has no rate for a model this call used.",
   "aicalls.ms": "{value} ms",
+  "aicalls.outcome.ok": "Answered",
+  "aicalls.outcome.fallback": "Fallback",
+  "aicalls.outcome.declined": "Declined",
+  "aicalls.outcome.error": "Failed",
+  "aicalls.filter.search": "Search calls",
+  "aicalls.filter.searchPlaceholder": "Search feature, model or error",
+  "aicalls.filter.window": "Time range",
+  "aicalls.filter.anyOutcome": "Any outcome",
+  "aicalls.filter.anyModel": "Any model",
+  "aicalls.window.any": "Any time",
+  "aicalls.window.hour": "Last hour",
+  "aicalls.window.day": "Last 24 hours",
+  "aicalls.window.week": "Last 7 days",
+  "aicalls.clear": "Clear filters",
+  "aicalls.filteredEmpty": "No calls match these filters.",
+  "aicalls.prev": "Previous call",
+  "aicalls.next": "Next call",
+  "aicalls.copy": "Copy",
+  "aicalls.copied": "Copied",
+  "aicalls.copyNamed": "Copy {what}",
+  "aicalls.copyRemedy": "Select the text in the box and copy it by hand.",
+  "aicalls.fact.served": "Served model",
+  "aicalls.fact.configured": "Configured model",
+  "aicalls.fact.provider": "Provider",
+  "aicalls.fact.tier": "Tier",
+  "aicalls.fact.error": "Error",
+  "aicalls.fact.tokensInOut": "{in} in, {out} out",
+  "aicalls.fact.reasoning": "Reasoning tokens",
+  "aicalls.fact.cached": "Cached tokens",
+  "aicalls.fact.source": "Model reported by",
+  "aicalls.fact.context": "Company context",
+  "aicalls.fact.none": "None",
+  "aicalls.fact.exactTime": "Exact time (UTC)",
+  "aicalls.fact.taskKey": "Task key",
+  "aicalls.fact.callId": "Call ID",
+  "aicalls.fact.logicalId": "Logical call ID",
+  "aicalls.fact.correlationId": "Correlation ID",
+  "aicalls.fact.configHash": "Config hash",
+  "aicalls.fact.errorCode": "Error code",
   "aicalls.badge.cacheHit": "Cache hit",
-  "aicalls.badge.degraded": "Degraded",
+  "aicalls.badge.degraded": "Budget degraded",
   "aicalls.badge.decision": "Decision model",
+  "aicalls.reason.provider_error": "Provider error on the attempt before",
+  "aicalls.reason.schema_invalid": "Answer before did not match the schema",
+  "aicalls.reason.budget_degrade": "Moved down a tier by the AI budget",
   "aicalls.reason.decision_below_floor":
     "Decision model below its confidence floor",
   "aicalls.reason.decision_error": "Decision model failed",
@@ -12055,15 +12010,13 @@ export const en = {
   "aicalls.reason.timeout": "The attempt before ran out of time",
   "aicalls.decisionAnswer": "answered {choice} at {confidence}",
   "aicalls.callsLabel": "Recent calls",
-  "aicalls.filter.all": "All tasks",
+  "aicalls.filter.all": "All features",
   "aicalls.empty": "No AI calls recorded yet.",
-  "aicalls.detail.identity":
-    "Served {served} via {provider} (configured: {configured})",
-  "aicalls.detail.identityNoModel":
-    "Served {served} via {provider} (no model configured)",
+  "aicalls.taskEmpty": "No calls recorded for this feature yet.",
+  "aicalls.detail.call": "Call",
+  "aicalls.detail.payload": "Payload",
+  "aicalls.detail.technical": "Technical details",
   "aicalls.detail.source": "Served identity source: {source}",
-  "aicalls.detail.context": "Injected context: {scopes}",
-  "aicalls.detail.contextNone": "No company context injected",
   "aicalls.detail.attempts": "Attempts",
   "aicalls.detail.request": "Request payload",
   "aicalls.detail.settings": "Request settings sent",
@@ -12075,7 +12028,6 @@ export const en = {
   "aicalls.col.outcome": "Outcome",
   "aicalls.outcome.retried": "Retried",
   "aicalls.outcome.failed": "Failed",
-  "aicalls.model.afterDecision": "Decision model, then {tier}",
   "aicalls.filter.servedProvider": "Served by",
   "aicalls.filter.servedModel": "Answered by",
   "aicalls.sentinel.provider_quota": "Out of quota",
@@ -12199,11 +12151,7 @@ export const en = {
     "An administrator can turn a provider off but cannot add one. A provider shows on the sign-in screen once its app below is set up.",
   "signInMethods.password": "Email and password",
   "signInMethods.passwordAlways":
-    "Always available. Every user can sign in this way, so the other methods can be turned off safely.",
-  "signInMethods.providerNoApp":
-    "Not on the sign-in screen yet. It shows once the app below is set up.",
-  "signInMethods.providerHint":
-    "Shows this provider on the sign-in screen. Turning it off stops sign-ins in progress; existing sessions continue.",
+    "Always available, so nobody is locked out when another method is off.",
   "signInMethods.noneConfigured":
     "This installation has no external provider configured. Password is the only sign-in method.",
   "signInMethods.requireMfa": "Require second factor",
@@ -12216,45 +12164,31 @@ export const en = {
     "You have not set up two-step sign-in yet, so you are asked to set it up too.",
   "groupRoles.title": "Group role grants",
   "groupRoles.sub":
-    "Grant a role at corporate sign-in to every invited member of an IdP group. Spell the group exactly as the ID token’s groups claim does. No account is created this way: an email nobody invited is refused, whether they have groups or not.",
-  "groupRoles.grantOnlyTitle": "Grants only: the directory never revokes",
+    "When someone you invited signs in with Google or Microsoft, they get the role mapped to a group they belong to in your company directory. Nobody gets in without an invitation.",
+  "groupRoles.grantOnlyTitle": "Groups only ever add a role",
   "groupRoles.grantOnly":
-    "Each sign-in grants the mapped roles and never removes any. Removing a member from an IdP group does not take the role away here: revocation stays a deliberate admin action on the member’s own account.",
+    "Taking someone out of a directory group does not take the role away here. Change it on their entry in Members.",
   "groupRoles.adminGrant":
-    "Mapping a group onto Admin grants admin to every invited member of that group at their next sign-in.",
-  "groupRoles.group": "IdP group",
-  "groupRoles.groupPlaceholder": "Group, exactly as the ID token spells it",
-  "groupRoles.role": "Granted role",
+    "A group mapped to Admin makes every invited member of it an admin at their next sign-in.",
+  "groupRoles.group": "Directory group",
+  "groupRoles.groupPlaceholder": "Group, exactly as your directory names it",
+  "groupRoles.role": "Role they get",
   "groupRoles.add": "Add group",
   "groupRoles.remove": "Remove this group mapping",
   "groupRoles.removeNamed": "Remove the {group} mapping",
-  "groupRoles.save": "Save group grants",
+  "groupRoles.save": "Save group roles",
   "groupRoles.empty":
-    "No groups are mapped. Corporate sign-in grants nothing beyond what each member already holds.",
+    "No groups are mapped. Signing in with Google or Microsoft grants nothing beyond the role each member already holds.",
   "groupRoles.blankGroup": "Every mapping needs a group name.",
   "groupRoles.whitespaceGroup":
-    "A group name cannot begin or end with a space. It must match the ID token exactly.",
+    "A group name cannot begin or end with a space. It must match your directory exactly.",
   "groupRoles.duplicateGroup": "Each group can be mapped only once.",
   "groupRoles.tooMany": "At most 64 groups can be mapped.",
   "oauthApp.google.title": "Google app",
-  "oauthApp.google.sub":
-    "Mailboxes are connected, and people sign in with Google, through a Google OAuth app your company owns, using its own credentials.",
-  "oauthApp.google.absent":
-    "No app is available from any source. Gmail and Calendar cannot be connected, and Google sign-in cannot be offered.",
-  "oauthApp.google.redirectSub":
-    "Register every URI below on the OAuth client in the Google console. A missing URI fails at the consent screen with redirect_uri_mismatch, which does not name the URI.",
   "oauthApp.google.clientIdPlaceholder":
     "000000000000-xxxx.apps.googleusercontent.com",
   "oauthApp.google.removeConfirmTitle": "Remove the Google app?",
-  "oauthApp.google.removeConfirmBody":
-    "The client secret cannot be read back, so restoring the app requires re-entering the client ID and secret from the Google console. Gmail and Calendar connections use this app; Microsoft and IMAP mailboxes are unaffected. First-run setup asks for an app again.",
   "oauthApp.microsoft.title": "Microsoft app",
-  "oauthApp.microsoft.sub":
-    "Outlook mailboxes and calendars are connected, and people sign in with Microsoft, through an Entra app registration your company owns, using its own credentials.",
-  "oauthApp.microsoft.absent":
-    "No app is available from any source. Outlook mail and calendar cannot be connected, and Microsoft sign-in cannot be offered.",
-  "oauthApp.microsoft.redirectSub":
-    "Register every URI below under Authentication on the Entra app registration as a Web platform. A missing URI fails at consent with AADSTS50011, which does not name the URI.",
   "oauthApp.microsoft.clientIdPlaceholder":
     "00000000-0000-0000-0000-000000000000",
   "oauthApp.microsoft.removeConfirmTitle": "Remove the Microsoft app?",
@@ -12284,6 +12218,7 @@ export const en = {
   "oauthApp.redirectUri": "URI",
   "oauthApp.redirectCopyFailed": "Select the address and copy it manually.",
   "oauthApp.redirectCopy": "Copy {purpose} URI",
+  "oauthApp.redirectTable": "Redirect addresses",
   "oauthApp.redirectCopiedFor": "Copied {purpose} URI",
   "oauthApp.redirect.mailbox_connect": "Mailbox",
   "oauthApp.redirect.calendar_connect": "Calendar",
@@ -12294,7 +12229,422 @@ export const en = {
   "oauthApp.clientSecret": "Client secret",
   "oauthApp.tenant": "Directory (tenant) ID",
   "oauthApp.tenantHint":
-    "Optional. Pins the app to one Entra directory: only its members can connect a mailbox, and Microsoft sign-in uses it. Leave empty to let any company connect; sign-in then waits until the server names your directories.",
+    "Limits the app to your company directory, so only its members can connect a mailbox. Leave it empty and anyone with a Microsoft work account can connect, but Continue with Microsoft stays off the sign-in screen until a directory is set.",
+  "oauthApp.noWriteReason": "Only an admin can set up company apps",
+  "oauthApp.unlock.gmail": "Gmail",
+  "oauthApp.unlock.outlook": "Outlook mail",
+  "oauthApp.unlock.calendar": "Calendar",
+  "oauthApp.unlock.signIn": "Sign-in",
+  "oauthApp.google.save": "Save Google app",
+  "oauthApp.microsoft.save": "Save Microsoft app",
+  "oauthApp.drawer.google.title": "Set up the Google app",
+  "oauthApp.drawer.google.intro":
+    "Two steps in Google Cloud console, then paste the result here. You need access to your company’s Google Cloud project.",
+  "oauthApp.drawer.google.value":
+    "One app for the whole company. Once it is saved, everyone at {company} can connect Gmail and Google Calendar, and Continue with Google can appear on the sign-in screen.",
+  "oauthApp.drawer.google.step1Title": "Create an OAuth client in Google Cloud",
+  "oauthApp.drawer.google.step1Body":
+    "Open APIs and services, then Credentials, and create an OAuth client ID of the type Web application.",
+  "oauthApp.drawer.google.step1Link": "Open Google Cloud console",
+  "oauthApp.drawer.google.step2Body":
+    "In the client, under Authorized redirect URIs. Margince lists one for each thing this installation uses Google for. Paste them exactly; if one is missing, Google stops the connection with “redirect_uri_mismatch” and does not say which address.",
+  "oauthApp.drawer.microsoft.title": "Set up the Microsoft app",
+  "oauthApp.drawer.microsoft.intro":
+    "Two steps in the Microsoft Entra admin center, then paste the result here. You need access to your company’s Entra directory.",
+  "oauthApp.drawer.microsoft.value":
+    "One app for the whole company. Once it is saved, everyone at {company} can connect Outlook mail and calendar, and Continue with Microsoft can appear on the sign-in screen.",
+  "oauthApp.drawer.microsoft.step1Title": "Register an app in Microsoft Entra",
+  "oauthApp.drawer.microsoft.step1Body":
+    "Open App registrations, register a new app, then add a client secret under Certificates and secrets.",
+  "oauthApp.drawer.microsoft.step1Link": "Open Microsoft Entra admin center",
+  "oauthApp.drawer.microsoft.step2Body":
+    "In the app registration, under Authentication, as redirect URIs of the Web platform. Margince lists one for each thing this installation uses Microsoft for. Paste them exactly; if one is missing, Microsoft stops the connection with “AADSTS50011” and does not say which address.",
+  "oauthApp.drawer.step2Title": "Add these redirect addresses",
+  "oauthApp.drawer.step3Title": "Paste the client ID and secret",
+  "oauthApp.drawer.step3Body":
+    "{vendor} shows both once the client is created.",
+  "oauthApp.drawer.secretHint":
+    "Stored encrypted and never shown again. To change it later, replace the app.",
+  "oauthApp.drawer.foot": "Takes effect for everyone as soon as it is saved.",
+  "confirmPhrase.risk": "I am aware of the risk",
+  "confirmPhrase.riskPrompt": "Type this sentence to confirm:",
+  "oauthApps.title": "Google and Microsoft apps",
+  "oauthApps.statusNeedsSetup": "Needs setup",
+  "oauthApps.statusReady": "Ready",
+  "oauthApps.noneTitle": "Nobody can connect Gmail, Outlook or a calendar yet",
+  "oauthApps.noneBody":
+    "Everyone you invite is told “Your company has not registered its Google app yet” when they connect a mailbox. Set up the app for the provider your company uses: one app serves everyone.",
+  "oauthApps.readyIntro":
+    "Every mail and calendar connector in {company} runs through one of these apps. Everyone connects their own mailbox under Connections.",
+  "oauthApps.imapNote":
+    "Mailboxes on any other host connect with an address and password (IMAP) and need no app.",
+  "oauthApp.status.none": "Not set up",
+  "oauthApp.status.stored": "Set up",
+  "oauthApp.status.environment": "Set by this installation",
+  "oauthApp.google.for": "For companies on Google Workspace or Gmail.",
+  "oauthApp.microsoft.for": "For companies on Microsoft 365 or Outlook.",
+  "oauthApp.unlocks": "Unlocks for everyone:",
+  "oauthApp.clientLine": "Client {clientId}",
+  "oauthApp.clientLineEnv":
+    "Client {clientId}, from this installation’s configuration",
+  "oauthApp.directoryLine": "Limited to your company directory {tenant}",
+  "oauthApp.google.setUp": "Set up Google app",
+  "oauthApp.microsoft.setUp": "Set up Microsoft app",
+  "oauthApp.menu": "More actions for the {app}",
+  "oauthApp.menu.showRedirects": "Show redirect addresses",
+  "oauthApp.menu.replace": "Replace client ID and secret",
+  "oauthApp.removeImpactTitle": "This changes how everyone connects mail",
+  "oauthApp.google.removeSecret":
+    "The client secret cannot be read back. To restore the app, enter the ID and secret again from Google Cloud console.",
+  "oauthApp.google.removeUsedBy":
+    "Gmail and Google Calendar connections use this app.",
+  "oauthApp.google.removeOthers":
+    "Microsoft and IMAP mailboxes are not affected.",
+  "oauthApp.google.removeSignIn":
+    "Continue with Google leaves the sign-in screen unless this installation also configures an app.",
+  "oauthApp.microsoft.removeSecret":
+    "The client secret cannot be read back. To restore the app, enter the ID and secret again from the Microsoft Entra admin center.",
+  "oauthApp.microsoft.removeUsedBy":
+    "Outlook mail and calendar connections use this app.",
+  "oauthApp.microsoft.removeOthers":
+    "Google and IMAP mailboxes are not affected.",
+  "oauthApp.microsoft.removeSignIn":
+    "Continue with Microsoft leaves the sign-in screen unless this installation also configures an app.",
+  "oauthApp.removeFirstRun": "First-run setup asks for an app again.",
+  "signInMethods.alwaysOn": "Always on",
+  "signInMethods.desc.google":
+    "A Google button for anyone whose work account is on Google.",
+  "signInMethods.desc.microsoft":
+    "A Microsoft button for anyone whose work account is on Microsoft 365.",
+  "signInMethods.onScreen": "On the sign-in screen",
+  "signInMethods.offScreen": "Not on the sign-in screen",
+  "signInMethods.offScreenReason.noApp": "The {vendor} app is not set up.",
+  "signInMethods.offScreenReason.noDirectory":
+    "The Microsoft app is not limited to your company directory.",
+  "signInMethods.offScreenReason.unusable":
+    "The {vendor} app cannot be used right now.",
+  "signInMethods.offScreen.turnedOff": "Turned off",
+  "signInMethods.turnOffTitle": "Turn off {provider}?",
+  "signInMethods.turnOffBody":
+    "The {vendor} button leaves the sign-in screen for everyone at {company}. You can turn it back on at any time.",
+  "signInMethods.impactTitle": "This changes how everyone signs in",
+  "signInMethods.impact.fallback":
+    "Anyone who uses {vendor} signs in with email and password instead. Anyone who never set a password uses Forgot password on the sign-in screen.",
+  "signInMethods.impact.inProgress":
+    "A {vendor} sign-in in progress is stopped. Sessions already open continue.",
+  "signInMethods.impact.groups":
+    "Roles from directory groups are no longer granted at {vendor} sign-in.",
+  "signInMethods.impact.connectors":
+    "Mail and calendar connectors keep working: they use the {vendor} app, not this button.",
+  "signInMethods.turnOffConfirm": "Turn off {vendor} sign-in",
+  "signInMethods.keepOn": "Keep it on",
+  "groupRoles.roleFor": "Role for the {group} group",
+  "groupRoles.adminConfirmTitle": "Make every member of {group} an admin?",
+  "groupRoles.adminImpactTitle": "This hands out the highest role",
+  "groupRoles.adminImpact.signIn":
+    "Every invited member of the group becomes an admin at their next sign-in with Google or Microsoft.",
+  "groupRoles.adminImpact.reach":
+    "An admin can change every setting, every role and every record.",
+  "groupRoles.adminImpact.keep":
+    "Leaving the group later does not take the role away.",
+  "groupRoles.adminConfirm": "Save and grant admin",
+  "connectors.vendorGoogle": "Google",
+  "connectors.vendorMicrosoft": "Microsoft 365",
+  "connectors.oauthConnectedTitle": "{provider} connected",
+  "connectors.oauthBoth": "Mail and Calendar are syncing.",
+  "connectors.oauthMailOnly": "Mail is syncing.",
+  "connectors.oauthCalendarOnly": "Calendar is syncing.",
+  "connectors.oauthImportRuns":
+    "You can leave this page: the import of past email keeps running on its own.",
+  "connectors.oauthCalendarDeclined":
+    "Mail is connected. Calendar was not, because access to it was not allowed.",
+  "connectors.oauthCalendarFailed": "Mail is connected. Calendar was not.",
+  "connectors.connectCalendar": "Connect calendar",
+  "connectors.health.connected": "Connected",
+  "connectors.health.syncing": "Syncing",
+  "connectors.health.upToDate": "Up to date",
+  "connectors.health.reconnect": "Needs reconnect",
+  "connectors.health.attention": "Needs attention",
+  "connectors.health.notConnected": "Not connected",
+  "connectFlow.title": "Connect mail and calendar",
+  "connectFlow.progress": "Steps",
+  "connectFlow.stepAccount": "Account",
+  "connectFlow.stepBringIn": "What to bring in",
+  "connectFlow.stepSignIn": "Sign in",
+  "connectFlow.permsLabel": "What {vendor} will ask for",
+  "connectFlow.where": "Where do you read your work email?",
+  "connectFlow.google": "Gmail and Google Calendar",
+  "connectFlow.microsoft": "Outlook mail and calendar on a work account",
+  "connectFlow.otherHost": "Another mail host",
+  "connectFlow.otherHostDesc":
+    "IMAP with an app password. Mail only, no calendar, no sending.",
+  "connectFlow.alreadyConnected": "Already connected.",
+  "connectFlow.pickAccount": "Choose an account first.",
+  "connectFlow.titleVendor": "Connect {vendor}",
+  "connectFlow.titleImap": "Connect another mail host",
+  "connectFlow.mail": "Mail",
+  "connectFlow.calendar": "Calendar",
+  "connectFlow.mailHelp":
+    "Email you send and receive is filed to the right contacts and deals. You can also send from Margince.",
+  "connectFlow.mailHelpImap":
+    "Email you send and receive is filed to the right contacts and deals.",
+  "connectFlow.calendarHelp":
+    "Meetings appear on contacts and deals, and your booking link offers only your free times.",
+  "connectFlow.calendarImap": "Not available over IMAP.",
+  "connectFlow.pickService": "Tick Mail, Calendar or both.",
+  "connectFlow.importLabel": "Import past email",
+  "connectFlow.importNone": "None",
+  "connectFlow.importAfter":
+    "Once you are signed in, you see how many emails that covers. A small import starts on its own, a larger one waits for you to start it, and you can stop either at any time.",
+  "connectFlow.signInTitle": "Sign in with {vendor}",
+  "connectFlow.handoff":
+    "{vendor} opens in this tab. Sign in with the account you work in and allow each permission {vendor} lists:",
+  "connectFlow.permMail": "Read and send email",
+  "connectFlow.permMailFor": "For Mail",
+  "connectFlow.permCalendar": "See and edit calendar events",
+  "connectFlow.permCalendarFor": "For Calendar and your booking link",
+  "connectFlow.asksTwice":
+    "{vendor} asks twice: once for mail, then once for your calendar.",
+  "connectFlow.afterBoth":
+    "Afterwards you land back on Connections. New mail and meetings start arriving on their own.",
+  "connectFlow.afterMail":
+    "Afterwards you land back on Connections. New mail starts arriving on its own.",
+  "connectFlow.afterCalendar":
+    "Afterwards you land back on Connections. New meetings start arriving on their own.",
+  "connectFlow.back": "Back",
+  "connectFlow.next": "Continue",
+  "connectFlow.continueTo": "Continue to {vendor}",
+  "connectors.bringsMail": "Mail",
+  "connectors.bringsCalendar": "Calendar",
+  "connectors.bringsSend": "Sends from Margince",
+  "connectors.servicesBoth": "Mail and Calendar",
+  "connectors.connectMail": "Connect mail",
+  "connectors.account.connectedOn": "Connected {date}",
+  "connectors.account.menu": "More actions for {account}",
+  "connectors.menu.bringsIn": "Change what it brings in",
+  "connectors.menu.importOlder": "Import older email",
+  "connectors.svc.list": "What {account} brings in",
+  "connectors.svc.newMail": "New mail",
+  "connectors.svc.newMailDesc":
+    "Mail you send and receive is filed to the right contacts and deals.",
+  "connectors.svc.pastEmail": "Past email",
+  "connectors.svc.pastEmailWindow": "Past email, {window}",
+  "connectors.svc.pastEmailDesc":
+    "Margince reads each email to find contacts and companies. Everything imported stays if you stop.",
+  "connectors.svc.checked_one": "{done} of about {count} email checked",
+  "connectors.svc.checked_other": "{done} of about {count} emails checked",
+  "connectors.svc.notImported": "Not imported",
+  "connectors.svc.importPast": "Import past email",
+  "connectors.svc.waiting": "Waiting for you",
+  "connectors.svc.heldNote":
+    "This import waits for you. Check how many emails it covers, then start it.",
+  "connectors.svc.queued": "Starting soon",
+  "connectors.svc.imported": "Imported",
+  "connectors.svc.stopped": "Stopped",
+  "connectors.svc.calendar": "Calendar",
+  "connectors.svc.calendarDesc":
+    "Meetings show on contacts and deals, and your booking link offers only your free times.",
+  "connectors.svc.bookingLink": "Set up your booking link",
+  "connectors.accountSettings": "Who sees mail from {account}",
+  "connectors.heldPointer.label": "Held threads and sender decisions",
+  "connectors.heldPointer.some_one":
+    "{count} thread is held back from the team right now. Review it, and every sender your mailbox brought in, in Capture activity.",
+  "connectors.heldPointer.some_other":
+    "{count} threads are held back from the team right now. Review them, and every sender your mailbox brought in, in Capture activity.",
+  "connectors.heldPointer.none":
+    "Nothing is held back from the team right now. Every sender your mailbox brought in is listed in Capture activity.",
+  "connectors.heldPointer.unknown":
+    "Threads held back from the team, and every sender your mailbox brought in, are listed in Capture activity.",
+  "connectors.heldPointer.review": "Review",
+  "connectors.advanced": "Advanced",
+  "connectors.advancedCount_one": "{count} setting",
+  "connectors.advancedCount_other": "{count} settings",
+  "connectors.disconnectAccountTitle": "Disconnect {account}?",
+  "connectors.stopServicesTitle": "Stop bringing in {services}?",
+  "connectors.disconnectServicesBody":
+    "This stops {services} and deletes the stored credential. What was captured stays in the CRM, and connecting again asks for permission again.",
+  "connectors.bringsIn.title": "What {account} brings in",
+  "connectors.bringsIn.addNote":
+    "{vendor} opens in this tab and asks for the new permission.",
+  "connectors.bringsIn.unchanged": "Tick or untick a service first.",
+  "connectors.bringsIn.save": "Save",
+  "connectors.tile.google": "Gmail and Google Calendar",
+  "connectors.tile.microsoft": "Outlook mail and calendar",
+  "connectors.connectVendor": "Connect {vendor}",
+  "connectors.strip.label": "How connecting works",
+  "connectors.strip.pick": "Pick your account",
+  "connectors.strip.tick": "Tick Mail and Calendar",
+  "connectors.strip.signIn": "Sign in",
+  "connectors.strip.syncs": "Syncing starts on its own",
+  "mailSharing.plate.scope": "Whole company",
+  "mailSharing.plate.shared":
+    "{company} shares newly captured mail with colleagues who can see the contact. Each mailbox can hold its own mail back further.",
+  "mailSharing.plate.private":
+    "{company} holds newly captured mail to the people on the message and the mailbox that captured it.",
+  "connectors.originTitle": "Links in outgoing mail",
+  "connectors.originSub":
+    "The address Margince puts in the links it emails, such as unsubscribe links. If nobody outside can reach it, those links open nothing.",
+  "overnightGrant.choiceHelp":
+    "Margince reads your deals and mail overnight to rank today’s priorities and writes notes back. It never sends. Saved when you continue with mail connected.",
+  "overnightGrant.off": "Off",
+  "overnightGrant.offNote":
+    "While this is off, the Morning brief is not prepared ahead. Your records, Worklist and weekly review work as usual.",
+  "linkedinImport.addProfile": "Add profile",
+  "linkedinImport.notImported": "Not imported",
+  "linkedinImport.importedCount_one": "{count} imported",
+  "linkedinImport.importedCount_other": "{count} imported",
+  "ob.conv.connect.whereTitle": "Where is your work account?",
+  "ob.conv.connect.whereHint":
+    "Select the service your company uses. Mail and calendar come from the same account.",
+  "ob.conv.connect.tileGoogleDesc": "Gmail and Google Calendar",
+  "ob.conv.connect.tileMicrosoftDesc": "Outlook mail and Outlook Calendar",
+  "ob.conv.connect.tileImap": "Other mail provider",
+  "ob.conv.connect.tileImapDesc":
+    "Any host that offers IMAP. Mail only: add a calendar later in Settings.",
+  "ob.conv.connect.panelTitle": "What to connect from {vendor}",
+  "ob.conv.connect.servicesLegend": "What to connect",
+  // Free times only: what a booking sends attendees is not promised here.
+  "ob.conv.connect.asksTwiceTitle":
+    "{vendor} asks twice, then brings you back here",
+  "ob.conv.connect.asksTwiceBody": "One screen for mail, one for calendar.",
+  "ob.conv.connect.asksOnceTitle":
+    "{vendor} asks once, then brings you back here",
+  "ob.conv.connect.meansTitle": "What connecting means",
+  "ob.conv.connect.meansSub": "Who can read your mail, and how to disconnect",
+  "ob.conv.connect.connectBoth": "Connect mail and calendar",
+  "ob.conv.connect.connectMailOnly": "Connect mail",
+  "ob.conv.connect.connectCalendar": "Connect calendar",
+  "ob.conv.connect.pickService": "Select mail, calendar or both.",
+  "ob.conv.connect.skipCaption":
+    "Nothing is connected yet. Your setup checklist reminds you if you skip.",
+  "ob.conv.connect.calendarFailedTitle": "Your calendar was not connected",
+  "ob.conv.connect.calendarDeclined":
+    "Access to the calendar was not allowed. Your setup checklist reminds you to connect it.",
+  "ob.conv.connect.waitingAdmin": "Waiting for an administrator",
+  "ob.conv.connect.availableNow": "Available now",
+  "ob.conv.connect.yourCompany": "your company",
+  "ob.conv.connect.appMissingTitle":
+    "{vendor} is not set up for your company yet",
+  "ob.conv.connect.appMissingBody":
+    "Before anyone at {company} can connect a {vendor} account, an administrator registers the company’s {vendor} app once in Settings under {page}. Nothing for you to do in {vendor}.",
+  "ob.conv.connect.appMissingHolderBody":
+    "Before anyone at {company} can connect a {vendor} account, the company’s {vendor} app is registered once. You can do it now without leaving setup: create the app in the {vendor} console and paste its two values here.",
+  "ob.conv.connect.appUnusableTitle": "{vendor} cannot be connected right now",
+  "ob.conv.connect.appUnusableBody":
+    "The {vendor} app at {company} is registered, but its client secret no longer opens, so no {vendor} account can connect. An administrator replaces the client secret in Settings under {page}; a new app is not needed.",
+  "ob.conv.connect.appUnusableHolderBody":
+    "The {vendor} app at {company} is registered, but its client secret no longer opens, so no {vendor} account can connect. Paste a new client secret now; a new app is not needed.",
+  "ob.conv.connect.registerApp": "Register the company’s {vendor} app",
+  "ob.conv.connect.replaceApp": "Replace the {vendor} client secret",
+  "ob.conv.connect.copyRequest": "Copy request for your administrator",
+  "ob.conv.connect.requestCopied": "Request copied",
+  "ob.conv.connect.requestCopyFailed":
+    "Send your administrator this request yourself: {request}",
+  "ob.conv.connect.requestText":
+    "Could you register the company’s {vendor} app in Margince, in Settings under {page}? Then I can connect my mail and calendar.",
+  "ob.conv.connect.requestTextUnusable":
+    "Could you replace the client secret of the company’s {vendor} app in Margince, in Settings under {page}? Then I can connect my mail and calendar.",
+  "ob.conv.connect.useImap": "Use another mail provider",
+  "ob.conv.connect.skipCaptionWaiting":
+    "Your setup checklist reminds you to connect once {vendor} is ready.",
+  "ob.conv.connect.connectedTitle": "{vendor} is connected",
+  "ob.conv.connect.calendarNotConnected":
+    "Not connected. Connect it now, or later from your setup checklist.",
+  "ob.conv.connect.postureIntro":
+    "Who can read the mail Margince captures from this mailbox. Saved as soon as you choose, before the import, so past mail follows the same rule.",
+  "ob.conv.connect.importTitle": "Import past mail",
+  "ob.conv.connect.importIntro":
+    "Builds your contacts and history from mail you already have. Nothing starts until you choose.",
+  "ob.conv.connect.connectedCaption":
+    "Mail and calendar connected. You can change all of this in Settings under {page}.",
+  "ob.conv.connect.connectedCaptionMailOnly":
+    "Mail connected. Your setup checklist reminds you about the calendar.",
+  "ob.conv.connect.continueNoImport": "Continue without importing",
+  "ob.conv.connect.importAndContinue": "Import {period} and continue",
+  "ob.conv.connect.alsoTitle": "Also worth doing now",
+  "ob.conv.connect.alsoSub": "Optional. Both can be changed later in Settings.",
+  "ob.conv.connect.linkedinRow": "Your LinkedIn profile",
+  "ob.conv.connect.linkedinAdd": "Add profile",
+  "setup.reminder.trigger": "Finish setup",
+  "setup.reminder.count": "{done} of {total}",
+  "setup.reminder.title": "Finish setting up",
+  "setup.reminder.hide": "Hide until next sign-in",
+  "setup.step.mail": "Connect your mail",
+  "setup.step.connectedAs": "{address}, {provider}",
+  "setup.step.calendar": "Connect your calendar",
+  "setup.step.voiceDone": "Drafts now sound like you.",
+  "setup.step.booking": "Turn on your booking link",
+  "setup.step.bookingDone": "Customers can book time with you.",
+  "setup.action.mail": "Connect mail",
+  "setup.action.calendar": "Connect calendar",
+  "setup.action.voice": "Add samples",
+  "setup.action.booking": "Turn on",
+  "settings.home.setup.title": "Your setup",
+  "settings.home.setup.complete": "Setup is complete",
+  "settings.home.setup.show": "Show steps",
+  "connectors.tile.notSetUp": "Not set up",
+  "connectors.tile.askAdmin": "An administrator turns {vendor} on in {page}.",
+  "connectors.tile.registerApp":
+    "Set up the company {vendor} app to turn it on.",
+  "connectors.tile.openPage": "Open {page}",
+  "connectors.imapRow.note":
+    "Mail only, no calendar. Signs in with an app password.",
+  "connectors.imapRow.connect": "Connect with IMAP",
+  // end polish: connections-tiles
+  "setup.step.writingVoice": "Train your writing voice",
+  "setup.caption.mail": "Brings in contacts and history.",
+  "setup.caption.calendar": "Puts meetings on your deals.",
+  "setup.caption.calendarSkipped": "Skipped during setup.",
+  "setup.caption.calendarNeedsVendor": "Needs Google or Microsoft.",
+  "setup.caption.waitsAdmin": "Waits on an administrator.",
+  "setup.caption.mailReconnect": "Connection expired.",
+  "setup.caption.calendarReconnect": "Expired or cannot add bookings.",
+  "setup.caption.voice": "Needs 800 words you wrote.",
+  "setup.caption.booking": "Customers book your free time.",
+  "setup.caption.bookingNeedsCalendar": "Needs a calendar.",
+  "setup.reminder.progress": "Setup progress",
+  // end polish: setup-popover
+  "account.profileCard": "Profile",
+  "account.signInCard": "Sign-in",
+  "account.languageCard": "Language",
+  "account.browserCard": "This browser",
+  "account.passwordHelp":
+    "For signing in as {email}. Changing it signs you out everywhere else and disconnects the apps and agents that act for you.",
+  "account.passwordWarnTitle": "Everything else signed in as you stops",
+  "account.passwordWarnBody":
+    "Other browsers and devices sign out. Apps you connected with your account and agents acting for you lose access until you connect them again. This browser stays signed in.",
+  "account.passwordDone":
+    "Other devices were signed out and connected apps need connecting again.",
+  "account.signOutHelp":
+    "Ends your session in this browser. Other devices stay signed in.",
+  "account.languageHelp":
+    "The language of menus, pages and messages from Margince. Saved to your account, so it follows you to every device you sign in on.",
+  "account.appearanceHelp":
+    "Light, dark or follow this computer’s setting. Applies in this browser only. The account menu changes the same setting.",
+  "reviewTemplates.questionCount_one": "{count} question",
+  "reviewTemplates.questionCount_other": "{count} questions",
+  "reviewTemplates.summary": "{questions}, {required} required",
+  "reviewTemplates.col.answer": "Answer",
+  "reviewTemplates.prefilled":
+    "Filled with the close reason, when the rep gave one",
+  "reviewTemplates.type.text": "Free text",
+  "reviewTemplates.type.multiselect": "Pick from a list",
+  "reviewTemplates.requiredBadge": "Required",
+  "reviewTemplates.drawer.lost":
+    "Offered whenever a deal is closed as lost, in every pipeline. Changes apply from the next close; reviews already written keep their questions.",
+  "reviewTemplates.drawer.won":
+    "Offered whenever a deal is closed as won, in every pipeline. Changes apply from the next close; reviews already written keep their questions.",
+  "reviewTemplates.prefillCallout.title":
+    "The first question gets the close reason",
+  "reviewTemplates.prefillCallout.body":
+    "When the rep typed a reason while closing the deal, it is filled into question 1. Keep the question that asks why at the top.",
+  "reviewTemplates.choices": "Choices, one per line",
+  "reviewTemplates.choicesHint": "Reps can pick more than one.",
+  "reviewTemplates.moveUp": "Move question {n} up",
+  "reviewTemplates.moveDown": "Move question {n} down",
+  "reviewTemplates.removeNumbered": "Remove question {n}",
+  "reviewTemplates.unsaved": "Unsaved changes",
+  "reviewTemplates.saveQuestions": "Save questions",
   "oauthApp.tenantPlaceholder": "00000000-0000-0000-0000-000000000000",
   "oauthApp.saveFailed": "App not saved",
   "firstRun.continue": "Continue",
@@ -12555,22 +12905,14 @@ export const en = {
     "A blocked provider is skipped, and the next model in line answers.",
   "aiTasks.embeddingsEdit":
     "Search and retrieval has no thinking level or timeouts to set. Change its provider and model on the Embedding model row under Model tiers.",
-  "workingHours.title": "Bookable hours",
   "workingHours.unsetTitle": "Not set yet",
   "workingHours.unset":
     "Customers are offered 09:00 to 17:00, Monday to Friday, in the installation timezone.",
-  "workingHours.start": "Day starts",
-  "workingHours.end": "Day ends",
-  "workingHours.days": "Working days",
   "workingHours.timezone": "Timezone",
   "workingHours.browserZone":
     "Your browser is on {zone}. Availability uses the timezone chosen here.",
-  "workingHours.timezoneHelp":
-    "Timezone used to calculate availability. Search for a city or region.",
   "workingHours.narrowedTitle": "Fewer bookable hours",
   "workingHours.narrowed": "Customers have fewer times to choose from.",
-  "workingHours.saveFailed": "Working hours not saved",
-  "workingHours.save": "Save working hours",
   "workingHours.day.1": "Monday",
   "workingHours.day.2": "Tuesday",
   "workingHours.day.3": "Wednesday",
@@ -12777,9 +13119,9 @@ export const en = {
   "captureExclusions.notRetroactive":
     "Applies from the next message. Messages already captured stay.",
   "captureExclusions.empty": "No exclusions.",
-  "ownerIdentities.title": "Your other addresses",
+  "ownerIdentities.title": "Your other email addresses",
   "ownerIdentities.sub":
-    "Addresses that are also yours: a send-as alias, a private domain you read, an address you forward from. Mail between them is not captured and never creates a contact.",
+    "Aliases, a private domain or an address you forward from. Margince treats them as you: mail between them is not captured and never creates a contact.",
   "ownerIdentities.add": "Add address",
   "ownerIdentities.addLabel": "Add your own address",
   "ownerIdentities.addDescription":
@@ -14142,9 +14484,12 @@ export const en = {
     "New lookups stop immediately and the key is destroyed. Purchased data stays on your records; disconnecting does not delete it.",
   "provider.deleteData": "Delete purchased data",
   "provider.deleteDataConfirm.title": "Delete all data from this provider?",
-  "provider.deleteDataConfirm.body":
-    "Every value this provider supplied is removed from every contact. Spend records stay; the data does not. This cannot be undone.",
-  "provider.deleteDataConfirm.typed": "Enter the provider name to confirm",
+  "provider.deleteDataConfirm.impactTitle": "This cannot be undone",
+  "provider.deleteDataConfirm.impact.values":
+    "Every value this provider supplied is removed from every contact.",
+  "provider.deleteDataConfirm.impact.spend":
+    "Spend records stay; the data does not.",
+  "provider.deleteDataConfirm.typed": "Type the provider name to confirm:",
   "provider.automaticLookup": "Look up contacts automatically",
   "provider.automaticLookupHint":
     "New contacts get the details the provider gives for free, such as role and work history. Email addresses and mobile numbers are never bought automatically, and the button on each contact still works. Switch this off where the law forbids trading personal data.",
@@ -15669,7 +16014,7 @@ export const en = {
     "Each mailbox connects with its own IMAP app password. Sign-in uses email and password.",
   "firstRun.platform.redirectTitle": "Register these redirect URIs in the app",
   "firstRun.platform.redirectHint":
-    "Add each URI to the app before saving here. Sign-in adds the sign-in button to the login page; Mailbox and Calendar let people connect theirs. A missing URI fails at the provider’s consent screen.",
+    "Add each URI to the app before saving here. Sign-in adds the sign-in button to the login page; the mail and calendar connectors let people connect theirs. A missing URI fails at the provider’s consent screen.",
   "firstRun.google.helpToggle": "Where to find these",
   "firstRun.google.helpStep1":
     "In the Google Cloud console, open a project and go to “APIs & Services”, then “Credentials”. Select “Create credentials”, then “OAuth client ID”, and choose “Web application”.",
@@ -16154,6 +16499,181 @@ export const en = {
   "magic.consequence.capture_may_be_incomplete":
     "Recent capture may be incomplete.",
   "magic.consequence.capture_history_incomplete": "History import incomplete.",
+  "scheduling.linksTitle": "Booking links",
+  "scheduling.status.paused": "Paused",
+  "scheduling.status.attention": "Needs attention",
+  "scheduling.acceptBookings": "Accept bookings",
+  "scheduling.acceptBookingsHelp":
+    "Anyone with your link can pick a free time. Turn off to pause bookings; the link stays the same.",
+  "scheduling.acceptNeedsCalendar":
+    "Available once a calendar is connected. Visitors who open your link meanwhile see that bookings are paused.",
+  "scheduling.acceptNeedsReconnect":
+    "Available once your calendar is reconnected. Visitors who open your link meanwhile see that bookings are paused.",
+  "scheduling.acceptNeedsChoice":
+    "Available once a calendar for bookings is saved under Calendar.",
+  "scheduling.col.link": "Link",
+  "scheduling.col.length": "Length",
+  "scheduling.col.status": "Status",
+  "scheduling.col.actions": "Actions",
+  "scheduling.videoCall": "Video call",
+  "scheduling.row.live": "Live",
+  "scheduling.row.noInvitations": "No invitations",
+  "scheduling.videoNotSet": "Not set",
+  "scheduling.video.ownShort": "Your own link",
+  "scheduling.mainLink": "(main link)",
+  "scheduling.linkActions": "More actions for {name}",
+  "scheduling.editLink": "Edit link",
+  "scheduling.createLink": "Create booking link",
+  "scheduling.noLinkYet": "No booking link yet.",
+  "scheduling.noLinkYetBody":
+    "Create one to share a page where guests pick a time.",
+  "scheduling.replaceAddress": "Replace address",
+  "scheduling.replaceConfirmTitle": "Replace link address?",
+  "scheduling.personalLinksFoot":
+    "Meeting one specific person? Open their contact and choose Book a meeting to send a few times or a personal link that only they can use.",
+  "scheduling.liveNoInvitesTitle": "Guests can book, but no invitations go out",
+  "scheduling.attentionExpired":
+    "Your {provider} connection has expired. Reconnect it so bookings land in your calendar again, or pause bookings until you can.",
+  "scheduling.attentionReadOnly":
+    "Your {provider} connection can read events but cannot add them. Reconnect it and allow invitations, or pause bookings until you can.",
+  "scheduling.attentionMissing":
+    "No calendar is connected for bookings. Connect one so bookings land in your calendar, or pause bookings until you can.",
+  "scheduling.reconnectCalendar": "Reconnect calendar",
+  "scheduling.reconnect": "Reconnect",
+  "scheduling.openConnections": "Open Connections",
+  "scheduling.drawerTitle": "Edit booking link",
+  "scheduling.drawerIntro":
+    "Changes apply to new bookings. Meetings already booked keep their details.",
+  "scheduling.meetingName": "Meeting name",
+  "scheduling.meetingNameHelp":
+    "Guests see it on the booking page and in the invitation.",
+  "scheduling.linkAddress": "Link address",
+  "scheduling.linkAddressHelp":
+    "Replacing gives this link a new address after you confirm. Meetings already booked keep their own change links.",
+  "scheduling.lengthOther": "Other",
+  "scheduling.lengthOtherHelp":
+    "Other takes any length from 15 minutes to 8 hours.",
+  "scheduling.lengthMinutes": "Length in minutes",
+  "scheduling.lengthInvalid": "Enter a length from 15 to 480 minutes.",
+  "scheduling.video.meetHelp":
+    "A new Meet link is created for every booking and added to the invitation. Uses your Google Calendar, {account}.",
+  "scheduling.video.teamsHelp":
+    "A new Teams link is created for every booking and added to the invitation. Uses your Microsoft 365 calendar, {account}.",
+  "scheduling.video.meetNeeds": "Needs a Google calendar.",
+  "scheduling.video.teamsNeeds": "Needs a Microsoft 365 calendar.",
+  "scheduling.video.meetOther":
+    "Used when bookings go to your Google calendar, chosen under Calendar.",
+  "scheduling.video.teamsOther":
+    "Used when bookings go to your Microsoft 365 calendar, chosen under Calendar.",
+  "scheduling.connectGoogle": "Connect Google",
+  "scheduling.connectMicrosoft": "Connect Microsoft 365",
+  "scheduling.video.own": "Your own link or address",
+  "scheduling.video.ownHelp":
+    "A Zoom room, a phone number or an office address. The same for every booking.",
+  "scheduling.video.ownSaved": "Saved address: {location}",
+  "scheduling.video.none": "No location",
+  "scheduling.video.noneHelp": "Agree on the details with your guest by email.",
+  "scheduling.locationLabel": "Link or address",
+  "scheduling.locationRequired": "Enter a link or an address.",
+  "scheduling.usesHours":
+    "Uses your hours: {days}, {from} to {until} {zone} time, at least {notice} ahead.",
+  "scheduling.usesHoursAnyNotice":
+    "Uses your hours: {days}, {from} to {until} {zone} time.",
+  "scheduling.dayRange": "{from} to {until}",
+  "scheduling.changeHours": "Change hours",
+  "scheduling.saveLink": "Save link",
+  "scheduling.readsBusy": "Reads busy times",
+  "scheduling.sendsInvites": "Sends invitations",
+  "scheduling.syncedAgo": "Synced {ago}",
+  "scheduling.reconnectNeeded": "Reconnect needed",
+  "scheduling.expiredRow":
+    "The connection has expired. Margince cannot read your busy times or send invitations until you reconnect.",
+  "scheduling.eventCalendar": "Add booked meetings to",
+  "scheduling.eventCalendarHelp":
+    "Each booking becomes an event here, with the guest invited and the video link attached.",
+  "scheduling.blocking": "Also count as busy",
+  "scheduling.blockingRowHelp":
+    "Events in these calendars hide the time from guests too. Event names stay private.",
+  "scheduling.keptAsSaved":
+    "Kept as saved. You can change it after reconnecting.",
+  "scheduling.mainCalendar": "Main calendar",
+  "scheduling.savedCalendar": "Saved calendar",
+  "scheduling.calendarCount_one": "{count} calendar",
+  "scheduling.calendarCount_other": "{count} calendars",
+  "scheduling.noneChosen": "None",
+  "scheduling.setup.title": "Connect a calendar to take bookings",
+  "scheduling.setup.intro":
+    "Margince reads your busy times so guests only see free slots, then adds every booking to your calendar with the guest invited and a video link attached. Until then your link stays paused.",
+  "scheduling.setup.step1": "Connect Google or Microsoft 365",
+  "scheduling.setup.step1Help":
+    "Sign in with the account your calendar belongs to. Takes about a minute.",
+  "scheduling.connectCalendar": "Connect calendar",
+  "scheduling.setup.step2": "Check your hours below",
+  "scheduling.setup.step2Help":
+    "Guests are offered 09:00 to 17:00, Monday to Friday, until you save your own.",
+  "scheduling.setup.step2Done": "Your hours are saved.",
+  "scheduling.setup.step3": "Turn on bookings and share your link",
+  "scheduling.setup.step3Help":
+    "Your link already exists, so you can put it in your signature now.",
+  "scheduling.whenTitle": "When people can book",
+  "scheduling.days": "Days",
+  "workingHours.from": "From",
+  "workingHours.until": "Until",
+  "workingHours.zoneHelp": "Guests see these hours in their own time zone.",
+  "scheduling.bookingRules": "Booking rules",
+  "scheduling.noticeRow": "Minimum notice",
+  "scheduling.noticeRowHelp":
+    "Nobody can book a time that starts sooner than this.",
+  "scheduling.bufferRow": "Break between meetings",
+  "scheduling.bufferRowHelp":
+    "Kept free before and after every meeting in your calendar.",
+  "scheduling.horizonRow": "How far ahead",
+  "scheduling.horizonRowHelp":
+    "Guests can pick a date up to this far in the future.",
+  "scheduling.ruleOther": "Other",
+  "scheduling.ruleMinutes": "Minutes",
+  "scheduling.ruleDays": "Days ahead",
+  "scheduling.ruleInvalid": "Enter a whole number from {min} to {max}.",
+  "scheduling.unit.minutes_one": "{count} minute",
+  "scheduling.unit.minutes_other": "{count} minutes",
+  "scheduling.unit.hours_one": "{count} hour",
+  "scheduling.unit.hours_other": "{count} hours",
+  "scheduling.unit.days_one": "{count} day",
+  "scheduling.unit.days_other": "{count} days",
+  "scheduling.unit.weeks_one": "{count} week",
+  "scheduling.unit.weeks_other": "{count} weeks",
+  "scheduling.rulesFoot": "Applies to every booking.",
+  "scheduling.rulesFootAttention":
+    "Applies to every booking. You can save this while the calendar is being reconnected.",
+  "scheduling.bookNeedsGrant":
+    "Booking meetings needs permission from an administrator.",
+  "scheduling.guestView": "What guests see",
+  "scheduling.previewLabel": "Preview of your public booking page",
+  "scheduling.companyRow": "Company name and logo",
+  "scheduling.companyRowHelp": "From the company profile.",
+  "scheduling.companyNoLogo":
+    "From the company profile. No logo is uploaded yet, so guests see the name only.",
+  "scheduling.companyNoName":
+    "Not set in the company profile yet, so guests see your name only.",
+  "scheduling.addLogo": "Add logo",
+  "scheduling.change": "Change",
+  "scheduling.yourName": "Your name",
+  "scheduling.yourNameHelp": "{name}, from your account.",
+  "scheduling.reminderRow": "Reminder email",
+  "scheduling.reminderFrom":
+    "One hour before each meeting, sent from {mailbox}.",
+  "scheduling.reminderNoMailbox":
+    "One hour before each meeting. Needs a connected mailbox, which you can add under Connections.",
+  "confirmPhrase.matches": "Phrase matches",
+  "checklist.stepDone": "Done",
+  "checklist.stepOpen": "Still to do",
+  "checklist.stepWaiting": "Waiting",
+  "checklist.count": "{done} of {total} done",
+  "saveBar.save": "Save",
+  "saveBar.discard": "Discard",
+  "saveBar.unsaved": "Unsaved changes",
+  "saveBar.invalid": "Fix the marked fields to save.",
+  "privacy.typeErasePrompt": "Type this word to confirm:",
   "aiFigures.window.24h": "24 h",
   "aiFigures.window.7d": "7 d",
   "aiFigures.window.30d": "30 d",
@@ -16202,10 +16722,6 @@ export const en = {
   "aiFigures.line.week": "7 d: {figures}",
   "aiFigures.line.prefix": "7 d: {sentence}",
   "aicalls.filtered": "Showing calls that ended on {filter}.",
-  "aicalls.filtered.clear": "Show all calls",
-  "aicalls.filters": "Filters",
-  "aicalls.folded.tokens": "Tokens: {in} in, {out} out",
-  "aicalls.folded.latency": "Latency: {value} ms",
   "aiOpenRouter.title": "OpenRouter settings",
   "aiOpenRouter.privacyDocs": "Data policies ↗",
   "aiOpenRouter.routingDocs": "Provider routing ↗",
@@ -16554,6 +17070,22 @@ export const en = {
   "aiTask.name.weekly_learnings": "What last week taught",
   "aiTask.name.weekly_review": "Weekly review narrative",
   "aiTask.name.unknown": "AI task",
+  "oauthApp.google.sub":
+    "Mailboxes are connected, and people sign in with Google, through a Google OAuth app your company owns, using its own credentials.",
+  "oauthApp.google.absent":
+    "No app is available from any source. Gmail and Calendar cannot be connected, and Google sign-in cannot be offered.",
+  "oauthApp.google.redirectSub":
+    "Register every URI below on the OAuth client in the Google console. A missing URI fails at the consent screen with redirect_uri_mismatch, which does not name the URI.",
+  "oauthApp.google.removeConfirmBody":
+    "The client secret cannot be read back, so restoring the app requires re-entering the client ID and secret from the Google console. Gmail and Calendar connections use this app; Microsoft and IMAP mailboxes are unaffected. First-run setup asks for an app again.",
+  "oauthApp.microsoft.sub":
+    "Outlook mailboxes and calendars are connected, and people sign in with Microsoft, through an Entra app registration your company owns, using its own credentials.",
+  "oauthApp.microsoft.absent":
+    "No app is available from any source. Outlook mail and calendar cannot be connected, and Microsoft sign-in cannot be offered.",
+  "oauthApp.microsoft.redirectSub":
+    "Register every URI below under Authentication on the Entra app registration as a Web platform. A missing URI fails at consent with AADSTS50011, which does not name the URI.",
+  "scheduling.active": "Accepting bookings",
+  "scheduling.pause": "Pause bookings",
   "record.details.showEmpty_one": "Show {count} empty field",
   "record.details.showEmpty_other": "Show {count} empty fields",
   "record.details.hideEmpty": "Hide empty fields",

@@ -14,11 +14,9 @@ reach features/ai/ai-price-sync.tsx features/settings/rates.tsx
 reach features/ai/ai-provider-sheet.tsx features/settings/rate-catalogue-refresh.tsx
 reach features/ai/ai-provider-sheet.tsx features/settings/rate-manual.tsx
 reach features/ai/ai-provider-sheet.tsx features/settings/rate-remove.tsx
-reach features/ai/aicalls.tsx features/settings/settingsrouting.ts
 reach features/ai/aiscope.test.tsx features/brief/meetingbrief/index.ts
 reach features/ai/aiscope.test.tsx features/companies/companies.tsx
 reach features/ai/aiscope.test.tsx features/companies/company360.tsx
-reach features/ai/aiusage.tsx features/settings/settingsrouting.ts
 reach features/analytics/analytics.delivery.tsx features/projects/projects.form.ts
 reach features/analytics/analytics.questions.builder.tsx features/lists/filtervalue.tsx
 reach features/analytics/analytics.questions.values.ts features/leads/leadpresentation.tsx
@@ -34,14 +32,12 @@ reach features/automations/automations.recipe.ts features/settings/audit.tsx
 reach features/automations/connected-agents.test.tsx features/settings/settings.tsx
 reach features/automations/connected-agents.tsx features/settings/settings-agents.css
 reach features/automations/extension-access.tsx features/settings/grantmatrix.tsx
-reach features/booking/booking-calendar-state.ts features/capture/connectors.tsx
 reach features/booking/booking-common.tsx features/deals/buyerroomframe.tsx
 reach features/booking/booking-invite.test.tsx features/mail/compose.tsx
 reach features/booking/booking-meeting.tsx features/brief/meetingbrief/drawer.tsx
 reach features/booking/booking-preview.test.tsx app/queryclient.ts
 reach features/booking/booking-review.tsx features/contacts/contactmeetings.waiting.tsx
 reach features/booking/booking-review.tsx features/mail/compose.tsx
-reach features/booking/meeting-settings.tsx features/capture/connectors.tsx
 reach features/brief/brief.changed.test.ts features/worklist/worklist.queries.ts
 reach features/brief/brief.changed.ts features/worklist/worklist.header.tsx
 reach features/brief/brief.changed.ts features/worklist/worklist.queries.ts
@@ -81,7 +77,6 @@ reach features/brief/brief.queue.tsx features/worklist/worklist.return.tsx
 reach features/brief/brief.queue.tsx features/worklist/worklist.tsx
 reach features/brief/brief.rail.test.tsx features/worklist/worklist.queries.ts
 reach features/brief/brief.readings.honesty.ts features/worklist/worklist.queries.ts
-reach features/brief/brief.readings.meetings.ts features/settings/settingsrouting.ts
 reach features/brief/brief.readings.meetings.ts features/worklist/worklist.queries.ts
 reach features/brief/brief.readings.sideread.test.tsx features/worklist/worklist.queries.ts
 reach features/brief/brief.readings.test.tsx features/worklist/worklist.queries.ts
@@ -90,7 +85,6 @@ reach features/brief/brief.readings.tsx features/worklist/worklist.queries.ts
 reach features/brief/brief.readings.tsx features/worklist/worklist.tsx
 reach features/brief/brief.schedule.stories.tsx features/worklist/worklist.queries.ts
 reach features/brief/brief.schedule.test.tsx features/worklist/worklist.queries.ts
-reach features/brief/brief.schedule.tsx features/settings/settingsrouting.ts
 reach features/brief/brief.schedule.tsx features/worklist/worklist.copy.ts
 reach features/brief/brief.schedule.tsx features/worklist/worklist.queries.ts
 reach features/brief/brief.sentence.test.ts features/worklist/worklist.queries.ts
@@ -112,10 +106,8 @@ reach features/brief/meetingbrief/view.stories.tsx features/contacts/contact360.
 reach features/brief/routinedelivery.tsx features/worklist/worklist.queries.ts
 reach features/capture/capture-activity.tsx features/mail/openemaildrawer.tsx
 reach features/capture/connection-outcomes.tsx features/import/linkedin-reach.tsx
-reach features/capture/connectors.row.tsx features/import/backfill.tsx
 reach features/capture/emailaccesseditor.tsx features/lists/audiencemembers.tsx
 reach features/capture/held-threads.tsx features/mail/openemaildrawer.tsx
-reach features/capture/mail-sharing.posture.stories.tsx features/settings/mail-sharing.tsx
 reach features/capture/providerhealth.test.tsx features/ai/ai-provider-keys.tsx
 reach features/capture/providerhealth.tsx features/ai/ai-provider-names.ts
 reach features/capture/providerhealth.tsx features/ai/ai-settings.css
@@ -250,13 +242,7 @@ reach features/deals/dealstatus.tsx features/records/record360/index.ts
 reach features/deals/offertemplates.tsx features/lists/listsection.css
 reach features/deals/products.tsx features/lists/listsection.css
 reach features/import/import.preset.test.tsx features/contacts/contactactions.tsx
-reach features/import/import.result.tsx features/settings/settingsrouting.ts
 reach features/import/import.test.tsx features/settings/settings.tsx
-reach features/import/import.test.tsx features/settings/settingsrouting.ts
-reach features/import/import.tsx features/settings/settingsrouting.ts
-reach features/import/import.wizard.tsx features/settings/settingsrouting.ts
-reach features/import/importaddress.ts features/settings/settingsrouting.ts
-reach features/import/importwizard.ts features/settings/settingsrouting.ts
 reach features/import/linkedin-reach.stories.tsx features/capture/connection-outcomes.tsx
 reach features/import/linkedin-reach.test.tsx features/capture/connection-outcomes.tsx
 reach features/import/merge.test.tsx features/contacts/contactrecordactions.tsx
@@ -296,17 +282,12 @@ reach features/mail/composefiling.ts features/companies/company360.tsx
 reach features/mail/composefiling.ts features/contacts/contact360.ts
 reach features/mail/composefiling.ts features/projects/projectrecord.ts
 reach features/mail/composesaveddraft.tsx features/projects/projectrecord.ts
-reach features/mail/composesignoff.tsx features/settings/settingsrouting.ts
 reach features/mail/openemaildrawer.tsx features/capture/emailaccesseditor.tsx
 reach features/mail/signaturetemplate.test.tsx features/settings/settingssignaturerow.tsx
 reach features/onboarding/onboarding-build-scene.tsx features/sign-in/auth.tsx
 reach features/onboarding/onboarding-connect-panels.imap.tsx features/capture/imap-connect-form.tsx
-reach features/onboarding/onboarding-connect-panels.tsx features/capture/connectors.tsx
 reach features/onboarding/onboarding-conversation/basis-act.tsx features/sign-in/installation-settings.tsx
 reach features/onboarding/onboarding-conversation/company-act.tsx features/sign-in/installation-setup.tsx
-reach features/onboarding/onboarding-conversation/connect-act.tsx features/automations/overnight-grant.tsx
-reach features/onboarding/onboarding-conversation/connect-scene.tsx features/automations/overnight-grant.tsx
-reach features/onboarding/onboarding-conversation/connect-scene.tsx features/capture/connectors.tsx
 reach features/onboarding/onboarding-conversation/team-act.tsx features/settings/users-invite-form.tsx
 reach features/onboarding/onboarding-conversation/team-act.tsx features/settings/users-password-link.tsx
 reach features/onboarding/onboarding-conversation/use-clarify-answers.test.tsx app/queryclient.ts
@@ -328,7 +309,6 @@ reach features/privacy/legalreviews.test.tsx features/settings/legalreviewsettin
 reach features/privacy/noticeduty.stories.tsx features/worklist/worklist.queries.ts
 reach features/privacy/noticeduty.tsx features/worklist/worklist.queries.ts
 reach features/privacy/privacy.caselink.test.ts features/worklist/worklist.copy.ts
-reach features/privacy/privacy.caselink.ts features/settings/settingsrouting.ts
 reach features/privacy/privacy.corrections.stories.tsx features/settings/settings.privacy.tsx
 reach features/privacy/privacy.deadline.test.tsx features/settings/settings.privacy.tsx
 reach features/privacy/privacy.dsr.test.tsx features/settings/settings.privacy.tsx
@@ -401,8 +381,6 @@ reach features/settings/account-settings.tsx features/sign-in/mfacard.tsx
 reach features/settings/account-settings.tsx features/sign-in/passwordcard.tsx
 reach features/settings/acquisitionsources.tsx features/leads/leadvocab.rows.tsx
 reach features/settings/audit.tsx app/searchkinds.ts
-reach features/settings/connection.test.tsx App.tsx
-reach features/settings/connection.test.tsx app/queryclient.ts
 reach features/settings/embedreindex.tsx features/ai/aiusage.tsx
 reach features/settings/financesource.tsx features/contacts/contactemployers.tsx
 reach features/settings/followupsettings.tsx features/worklist/worklist.queries.ts
@@ -450,7 +428,6 @@ reach features/settings/settings.tsx features/brief/briefdelivery.tsx
 reach features/settings/settings.tsx features/capture/blocked-domains.tsx
 reach features/settings/settings.tsx features/capture/capture-activity.tsx
 reach features/settings/settings.tsx features/capture/capture-owner-identities.tsx
-reach features/settings/settings.tsx features/capture/connection-outcomes.tsx
 reach features/settings/settings.tsx features/capture/connectors.tsx
 reach features/settings/settings.tsx features/capture/consumer-mail-domains.tsx
 reach features/settings/settings.tsx features/capture/integrations-provider.tsx
@@ -475,7 +452,6 @@ reach features/settings/settingsnav.tsx app/nav.ts
 reach features/settings/settingssearchbox.stories.tsx app/shell.css
 reach features/settings/settingssignature.ts features/mail/composesignoff.tsx
 reach features/settings/settingssignaturerow.tsx features/mail/composesignoff.tsx
-reach features/settings/writetohost.tsx features/capture/connectors.tsx
 reach features/settings/writetohost.tsx features/mail/compose.tsx
 reach features/sign-in/auth.test.tsx app/theme-reset.ts
 reach features/sign-in/auth.tsx app/ui-preview.ts
@@ -483,8 +459,6 @@ reach features/sign-in/installation-settings.profile.stories.tsx app/dateformats
 reach features/sign-in/installation-settings.stories.tsx app/dateformats.tsx
 reach features/sign-in/installation-settings.test.tsx app/dateformats.tsx
 reach features/sign-in/installation-setup.ai-step.tsx features/ai/ai-provider-key-hooks.ts
-reach features/sign-in/installation-setup.platform.tsx features/automations/oauth-app.tsx
-reach features/sign-in/installation-setup.platform.tsx features/automations/oauth-redirects.tsx
 reach features/sign-in/installation-setup.platform.tsx features/capture/imap-connect-form.tsx
 reach features/sign-in/installation-setup.tsx features/onboarding/onboarding-first-run.css
 reach features/sign-in/installation-setup.tsx features/onboarding/onboarding-ignition.tsx
@@ -493,7 +467,6 @@ reach features/sign-in/magic.records.tsx features/brief/brief.css
 reach features/sign-in/magic.stories.tsx features/brief/brief.changes.tsx
 reach features/sign-in/magic.tsx features/brief/brief.css
 reach features/sign-in/magic.tsx features/worklist/worklist.copy.ts
-reach features/sign-in/sign-in-methods.tsx features/automations/oauth-app.tsx
 reach features/voice-knowledge/activitydrawer.tsx features/records/activityfiles.tsx
 reach features/voice-knowledge/activitydrawer.tsx features/records/activityfollowups.tsx
 reach features/voice-knowledge/activitydrawer.tsx features/worklist/worklist.queries.ts
@@ -506,7 +479,6 @@ reach features/worklist/taskdetailmodal.tsx features/voice-knowledge/activitydra
 reach features/worklist/worklist.briefverbs.tsx features/brief/brief.queries.ts
 reach features/worklist/worklist.bundle.tsx features/brief/brief.decisions.tsx
 reach features/worklist/worklist.copy.ts features/privacy/privacy.caselink.ts
-reach features/worklist/worklist.copy.ts features/settings/settingsrouting.ts
 reach features/worklist/worklist.noticesource.tsx features/mail/openemaildrawer.tsx
 reach features/worklist/worklist.noticesource.tsx features/voice-knowledge/activitydrawer.tsx
 reach features/worklist/worklist.pane.tsx features/contacts/contact360.ts

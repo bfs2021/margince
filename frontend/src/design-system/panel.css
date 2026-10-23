@@ -347,6 +347,11 @@
   gap: var(--gapActions);
   padding: 0 var(--padPanel) var(--padPanel);
 }
+/* An action that renders nothing must not leave the band's padding as a
+   blank strip under the rows. */
+.panel-actions:empty {
+  display: none;
+}
 /* Directly under the header there is no body above to be spaced off, so the
  * strip pays for its own top interval; so it does under a list's last row. */
 .panel-head + .panel-actions,

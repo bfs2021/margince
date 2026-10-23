@@ -11,12 +11,12 @@ page: [Connecting your mailbox and calendar](connecting-mail-and-calendars.md).
 ### How does email get into Margince?
 Email gets into Margince through a mailbox you connect at **Settings → Connections**: Gmail, Outlook or an IMAP mailbox. On each sync, capture reads new mail and files it on the timelines of the contacts on it.
 There is no address to forward to and no step to copy and paste. Mail between colleagues is never stored, and senders judged to be newsletters, automated tools or spam create no contact.
-To bring in older mail, use **Import old emails** in the mailbox's **…** (**Actions**) menu; to see what happened to one message, open **Settings → Capture activity**.
+For older mail, choose **Import older email** in the account's menu; to see what happened to one message, open **Settings → Capture activity**.
 Also called: email logging, sync email to CRM, auto-log emails.
 
 ### How do I see emails I sent from Outlook or Gmail in Margince?
 Emails you send from Outlook or Gmail itself are captured into Margince too. A connected Gmail or Outlook mailbox is read in your inbox and your sent mail. So each sent message lands on the contact timelines of its recipients, marked **Sent**.
-1. Connect the mailbox at **Settings → Connections**; mail sent before that comes in with **Import old emails**.
+1. Connect the mailbox at **Settings → Connections**; mail sent before that comes in with the **Past email** import.
 2. Open the contact's **History** tab and pick **Threads** or **All** to see what you sent beside their replies.
 Mail sent only to colleagues is never stored. An IMAP mailbox reads only the one **Mailbox** it was set up with.
 Also called: sent items, outgoing mail, outbox, log sent emails.
@@ -313,8 +313,8 @@ It applies from the next message; captured mail stays. **Whole company** rules b
 Also called: block a sender, ignore a domain, blacklist, do not log.
 
 ### How do I tell Margince a sender is business, or exclude one?
-To correct what Margince decided about a sender, open **Settings → Connections** and find the address in **Senders**. In its **…** (**Actions**) menu, choose **Mark as business** to let it back in, or **Exclude** to keep it out.
-1. Open **Settings**, then **Connections**, and go down to **Senders**.
+To correct what Margince decided about a sender, open **Settings → Capture activity** and find the address in **Senders**. In its **…** (**Actions**) menu, choose **Mark as business** to let it back in, or **Exclude** to keep it out.
+1. Open **Settings**, then **Capture activity**, and go down to **Senders**.
 2. Find the address; the **Decision** column shows what was decided. **Contact** opens the contact that holds the address. **Messages** counts your stored mail with it. **Last seen** is when the newest of those arrived or went out.
 3. Open its **…** (**Actions**) menu and choose **Mark as business**, or choose **Exclude** and confirm **Exclude and destroy**.
 **Exclude** creates no contact and destroys the mail that sender sent into your mailbox; copies a colleague imported stay theirs. **Withdraw my answer** takes back your answer. A later verdict never writes over a decision you make.
@@ -360,7 +360,7 @@ read, you must choose an existing company yourself. **Retry site read** leaves
 the company question open and asks again. **Exclude domain** stops capture for your
 mailboxes. You can use **Set aside** without making these decisions.
 
-**Senders** (Settings → Connections): every address that came in through your mailbox, and
+**Senders** (Settings → Capture activity): every address that came in through your mailbox, and
 what Margince decided about each. That is a contact, a role mailbox, an
 automated tool, a newsletter, an advisor, or personal. You can change any of
 them.
@@ -371,7 +371,7 @@ a decision you make. **Waiting on a decision**, under the list, names the
 contacts only you see until their sender is decided. An administrator sees only
 how many there are.
 
-**Held threads** (Settings → Connections): the threads your mailbox is holding
+**Held threads** (Settings → Capture activity): the threads your mailbox is holding
 back right now, with the reason and the outside addresses on each. **Share with
 the team** releases one.
 

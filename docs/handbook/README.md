@@ -163,9 +163,9 @@ Records, deals and mail in Margince, by page:
   states mean, and moving, cancelling or retrying a meeting. Reminders, what
   counts as busy, and what a guest sees.
 - [Your own settings](your-own-settings.md): changing your password, display
-  name, language and theme. Your email signature, the hours others can book,
-  and your writing voice. Your agent passports and your mailbox connections.
-  What the last 24 hours of your mail turned into.
+  name, language and theme. Your email signature, your meetings and booking
+  link, and your writing voice. Your agent passports and your mailbox
+  connections. What the last 24 hours of your mail turned into.
 - [Configuration](configuration.md): the read-only list of every setting, its
   value and where the value comes from, and how to change a locked one.
 - [Settings](settings.md): how to open Settings, every settings page and which
