@@ -4,6 +4,7 @@
 
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
+import type { components } from "../../api/schema";
 import { en } from "../../i18n/en";
 import { taskRow } from "../../testing/brief.fixtures";
 import {
@@ -12,10 +13,11 @@ import {
   meRoute,
   StoryProviders,
 } from "../../testing/story-utils";
-import type { WorklistItem } from "../worklist/worklist.queries";
 import { Triage } from "./brief.focus";
 
 afterEach(cleanup);
+
+type WorklistItem = components["schemas"]["WorklistItem"];
 
 const LEAD: WorklistItem = {
   ...taskRow("task-1", "Call back Alice about the renewal"),
