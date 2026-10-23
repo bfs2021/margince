@@ -118,7 +118,6 @@
   .card {
     background: var(--pane); border: 1px solid var(--paneEdge); border-radius: 22px;
     box-shadow: var(--shadow); padding: 28px 30px;
-    backdrop-filter: blur(12px);
   }
   .card .tile {
     width: 40px; height: 40px; border-radius: 12px; margin-bottom: 22px;
@@ -140,7 +139,7 @@
   .hero .lockup svg { height: 34px; }
   .hero .lockup span { font-size: 34px; }
   .hero .chip { color: #fff; background: rgba(255, 255, 255, .12); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22); margin: auto 0 26px; align-self: flex-start; }
-  .hero .chip::before { background: var(--mint); box-shadow: 0 0 12px var(--mint); }
+  .hero .chip::before { background: var(--mint); }
   .hero h1 { color: #fff; font-size: 88px; line-height: 1; letter-spacing: -0.03em; max-width: 1000px; }
   .hero .subtitle { font-size: 24px; margin: 24px 0 0; color: rgba(255, 255, 255, .78); max-width: 760px; }
   .hero .byline { margin-top: 44px; font: 500 15px/1 Geist, sans-serif; color: rgba(255, 255, 255, .7); }
@@ -160,6 +159,13 @@
   }
   .section h2 { font-size: 60px; line-height: 1.04; letter-spacing: -0.025em; }
   .section p { font-size: 22px; color: var(--ink3); margin: 18px 0 0; max-width: 560px; }
+
+  /* A blurred shadow prints as a soft-masked image, which some PDF viewers (iOS)
+     draw as a solid block, so print keeps only crisp, unblurred shadows. */
+  @media print {
+    .band { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18); }
+    .card { box-shadow: 0 2px 0 rgba(16, 26, 21, .05); }
+  }
 </style>
 </head>
 <body>
