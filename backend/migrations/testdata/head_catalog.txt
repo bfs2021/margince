@@ -282,6 +282,7 @@ public.activity_meeting_attendee_repair.activity_meeting_attendee_repair_outcome
 public.activity_meeting_attendee_repair.activity_meeting_attendee_repair_pkey PRIMARY KEY (activity_id)
 public.activity_meeting_attendee_repair.outcome text NOT NULL gen=- def=-
 public.activity_meeting_attendee_repair.repaired_at timestamp with time zone NOT NULL gen=- def=now()
+public.activity_meeting_attendee_repair.rule_version integer NOT NULL gen=- def=1
 public.activity_meeting_attendee_repair_pkey CREATE UNIQUE INDEX activity_meeting_attendee_repair_pkey ON public.activity_meeting_attendee_repair USING btree (activity_id)
 public.activity_meeting_history acl=margince_owner=arwdDxt/margince_owner,margince_app=arwd/margince_owner rls=false force=false
 public.activity_meeting_history.activity_id uuid NOT NULL gen=- def=-
@@ -6472,7 +6473,7 @@ public.relationship.updated_at timestamp with time zone NOT NULL gen=- def=now()
 public.relationship.version bigint NOT NULL gen=- def=1
 public.relationship_nudge_dismissal acl=margince_owner=arwdDxt/margince_owner,margince_app=arwd/margince_owner rls=false force=false
 public.relationship_nudge_dismissal.contact_id uuid NOT NULL gen=- def=-
-public.relationship_nudge_dismissal.dismissed_until timestamp with time zone NOT NULL gen=- def=-
+public.relationship_nudge_dismissal.dismissed_until timestamp with time zone gen=- def=-
 public.relationship_nudge_dismissal.reader_id uuid NOT NULL gen=- def=-
 public.relationship_nudge_dismissal.relationship_nudge_dismissal_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES contact(id) ON DELETE CASCADE
 public.relationship_nudge_dismissal.relationship_nudge_dismissal_forward CHECK ((dismissed_until > set_at))

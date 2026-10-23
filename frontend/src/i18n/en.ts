@@ -5291,6 +5291,8 @@ export const en = {
   "brief.agenda.tasks_other": "{count} tasks",
   "brief.agenda.decisions_one": "{count} decision",
   "brief.agenda.decisions_other": "{count} decisions",
+  "brief.agenda.relationships_one": "{count} quiet relationship",
+  "brief.agenda.relationships_other": "{count} quiet relationships",
   "brief.agenda.system_one": "{count} system issue",
   "brief.agenda.system_other": "{count} system issues",
   "worklist.source.failed_approval": "Approved but not run",
@@ -15698,6 +15700,7 @@ export const en = {
   "worklist.filter.meetings": "Meetings",
   "worklist.filter.tasks": "Tasks",
   "worklist.filter.decisions": "Approvals",
+  "worklist.filter.relationships": "Quiet relationships",
   "worklist.filter.system": "System",
   "worklist.filter.linked.urgent":
     "Showing only urgent items: someone waiting, or a commitment about to break.",
@@ -15716,6 +15719,7 @@ export const en = {
   "worklist.category.meetings": "Meeting",
   "worklist.category.tasks": "Task",
   "worklist.category.decisions": "Approval",
+  "worklist.category.relationships": "Quiet relationship",
   "worklist.category.system": "System",
   "worklist.because.pinned": "pinned by you",
   "worklist.because.non_buyer_request": "not established as customer work",
@@ -15971,7 +15975,7 @@ export const en = {
   // composer and so never needs the reply/write "now" split above.
   "worklist.verb.open_meeting_brief": "Prepare for meeting",
   "worklist.deal.closes": "closes {date}",
-  "worklist.when.held": "held {when}",
+  "worklist.when.scheduled": "scheduled {when}",
   "worklist.meeting.hostedBy": "hosted by {name}",
   "worklist.meeting.hostedByYou": "hosted by you",
   "worklist.when.starts": "starts {when}",
