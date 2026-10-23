@@ -1,6 +1,7 @@
 import { CheckSquare, FileText, Search, Send, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import type { components } from "../../api/schema";
+import { TaskCallAction } from "../../components/tasknextsteps";
 import { Button } from "../../design-system/atoms";
 import { ErrorLine } from "../../design-system/errorline";
 import { NextBar } from "../../design-system/nextbar";
@@ -212,10 +213,13 @@ function TaskBar({
           : t("co.next.undated")
       }
       action={
-        <MoveButton
-          contactId={view.contact.id}
-          move={{ action: "open_task", arguments: { activity_id: task.id } }}
-        />
+        <>
+          <TaskCallAction task={task} pageContact={view.contact} />
+          <MoveButton
+            contactId={view.contact.id}
+            move={{ action: "open_task", arguments: { activity_id: task.id } }}
+          />
+        </>
       }
       more={more}
     />

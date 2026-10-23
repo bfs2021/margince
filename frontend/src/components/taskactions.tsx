@@ -32,6 +32,7 @@ import "./taskactions.css";
 import { ErrorLine } from "../design-system/errorline";
 import { useActivity } from "../lib/activityread";
 import { useCompleteTask } from "./taskcomplete";
+import { TaskNextSteps } from "./tasknextsteps";
 import { refetchAfterWrite } from "./taskwritefollowup";
 
 // Acting on a task from the record it belongs to. The tasks screen owns the
@@ -375,6 +376,10 @@ export function TaskDetailDialog({
                 <Badge tone="ai">{t("co.assistant.aiTag")}</Badge>
               )}
             </div>
+            <TaskNextSteps
+              task={task}
+              className="form-actions task-detail-actions"
+            />
             {!task.is_done && !readOnly && (
               <div className="form-actions task-detail-actions">
                 <TaskQuickActions

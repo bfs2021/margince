@@ -298,3 +298,68 @@ it("opens the actual task from the contact's attention list", async () => {
     await screen.findByRole("dialog", { name: OPEN_TASK.subject }),
   ).toBeTruthy();
 });
+
+describe("Call on the next task", () => {
+  const DIALABLE: Contact360 = {
+    ...VIEW,
+    contact: {
+      ...VIEW.contact,
+      phones: [
+        {
+          id: "ph-1",
+          phone: "+49 30 1234567",
+          phone_type: "mobile",
+          is_primary: true,
+          position: 0,
+          ...CAPTURED,
+        },
+      ],
+    },
+  };
+  const onTask = (sourceActivityId: string | null): Contact360 => ({
+    ...DIALABLE,
+    next_steps: {
+      data: [
+        {
+          ...OPEN_TASK,
+          source_activity_id: sourceActivityId,
+          links: [{ entity_type: "contact", entity_id: "p-1" }],
+        },
+      ],
+      page: { has_more: false },
+    },
+  });
+  const dial = () => document.querySelector('a[href^="tel:"]');
+
+  beforeEach(() =>
+    installFetchStub({
+      "GET /me": meRoute({ activity: ["read"] }),
+      "GET /activities/call-1": () =>
+        jsonResponse({
+          id: "call-1",
+          kind: "call",
+          content_state: "available",
+          occurred_at: "2026-08-09T09:00:00Z",
+        }),
+    }),
+  );
+
+  it("offers Call beside Open task when the task came from a call", async () => {
+    show(onTask("call-1"), QUIET);
+
+    const call = await screen.findByRole("link", {
+      name: en["record.verb.call"],
+    });
+    expect(call.getAttribute("href")).toBe("tel:+49301234567");
+    expect(
+      screen.getByRole("button", { name: en["deal360.openTask"] }),
+    ).toBeTruthy();
+  });
+
+  it("offers no Call on a task typed by hand", () => {
+    show(onTask(null), QUIET);
+
+    expect(screen.getByText(OPEN_TASK.subject)).toBeTruthy();
+    expect(dial()).toBeNull();
+  });
+});
