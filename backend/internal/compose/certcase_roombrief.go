@@ -31,6 +31,13 @@ import (
 
 type roomBriefCases struct{}
 
+// The contract's spellings a fixture is folded into.
+const (
+	roomThreadOpen     = "open"
+	roomThreadResolved = "resolved"
+	roomSideSeller     = "seller"
+)
+
 func (roomBriefCases) Site() aitasks.Site {
 	return aitasks.Site{Task: ai.TaskSummarize, Variant: "deal_room_brief", Kind: ai.SiteKindOneShot}
 }
@@ -168,9 +175,9 @@ func roomBriefThreadRead(
 	if len(t.Comments) == 0 {
 		return crmcontracts.DealRoomThread{}, fmt.Errorf("summarize/deal_room_brief: thread %q has no comments", t.Label)
 	}
-	thread := crmcontracts.DealRoomThread{Id: id, State: "open"}
+	thread := crmcontracts.DealRoomThread{Id: id, State: roomThreadOpen}
 	if t.Resolved {
-		thread.State = "resolved"
+		thread.State = roomThreadResolved
 	}
 	if t.DocumentLabel != "" {
 		doc, ok := docIDs[t.DocumentLabel]
@@ -184,9 +191,9 @@ func roomBriefThreadRead(
 		if err != nil {
 			return thread, fmt.Errorf("summarize/deal_room_brief: a comment on thread %q has no date: %w", t.Label, err)
 		}
-		side := "seller"
-		if c.Speaker == "buyer" {
-			side = "buyer"
+		side := roomSideSeller
+		if c.Speaker == roomSideBuyer {
+			side = roomSideBuyer
 		}
 		thread.Comments = append(thread.Comments, crmcontracts.DealRoomComment{
 			Author: crmcontracts.DealRoomAuthor{Name: c.Author, Side: side}, Body: c.Body, CreatedAt: at,
