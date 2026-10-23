@@ -15337,6 +15337,27 @@ func (e RelationshipStartedPrecision) Valid() bool {
 	}
 }
 
+// Defines values for RelationshipNudgeStateState.
+const (
+	RelationshipNudgeStateStateFollowing RelationshipNudgeStateState = "following"
+	RelationshipNudgeStateStateSetAside  RelationshipNudgeStateState = "set_aside"
+	RelationshipNudgeStateStateStopped   RelationshipNudgeStateState = "stopped"
+)
+
+// Valid indicates whether the value is a known member of the RelationshipNudgeStateState enum.
+func (e RelationshipNudgeStateState) Valid() bool {
+	switch e {
+	case RelationshipNudgeStateStateFollowing:
+		return true
+	case RelationshipNudgeStateStateSetAside:
+		return true
+	case RelationshipNudgeStateStateStopped:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for RelationshipStrengthBucket.
 const (
 	RelationshipStrengthBucketModerate RelationshipStrengthBucket = "moderate"
@@ -20126,6 +20147,7 @@ const (
 	WorklistFilterExceptDecisions   WorklistFilter = "except_decisions"
 	WorklistFilterLeads             WorklistFilter = "leads"
 	WorklistFilterMeetings          WorklistFilter = "meetings"
+	WorklistFilterRelationships     WorklistFilter = "relationships"
 	WorklistFilterSystem            WorklistFilter = "system"
 	WorklistFilterTasks             WorklistFilter = "tasks"
 	WorklistFilterUrgent            WorklistFilter = "urgent"
@@ -20149,6 +20171,8 @@ func (e WorklistFilter) Valid() bool {
 	case WorklistFilterLeads:
 		return true
 	case WorklistFilterMeetings:
+		return true
+	case WorklistFilterRelationships:
 		return true
 	case WorklistFilterSystem:
 		return true
@@ -20333,6 +20357,7 @@ const (
 	WorklistCountCategoryDecisions       WorklistCountCategory = "decisions"
 	WorklistCountCategoryLeads           WorklistCountCategory = "leads"
 	WorklistCountCategoryMeetings        WorklistCountCategory = "meetings"
+	WorklistCountCategoryRelationships   WorklistCountCategory = "relationships"
 	WorklistCountCategorySystem          WorklistCountCategory = "system"
 	WorklistCountCategoryTasks           WorklistCountCategory = "tasks"
 )
@@ -20349,6 +20374,8 @@ func (e WorklistCountCategory) Valid() bool {
 	case WorklistCountCategoryLeads:
 		return true
 	case WorklistCountCategoryMeetings:
+		return true
+	case WorklistCountCategoryRelationships:
 		return true
 	case WorklistCountCategorySystem:
 		return true
@@ -20534,6 +20561,7 @@ const (
 	WorklistItemCategoryDecisions       WorklistItemCategory = "decisions"
 	WorklistItemCategoryLeads           WorklistItemCategory = "leads"
 	WorklistItemCategoryMeetings        WorklistItemCategory = "meetings"
+	WorklistItemCategoryRelationships   WorklistItemCategory = "relationships"
 	WorklistItemCategorySystem          WorklistItemCategory = "system"
 	WorklistItemCategoryTasks           WorklistItemCategory = "tasks"
 )
@@ -20550,6 +20578,8 @@ func (e WorklistItemCategory) Valid() bool {
 	case WorklistItemCategoryLeads:
 		return true
 	case WorklistItemCategoryMeetings:
+		return true
+	case WorklistItemCategoryRelationships:
 		return true
 	case WorklistItemCategorySystem:
 		return true
@@ -23975,6 +24005,7 @@ const (
 	GetWorklistParamsFilterExceptDecisions   GetWorklistParamsFilter = "except_decisions"
 	GetWorklistParamsFilterLeads             GetWorklistParamsFilter = "leads"
 	GetWorklistParamsFilterMeetings          GetWorklistParamsFilter = "meetings"
+	GetWorklistParamsFilterRelationships     GetWorklistParamsFilter = "relationships"
 	GetWorklistParamsFilterSystem            GetWorklistParamsFilter = "system"
 	GetWorklistParamsFilterTasks             GetWorklistParamsFilter = "tasks"
 	GetWorklistParamsFilterUrgent            GetWorklistParamsFilter = "urgent"
@@ -23998,6 +24029,8 @@ func (e GetWorklistParamsFilter) Valid() bool {
 	case GetWorklistParamsFilterLeads:
 		return true
 	case GetWorklistParamsFilterMeetings:
+		return true
+	case GetWorklistParamsFilterRelationships:
 		return true
 	case GetWorklistParamsFilterSystem:
 		return true
@@ -27526,6 +27559,9 @@ type Attention struct {
 	// changes.
 	RelationshipDecay *[]AttentionItem `json:"relationship_decay,omitempty"`
 
+	// RelationshipDecayMoreAvailable The quiet-relationship scan used its whole candidate budget and may have stopped before more eligible contacts. True means the returned rows are a lower bound, even when none came back. Absent when this source could not be read.
+	RelationshipDecayMoreAvailable *bool `json:"relationship_decay_more_available,omitempty"`
+
 	// ThisMorning The overnight brief's queue, best-ranked first — what the night found worth
 	// the rep's first hour.
 	//
@@ -28063,6 +28099,12 @@ type AttentionRelationshipFacts struct {
 	// "no": a contact with an open deal the reader may not see reads the same as one
 	// with none, which is the answer every row-scoped read gives.
 	HasOpenDeal *bool `json:"has_open_deal,omitempty"`
+
+	// OwnerId The contact's live owner, who this suggestion is for. Absent when the contact
+	// has no owner or its owner has left: then the row is nobody's personal work and
+	// appears only where unassigned work is listed. Being copied on, or writing, a
+	// colleague's mail to the contact never makes a reader its owner.
+	OwnerId *openapi_types.UUID `json:"owner_id,omitempty"`
 
 	// Strength The relationship's band at the read instant, from the same §4 scoring the
 	// contact's own page shows — computed on read rather than stored, so the two
@@ -37477,13 +37519,25 @@ type DismissRelationshipNudgeRequest struct {
 	// Days How long the contact stays off the lane, counted from now. A COUNT rather than
 	// a moment, because the server owns "now" — a client computing an instant from a
 	// clock that is minutes out writes a dismissal that expires early or late for a
-	// reason nobody can see.
-	//
-	// Capped at 90 days, and there is no value meaning forever. A quarter is the
-	// longest a rep can honestly say "not this one" about a relationship without
-	// that being a decision to drop the contact, which is a different act with its
-	// own record.
-	Days int `json:"days"`
+	// reason nobody can see. Send `days` or `permanent: true`, not both.
+	Days *int `json:"days,omitempty"`
+
+	// Permanent Stop following this contact for good, for this reader only. It has no end
+	// date; the reader resumes it with the DELETE verb. A colleague, or a later
+	// owner, keeps their own choice.
+	Permanent *bool `json:"permanent,omitempty"`
+}
+
+// DismissRelationshipNudgesRequest defines model for DismissRelationshipNudgesRequest.
+type DismissRelationshipNudgesRequest struct {
+	// ContactIds The contacts to set aside, as the Worklist listed them.
+	ContactIds []openapi_types.UUID `json:"contact_ids"`
+
+	// Days How long they stay off the lane, counted from now. Send `days` or `permanent: true`, not both.
+	Days *int `json:"days,omitempty"`
+
+	// Permanent Stop following them for good, for this reader only, until resumed one by one.
+	Permanent *bool `json:"permanent,omitempty"`
 }
 
 // DisqualifyLeadRequest Why the lead is closed. Both fields are optional on the wire so an agent's governed disqualify still works; the UI always sends a reason.
@@ -46662,6 +46716,18 @@ type RelationshipListResponse struct {
 	Data []Relationship `json:"data"`
 	Page PageInfo       `json:"page"`
 }
+
+// RelationshipNudgeState defines model for RelationshipNudgeState.
+type RelationshipNudgeState struct {
+	// DismissedUntil When a `set_aside` contact comes back. Absent for the other states.
+	DismissedUntil *time.Time `json:"dismissed_until,omitempty"`
+
+	// State `set_aside` until `dismissed_until`; `stopped` has no end; `following` is neither.
+	State RelationshipNudgeStateState `json:"state"`
+}
+
+// RelationshipNudgeStateState `set_aside` until `dismissed_until`; `stopped` has no end; `following` is neither.
+type RelationshipNudgeStateState string
 
 // RelationshipStrength Deterministic relationship-strength (features/07 §4) — a transparent function over captured
 // interaction features (recency, frequency, direction, reciprocity), NOT a trained model. A fixed
@@ -61691,13 +61757,12 @@ type GetWorklistParams struct {
 	// longer folded into every reader's own queue, so it needs a queue of its own or
 	// the product would have stopped mentioning it.
 	//
-	// It carries unanswered mail too, and that is the case it matters most for. A
-	// message has no assignee, so its owner is the owner of the record it is filed
-	// under — deal, then lead, then contact, then company, first owner found. A
-	// thread no owned record attributes to anybody is the customer nobody is looking
-	// at, which is exactly what this queue is opened to find. Unassigned work stays
-	// in this queue until somebody takes responsibility for it. `mine` requires
-	// a verified personal assignment or an explicitly requested decision.
+	// An email creates personal reply work only for its sole verified directly
+	// addressed member. Mailbox delivery and linked-record ownership do not assign
+	// that duty. Mail with unclear responsibility stays on its record and does not
+	// become shared unassigned work. Explicitly created unassigned tasks remain
+	// available here until someone takes responsibility. `mine` requires a verified
+	// personal assignment or an explicitly requested decision.
 	//
 	// WHAT A WIDER SCOPE REACHES. The record-bearing sources widen: tasks, deals
 	// going quiet, meetings and duplicate pairs are read under the caller's row
@@ -62217,6 +62282,9 @@ type CreateConsentPurposeJSONRequestBody = CreateConsentPurposeRequest
 
 // CreateContactJSONRequestBody defines body for CreateContact for application/json ContentType.
 type CreateContactJSONRequestBody = CreateContactRequest
+
+// DismissRelationshipNudgesJSONRequestBody defines body for DismissRelationshipNudges for application/json ContentType.
+type DismissRelationshipNudgesJSONRequestBody = DismissRelationshipNudgesRequest
 
 // QuickCaptureContactJSONRequestBody defines body for QuickCaptureContact for application/json ContentType.
 type QuickCaptureContactJSONRequestBody = QuickCaptureContactRequest
@@ -74345,6 +74413,9 @@ type ServerInterface interface {
 	// Create a contact.
 	// (POST /contacts)
 	CreateContact(w http.ResponseWriter, r *http.Request, params CreateContactParams)
+	// Set several lapsed contacts aside at once — the Worklist's "Dismiss all".
+	// (PUT /contacts/nudge-dismissals)
+	DismissRelationshipNudges(w http.ResponseWriter, r *http.Request)
 	// Create a contact, their employer and the employment edge in one write.
 	// (POST /contacts/quick-capture)
 	QuickCaptureContact(w http.ResponseWriter, r *http.Request, params QuickCaptureContactParams)
@@ -74450,6 +74521,9 @@ type ServerInterface interface {
 	// Put a set-aside contact back on the lane — the undo behind the dismiss verb.
 	// (DELETE /contacts/{id}/nudge-dismissal)
 	RestoreRelationshipNudge(w http.ResponseWriter, r *http.Request, id Id)
+	// Whether THIS reader has set a quiet contact aside or stopped following it.
+	// (GET /contacts/{id}/nudge-dismissal)
+	GetRelationshipNudge(w http.ResponseWriter, r *http.Request, id Id)
 	// Set a lapsed contact aside, so the Worklist stops raising them for a while.
 	// (PUT /contacts/{id}/nudge-dismissal)
 	DismissRelationshipNudge(w http.ResponseWriter, r *http.Request, id Id)
@@ -78005,6 +78079,12 @@ func (_ Unimplemented) CreateContact(w http.ResponseWriter, r *http.Request, par
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Set several lapsed contacts aside at once — the Worklist's "Dismiss all".
+// (PUT /contacts/nudge-dismissals)
+func (_ Unimplemented) DismissRelationshipNudges(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // Create a contact, their employer and the employment edge in one write.
 // (POST /contacts/quick-capture)
 func (_ Unimplemented) QuickCaptureContact(w http.ResponseWriter, r *http.Request, params QuickCaptureContactParams) {
@@ -78212,6 +78292,12 @@ func (_ Unimplemented) GetContactNetwork(w http.ResponseWriter, r *http.Request,
 // Put a set-aside contact back on the lane — the undo behind the dismiss verb.
 // (DELETE /contacts/{id}/nudge-dismissal)
 func (_ Unimplemented) RestoreRelationshipNudge(w http.ResponseWriter, r *http.Request, id Id) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Whether THIS reader has set a quiet contact aside or stopped following it.
+// (GET /contacts/{id}/nudge-dismissal)
+func (_ Unimplemented) GetRelationshipNudge(w http.ResponseWriter, r *http.Request, id Id) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -95060,6 +95146,26 @@ func (siw *ServerInterfaceWrapper) CreateContact(w http.ResponseWriter, r *http.
 	handler.ServeHTTP(w, r)
 }
 
+// DismissRelationshipNudges operation middleware
+func (siw *ServerInterfaceWrapper) DismissRelationshipNudges(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DismissRelationshipNudges(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // QuickCaptureContact operation middleware
 func (siw *ServerInterfaceWrapper) QuickCaptureContact(w http.ResponseWriter, r *http.Request) {
 
@@ -96449,6 +96555,38 @@ func (siw *ServerInterfaceWrapper) RestoreRelationshipNudge(w http.ResponseWrite
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.RestoreRelationshipNudge(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRelationshipNudge operation middleware
+func (siw *ServerInterfaceWrapper) GetRelationshipNudge(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id Id
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid"})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRelationshipNudge(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -120283,6 +120421,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/contacts", wrapper.CreateContact)
 	})
 	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/contacts/nudge-dismissals", wrapper.DismissRelationshipNudges)
+	})
+	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/contacts/quick-capture", wrapper.QuickCaptureContact)
 	})
 	r.Group(func(r chi.Router) {
@@ -120386,6 +120527,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Delete(options.BaseURL+"/contacts/{id}/nudge-dismissal", wrapper.RestoreRelationshipNudge)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/contacts/{id}/nudge-dismissal", wrapper.GetRelationshipNudge)
 	})
 	r.Group(func(r chi.Router) {
 		r.Put(options.BaseURL+"/contacts/{id}/nudge-dismissal", wrapper.DismissRelationshipNudge)

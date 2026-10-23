@@ -5136,6 +5136,8 @@ export const vi = {
   "brief.agenda.tasks_other": "{count} công việc",
   "brief.agenda.decisions_one": "{count} quyết định",
   "brief.agenda.decisions_other": "{count} quyết định",
+  "brief.agenda.relationships_one": "{count} liên hệ đã im lặng",
+  "brief.agenda.relationships_other": "{count} liên hệ đã im lặng",
   "brief.agenda.system_one": "{count} sự cố hệ thống",
   "brief.agenda.system_other": "{count} sự cố hệ thống",
   "worklist.source.failed_approval": "Đã duyệt nhưng chưa thực hiện",
@@ -15381,6 +15383,7 @@ export const vi = {
   "worklist.filter.meetings": "Cuộc họp",
   "worklist.filter.tasks": "Việc cần làm",
   "worklist.filter.decisions": "Phê duyệt",
+  "worklist.filter.relationships": "Liên hệ đã im lặng",
   "worklist.filter.system": "Hệ thống",
   "worklist.filter.linked.urgent":
     "Chỉ hiển thị việc khẩn cấp: có ai đó đang chờ, hoặc một cam kết sắp bị lỡ.",
@@ -15399,6 +15402,7 @@ export const vi = {
   "worklist.category.meetings": "Cuộc họp",
   "worklist.category.tasks": "Việc cần làm",
   "worklist.category.decisions": "Phê duyệt",
+  "worklist.category.relationships": "Liên hệ đã im lặng",
   "worklist.category.system": "Hệ thống",
   "worklist.because.pinned": "bạn đã ghim",
   "worklist.because.non_buyer_request": "chưa xác định là việc của khách hàng",
@@ -15620,7 +15624,7 @@ export const vi = {
   // giờ mở trình soạn thảo nên không cần tách "ngay bây giờ" như trên.
   "worklist.verb.open_meeting_brief": "Chuẩn bị cuộc họp",
   "worklist.deal.closes": "ngày chốt {date}",
-  "worklist.when.held": "đã diễn ra {when}",
+  "worklist.when.scheduled": "dự kiến {when}",
   "worklist.meeting.hostedBy": "do {name} chủ trì",
   "worklist.meeting.hostedByYou": "do bạn chủ trì",
   "worklist.when.starts": "bắt đầu {when}",

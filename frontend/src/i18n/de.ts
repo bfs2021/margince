@@ -5255,6 +5255,8 @@ export const de = {
   "brief.agenda.tasks_other": "{count} Aufgaben",
   "brief.agenda.decisions_one": "{count} Entscheidung",
   "brief.agenda.decisions_other": "{count} Entscheidungen",
+  "brief.agenda.relationships_one": "{count} ruhende Beziehung",
+  "brief.agenda.relationships_other": "{count} ruhende Beziehungen",
   "brief.agenda.system_one": "{count} Systemproblem",
   "brief.agenda.system_other": "{count} Systemprobleme",
   "worklist.source.failed_approval": "Freigegeben, aber nicht ausgeführt",
@@ -15764,6 +15766,7 @@ export const de = {
   "worklist.filter.meetings": "Termine",
   "worklist.filter.tasks": "Aufgaben",
   "worklist.filter.decisions": "Freigaben",
+  "worklist.filter.relationships": "Ruhende Beziehungen",
   "worklist.filter.system": "System",
   "worklist.filter.linked.urgent":
     "Es werden nur dringende Einträge angezeigt: Jemand wartet, oder eine Zusage droht gebrochen zu werden.",
@@ -15782,6 +15785,7 @@ export const de = {
   "worklist.category.meetings": "Termin",
   "worklist.category.tasks": "Aufgabe",
   "worklist.category.decisions": "Freigabe",
+  "worklist.category.relationships": "Ruhende Beziehung",
   "worklist.category.system": "System",
   "worklist.because.pinned": "von dir angeheftet",
   "worklist.because.non_buyer_request": "nicht als Kundenanliegen bestätigt",
@@ -16020,7 +16024,7 @@ export const de = {
   // nicht braucht.
   "worklist.verb.open_meeting_brief": "Termin vorbereiten",
   "worklist.deal.closes": "Abschluss {date}",
-  "worklist.when.held": "Fand statt: {when}",
+  "worklist.when.scheduled": "Geplant: {when}",
   "worklist.meeting.hostedBy": "Organisiert von {name}",
   "worklist.meeting.hostedByYou": "Von dir organisiert",
   "worklist.when.starts": "Beginn: {when}",
